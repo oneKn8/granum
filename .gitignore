@@ -1,0 +1,16 @@
+.env
+.env.local
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+node_modules/
+.next/
+dist/
+build/
+*.log
+.DS_Store
+.coverage
+htmlcov/
+phoenix-audit-data/
+synthetic-secrets/
