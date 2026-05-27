@@ -1,0 +1,72 @@
+[
+  {
+    "cpb_number": "0119",
+    "cpt_code": "93306",
+    "icd10_code": "I25.10",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for echocardiogram (CPT 93306) for patient with stable angina (ICD-10 I25.10). Aetna Clinical Policy Bulletin 0119 requires documentation of new or worsening symptoms, abnormal stress test results, or post-procedural evaluation. Submitted records show stable symptoms over 12-month period without intervention. Appeal must include specific clinical change justifying repeat imaging. Appeal deadline: 30 days from this notice."
+  },
+  {
+    "cpb_number": "0286",
+    "cpt_code": "33533",
+    "icd10_code": "I25.110",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for coronary artery bypass grafting (CPT 33533) for patient with atherosclerotic heart disease with unstable angina (ICD-10 I25.110). Aetna CPB 0286 requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0353",
+    "cpt_code": "93458",
+    "icd10_code": "I20.9",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for diagnostic cardiac catheterization (CPT 93458) for patient with unspecified angina (ICD-10 I20.9). Aetna CPB 0353 requires either positive non-invasive stress test, intermediate-to-high pretest probability of CAD per ACC/AHA criteria, or specific high-risk clinical features documented. Submitted notes lack pretest probability calculation or recent stress imaging. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0535",
+    "cpt_code": "92928",
+    "icd10_code": "I25.110",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for percutaneous coronary intervention with stent placement (CPT 92928) for patient with unstable angina (ICD-10 I25.110). Aetna CPB 0535 requires evidence of lesion stenosis >=70% on diagnostic angiography or fractional flow reserve <0.80. Submitted imaging shows 60% stenosis without functional assessment. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0119",
+    "cpt_code": "93350",
+    "icd10_code": "I50.32",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for stress echocardiogram (CPT 93350) for patient with chronic diastolic heart failure (ICD-10 I50.32). Aetna CPB 0119 requires prior authorization for stress imaging studies. No prior authorization submitted before service rendered. Member may appeal with retrospective documentation of clinical urgency. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0286",
+    "cpt_code": "33361",
+    "icd10_code": "I35.0",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for transcatheter aortic valve replacement (CPT 33361) for patient with nonrheumatic aortic valve stenosis (ICD-10 I35.0). Aetna CPB 0286 covers TAVR only for patients deemed high-risk or inoperable for surgical aortic valve replacement per multidisciplinary heart team evaluation. Submitted records lack heart team consult documentation. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0353",
+    "cpt_code": "93656",
+    "icd10_code": "I48.0",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for atrial fibrillation ablation (CPT 93656) for patient with paroxysmal atrial fibrillation (ICD-10 I48.0). Aetna CPB 0353 requires documented failure of at least one antiarrhythmic medication trial before catheter ablation. Submitted records show no prior antiarrhythmic therapy. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0535",
+    "cpt_code": "33207",
+    "icd10_code": "I44.2",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for permanent pacemaker insertion (CPT 33207) for patient with complete atrioventricular block (ICD-10 I44.2). Aetna CPB 0535 requires documentation per ACC/AHA Class I indications including symptoms (syncope, presyncope, fatigue) or specific ECG findings (sustained pauses >=3 seconds, escape rhythm <40 bpm). Submitted records lack this documentation. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0119",
+    "cpt_code": "93303",
+    "icd10_code": "Q23.4",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for transthoracic echocardiogram (CPT 93303) for patient with congenital mitral stenosis (ICD-10 Q23.4). Aetna CPB 0119 indicates this study was performed within the prior 90 days at a contracted facility. Re-imaging requires documented clinical change. Appeal deadline: 30 days."
+  },
+  {
+    "cpb_number": "0286",
+    "cpt_code": "33405",
+    "icd10_code": "I06.0",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for aortic valve replacement, open (CPT 33405) for patient with rheumatic aortic stenosis (ICD-10 I06.0). Aetna CPB 0286 requires moderate-to-severe symptomatic aortic stenosis with documented LVEF decline, symptoms (CHF, syncope, angina), or aortic valve area <1.0 cm^2. Submitted records show mild stenosis (AVA 1.4 cm^2) without symptoms. Appeal deadline: 30 days."
+  }
+]
