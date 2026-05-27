@@ -68,27 +68,50 @@ export function LineageTree({
     const rootDatum = buildHierarchy(strategies);
     if (!rootDatum) return null;
     const root = hierarchy<TreeDatum>(rootDatum);
-    const layoutFn = tree<TreeDatum>().nodeSize([44, 220]);
+    const layoutFn = tree<TreeDatum>().nodeSize([40, 130]);
     return layoutFn(root);
   }, [strategies]);
 
-  // d3-zoom: pan + zoom on the SVG, applying transform to the inner <g>.
+  // Bounding box of laid-out nodes — used to fit the tree to the viewport.
+  const bbox = useMemo(() => {
+    if (!layout) return null;
+    const nodes = layout.descendants();
+    if (nodes.length === 0) return null;
+    let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
+    for (const n of nodes) {
+      if (n.x < xMin) xMin = n.x;
+      if (n.x > xMax) xMax = n.x;
+      if (n.y < yMin) yMin = n.y;
+      if (n.y > yMax) yMax = n.y;
+    }
+    return { xMin, xMax, yMin, yMax };
+  }, [layout]);
+
+  // d3-zoom: pan + zoom on the SVG. Initial transform fits the tree.
   useEffect(() => {
-    if (!svgRef.current || !gRef.current) return;
-    const svg = select(svgRef.current);
-    const g = select(gRef.current);
+    const svgEl = svgRef.current;
+    const gEl = gRef.current;
+    if (!svgEl || !gEl || !bbox) return;
+    const width = svgEl.clientWidth || 800;
+    const padding = 120;
+    const treeW = bbox.yMax - bbox.yMin + padding * 2;
+    const treeH = bbox.xMax - bbox.xMin + padding * 2;
+    const scale = Math.min(width / treeW, height / treeH, 1);
+    const tx = padding * scale - bbox.yMin * scale;
+    const ty = height / 2 - ((bbox.xMin + bbox.xMax) / 2) * scale;
+    const svg = select(svgEl);
+    const g = select(gEl);
     const zoomBehavior = zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.4, 3])
+      .scaleExtent([0.3, 3])
       .on("zoom", (event: D3ZoomEvent<SVGSVGElement, unknown>) => {
         g.attr("transform", event.transform.toString());
       });
     svg.call(zoomBehavior);
-    // Center initial view a bit to the right so root is visible.
-    svg.call(zoomBehavior.transform, zoomIdentity.translate(80, height / 2));
+    svg.call(zoomBehavior.transform, zoomIdentity.translate(tx, ty).scale(scale));
     return () => {
       svg.on(".zoom", null);
     };
-  }, [height, layout]);
+  }, [height, bbox]);
 
   if (!layout) return null;
 

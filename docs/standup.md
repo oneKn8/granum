@@ -103,3 +103,18 @@
 - IN PROGRESS: Phase 1.9 (mutation strategies — deterministic proposer)
 - BLOCKED: Phase 0.5 + 1.10 (user actions)
 - NEXT: Phase 1.10 (live cycle, blocked until 0.4 done)
+
+## [Terminal C] — 2026-05-27 12:55
+- DONE:
+  - Polish pipeline complete (sequential, per startup prompt):
+    - baseline-ui: added `web/lib/cn.ts` (clsx + tailwind-merge), converted bare `role="tab"` to plain `aria-pressed` toggle buttons, added `font-variant-numeric: tabular-nums` to all mono spans, documented three explicit exceptions in `web/DESIGN.md` §8.5 (editorial `tracking-widest`, SVG chart-area gradient, 600ms tombstone fade).
+    - fixing-accessibility: added `sr-only h1` to `/cell/[cell]`, wrote `web/public/favicon.svg` (lineage motif in OKLCH palette), removed dead `og.png`/`apple-touch-icon` metadata refs.
+    - fixing-motion-performance: clean — every transition audited (compositor-only on small SVG surfaces; `isAnimationActive=false` on Recharts; no `will-change`; `prefers-reduced-motion` honored).
+    - fixing-metadata: `app/opengraph-image.tsx` + per-cell variant using `next/og` ImageResponse (Germinal Lab palette); per-cell `openGraph.url`/`twitter` override so `og:url` agrees with canonical.
+  - Demo materials: `docs/demo-script.md` (3-min, 20-second beats), `docs/storyboard.md` (12 frames), `scripts/demo.sh` (orchestrator with DEMO_PACE/FRESH/CELL/CYCLES/SEED knobs).
+  - Browser verification via Playwright MCP: landing + `/cell/aetna_cardiac` render correctly. Hero (asymmetric serif with apoptosis-red "permanently"), cell meta strip, PromptDiff (word-level diff with citation delta), and FitnessCurve (0.41→0.79 climb) all production-quality.
+- IN PROGRESS: none for Phase 5 primary scope; standing by for integration day.
+- BLOCKED: none for Terminal C. Phase 5 integration with real Phoenix data is gated on Terminal A publishing `docs/api-contract.md` (Phase 3) and on user clearing the GCP+Phoenix-Cloud auth blockers.
+- KNOWN ISSUE: with `tree<TreeDatum>().nodeSize([44, 220])`, the 8-generation Aetna lineage extends ~1760px wide vs a ~745px viewport so the alive + champion nodes are initially offscreen-right. Attempted a fit-to-content fix (smaller spacing + auto-zoom to bbox); it was reverted on disk twice despite user confirmation. Leaving as-is; users can wheel-zoom + drag-pan via d3-zoom. Not blocking but worth resolving before final video capture.
+- NEXT: when Terminal A publishes `docs/api-contract.md`, swap `web/lib/mock-data.ts` for a real `/api/cell/[cell]` fetcher. Run `web-quality-audit` skill (Core Web Vitals) after integration. Generate the actual OG PNGs via Playwright once a real URL is deployed.
+- FILES TOUCHED THIS SESSION: `docs/{design-references.md, demo-script.md, storyboard.md}`, `web/**` (full Next.js app), `scripts/demo.sh`.
