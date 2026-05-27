@@ -22,6 +22,7 @@ from granum.center.judge import LLMJudge
 from granum.center.negative_selection import verify_citations
 from granum.data.denials import Denial
 from granum.data.gold import GoldAppeal, load_gold_appeals
+from granum.tools.phoenix_client import PhoenixClient, PromptVersion
 
 
 class _DenialFactory(Protocol):
@@ -133,6 +134,41 @@ class TransferTrialHarness:
             baseline_target_fitness=self._baseline,
             n_negative_selection_failures=0,
         )
+
+
+async def promote_transfer(
+    trial: TransferTrial,
+    *,
+    phoenix: PhoenixClient,
+    p_value_threshold: float = 0.05,
+    lift_threshold: float = 1.0,
+) -> PromptVersion | None:
+    """Promote a successful transfer trial into the target cell's namespace.
+
+    Gate criteria (both must hold):
+      1. ``trial.p_value < p_value_threshold``
+      2. ``trial.mean_score >= trial.baseline_target_fitness + lift_threshold``
+
+    On gate-pass: upserts ``trial.prompt_body`` into the target cell namespace
+    under ``{target_cell}/transferred_from_{source_cell}_{source_prompt_id}``
+    with tags ``("transferred", "experimental")``. Returns the new
+    :class:`PromptVersion`.
+
+    On gate-fail: returns ``None``. No Phoenix calls are made.
+    """
+    if trial.p_value >= p_value_threshold:
+        return None
+    if trial.mean_score < trial.baseline_target_fitness + lift_threshold:
+        return None
+    name = (
+        f"{trial.target_cell}/transferred_from_"
+        f"{trial.source_cell}_{trial.prompt_id}"
+    )
+    return await phoenix.upsert_prompt(
+        name=name,
+        body=trial.prompt_body,
+        tags=("transferred", "experimental"),
+    )
 
 
 def _t_survival(t: float, df: int) -> float:
