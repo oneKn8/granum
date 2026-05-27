@@ -1,0 +1,24 @@
+### GRANUM DEMO VOICEOVER — 3:00 total ###
+# Format: one section per beat, separated by `### BEAT N ###` markers.
+# scripts/render_voiceover.py splits on those markers and renders one MP3 per beat,
+# then concatenates with ffmpeg. SSML <break> tags are honored by eleven_multilingual_v2.
+# Target voice: neutral US male, ~140 wpm. Recommended settings: stability 0.55, similarity 0.85, style 0.05.
+# Do NOT add or remove beat markers without updating the render script.
+
+### BEAT 0 — 0:00-0:20 — Cold open (39 words) ###
+Every year, U.S. insurers deny medically necessary care to millions of patients. <break time="0.4s" /> When a physician appeals, eighty-three percent win. <break time="0.5s" /> Only ten percent are ever filed — writing one costs twelve hours of physician time. <break time="0.6s" /> The math kills the appeal before it's written.
+
+### BEAT 1 — 0:20-1:00 — Inject denial, three mutants compete, apoptosis (71 words) ###
+Granum's appeal-writer holds a small population of strategies — five to twelve at steady state — one per payer-and-diagnosis pair. <break time="0.3s" /> A new denial arrives. Three strategies generate three candidate appeals. An LLM-as-judge scores each one against a gold dataset of prior overturned appeals. <break time="0.4s" /> The winner is submitted. The losers' prompts are permanently tombstoned in the Phoenix registry. No revert. No archive. <break time="0.6s" /> Apoptosis.
+
+### BEAT 2 — 1:00-1:30 — The winning appeal (62 words) ###
+Here's the winning appeal. <break time="0.3s" /> It cites Aetna's exact clinical-policy sub-clause. It cross-references the A-C-C-A-H-A cardiology guideline. It includes two prior overturned precedents from the gold dataset. It preempts the three most common secondary denial reasons Aetna uses on cardiac cases. <break time="0.4s" /> None of this was hand-written. The strategy mutated into this shape over eight generations.
+
+### BEAT 3 — 1:30-2:00 — Six weeks fast-forward (58 words) ###
+Six weeks of evolution, fast-forwarded. <break time="0.3s" /> The population mutates. Strategies that won become parents. Strategies that lost are erased. <break time="0.4s" /> The fitness curve climbs from forty-one percent — vanilla baseline overturn rate — to seventy-nine percent at generation eight. <break time="0.4s" /> The lineage tree is the system of record: every branch, every death, every promotion, frozen on the canvas.
+
+### BEAT 4 — 2:00-2:30 — Gen 1 vs Gen 8 prompt diff (58 words) ###
+Here's what the agent learned. <break time="0.3s" /> Gen one cited a generic clinical guideline. Gen eight cites Aetna's specific sub-clause six times, preempts three secondary denial reasons, attaches physician credentials, and references two prior overturned cases. <break time="0.5s" /> The agent learned Aetna's exact medical-necessity language. Not because we trained it. Because it watched losing strategies die and survivors mutate.
+
+### BEAT 5 — 2:30-3:00 — Closer (57 words) ###
+Granum is one agent. <break time="0.3s" /> No supervisor, no meta-watcher, no diagnose-and-patch loop. <break time="0.4s" /> The agent is the germinal center. It generates, competes, mutates, and prunes. <break time="0.4s" /> Losing strategies are permanently apoptosed — structurally dead, ineligible for any future tournament. That commitment forces every mutation to be a real bet. <break time="0.6s" /> Apache two point zero. Synthetic data. Built on Google A-D-K and Arize Phoenix.
