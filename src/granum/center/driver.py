@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Callable, Protocol
+from typing import Protocol
 
 from granum.center.antigen_drift import AntigenDrift
 from granum.center.cell import Cell, CellRegistry

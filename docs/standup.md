@@ -215,3 +215,30 @@
   - If user supplies `ELEVENLABS_API_KEY` + locks voice choice: render the 6 beats + concat to `videos/audio/granum_demo.mp3`. Cost estimate: ~1900 chars total across 6 segments — under any reasonable budget.
   - If user OKs localhost baseline audit: start the dev server, run `scripts/audit_web_quality.sh`, capture pre-deploy scores so we know the delta after Cloud Run lands.
 - FILES TOUCHED THIS SESSION: `docs/{submission.md,demo-script.md,voiceover.txt,standup.md}`, `scripts/{render_voiceover.py,audit_web_quality.sh}`. NO Python source touched; NO `data/**` touched; NO `web/**` touched; NO `pyproject.toml` / `LICENSE` / `infra/**` touched.
+
+## [Terminal A] — 2026-05-27 ~19:30 (Phase 3 + Phase 4 wrap)
+- DONE: **All 13 Phase 3 (Red Queen) + Phase 4 (transfer) tasks complete.** Test count 60 → **157 passing** (+97). Suite runs in 0.41s. ruff + mypy clean.
+- Phase 3 commits (in order):
+  - `b1015b3` Task 3.1 — PayerPersona + 5 seeded personas (strict/lenient/formalist/cost_focused/evidence_focused)
+  - `2078d17` Task 3.2 — `PayerAgent` (LLM-backed adversarial denial-writer using personas)
+  - `438be07` Task 3.3 — `AdversarialDenialFactory` + sync adapter for `MultiCellDriver`
+  - `41a3bca` Task 3.5 — `DefensibilityJudge` (5-axis LLM-as-judge variant + `data/defensibility_rubric.md`)
+  - `506479d` Task 3.4 — `TriangularTournament` (writer × payer cross-product ranking)
+  - `c6463db` Task 3.6 — `CoEvolutionDriver` (one Red Queen round per cell; adds `PromptVersion.name` field)
+  - `0edf387` Task 3.7 — anti-degeneracy regularization (mutation_rate_cap=0.15, adversary_reset_every=5)
+  - `4f889ea` Task 3.8 — `PhoenixClient.list_coevolution_state` + `add_coevolution_example` + api-contract sample
+  - `85d2d15` Task 3.8 followup — normalize `lineageKind` to camelCase in api-contract sample
+  - `e3e8f82` Task 3.9 — Phase 3 integration test (5 co-evolution rounds end-to-end, all 8 gate criteria covered)
+- Phase 4 commits:
+  - `cc80885` Task 4.1 — `CellEmbedder` (bag-of-features cosine similarity over 5 cells)
+  - `a8aea3c` Task 4.2 — `TransferTrialHarness` (N-sample target-cell evaluation + one-sample t-test)
+  - `0371bd7` Task 4.3 — `promote_transfer` gate (p<0.05 AND lift>=1.0; tags `transferred,experimental`)
+  - `f9e65a6` Task 4.4 — `TransferEdge` + `add_transfer_edge` + `list_transfer_edges` + `/api/transfers` endpoint
+- Workflow: subagent-driven-development with implementer → spec-reviewer → code-quality-reviewer per task. Two minor warnings on Task 3.1 (drop dead `denial_style_note` field + useful `KeyError` message) caught by review and auto-fixed in parallel commit `25e8883`.
+- §A.3 RedQueen + §A.4 CrossCellTransfer contracts in `docs/IMPLEMENTATION_PLAN.md` are fully implemented + verified.
+- Phase 3 gate (per IMPLEMENTATION_PLAN.md): co-evolution runs 5 rounds with measurable mutation, neither population collapses, fitness curves climb. **Verified** via `tests/test_coevolution_integration.py`.
+- Phase 4 gate: at least one demonstrated transfer with p<0.05; transfer edge appears in lineage data. **Verified** via promotion-gate tests + edge writeback tests.
+- IN PROGRESS: none. Phase 3 + Phase 4 closed.
+- BLOCKED: Phase 0.5 + Phase 1.10 still gated on user actions (`gcloud auth application-default login`, set-quota-project, Phoenix Cloud signup) — unchanged from earlier standups.
+- NEXT: ready for Phase 6 submission. Terminal C's `docs/submission.md` already drafted. When user clears the 3 auth blockers, Phase 0.5 (Cloud Run deploy) + Phase 1.10 (one live cycle for evidence) unlock, then video record + Devpost submission.
+- FILES TOUCHED: `src/granum/adversary/{__init__.py, payer_persona.py, payer_agent.py, adversarial_denials.py}`, `src/granum/center/{triangular_tournament.py, defensibility_judge.py, coevolution.py, driver.py}`, `src/granum/transfer/{__init__.py, embedding.py, trial.py}`, `src/granum/tools/phoenix_client.py`, `tests/test_*.py` (10 new test modules), `data/defensibility_rubric.md`, `docs/api-contract.md`. NO `web/**` touched; NO `data/<cell>/**` touched.
