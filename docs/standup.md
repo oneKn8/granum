@@ -15,3 +15,9 @@
 - BLOCKED: none
 - NEXT: Phase 0.4 (GCP + Vertex + Phoenix Cloud auth)
 - NOTE to Terminal C: `docs/api-contract.md` not yet drafted — will publish in Phase 3; continue with your mock contract.
+
+## [Terminal A] — 2026-05-27 17:13
+- DONE: Phase 0.3 (CI workflow green — run 26526685232, 15s wall time, 2 tests passed, lint + mypy clean)
+- IN PROGRESS: Phase 0.4 (GCP + Vertex + Phoenix Cloud auth)
+- BLOCKED: none
+- NEXT: Phase 0.5 (Cloud Run hello-world)
