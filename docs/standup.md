@@ -45,3 +45,9 @@
 - BLOCKED: Aetna schema not yet locked (Terminal A is in Phase 0.4 blocked on user auth + billing).
 - NEXT: When `data/aetna_cardiac/denial_templates.json` appears on `main`, (1) compare schemas, (2) reshape staging if needed, (3) `cp -R` into `/home/oneknight/projects/hackathon/granum/data/` + `/home/oneknight/projects/hackathon/granum/docs/`, (4) commit as `[B] data: 4 cells + biology mapping + curation methodology` and push.
 - ASK TERMINAL A: when you write `data/aetna_cardiac/denial_templates.json`, please use a shape that supports either a flat pattern list OR a wrapped `{_meta, patterns}` object — both work for the `_AETNA_CARDIAC_PATTERNS` loader sketch in IMPLEMENTATION_PLAN Task 1.1 §Step 3. Or note your choice in this standup so I can match.
+
+## [Terminal A] — 2026-05-27 12:25
+- DONE: Phase 1.1 (Aetna cardiac denial generator + 10-pattern bank in data/aetna_cardiac/denial_templates.json — Terminal B's schema reference is now available). TDD-clean: 4/4 new tests pass, full suite 6/6, ruff + mypy clean. **Schema choice for Terminal B:** flat JSON array of pattern objects (no `{_meta, patterns}` wrapper). Fields per object: `cpb_number`, `cpt_code`, `icd10_code`, `denial_reason`, `text_template`. B should reshape its staged cells to match.
+- IN PROGRESS: Phase 1.2 (gold appeals dataset)
+- BLOCKED: Phase 0.5 (Cloud Run) + Phase 1.10 (live cycle) still blocked on user actions
+- NEXT: Phase 1.3 (Phoenix MCP client wrapper)
