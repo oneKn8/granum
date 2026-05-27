@@ -68,5 +68,89 @@
     "icd10_code": "T84.53XA",
     "denial_reason": "out_of_network",
     "text_template": "Coverage denied for revision total knee arthroplasty, both components, with allograft (CPT 27487) for a patient with infection and inflammatory reaction due to internal right knee prosthesis, initial encounter (ICD-10 T84.53XA). Claim was submitted by an out-of-network facility without prior authorization for OON service. Per Cigna Medical Coverage Policy / EviCore CMM-311 Knee Replacement Arthroplasty and the related revision-procedure indication block, revision TKA for prosthetic joint infection is medically necessary; however, OON facility services require prior authorization with documentation of network inadequacy or emergent clinical necessity. Resubmit with OON-justification documentation or transfer to in-network revision-arthroplasty center."
+  },
+  {
+    "cpb_number": "Cigna-0347",
+    "cpt_code": "27446",
+    "icd10_code": "M17.12",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for unicompartmental knee arthroplasty (CPT 27446) for a patient with unilateral primary osteoarthritis of the left knee (ICD-10 M17.12). Per Cigna Medical Coverage Policy 0347 Minimally Invasive Knee Replacement and Cigna Medical Coverage Policy / EviCore CMM-311 Knee Replacement Arthroplasty (V2.0.2025, Eff. March 7, 2026), unicompartmental knee arthroplasty is medically necessary when documented (1) isolated single-compartment Kellgren-Lawrence grade-3 or higher osteoarthritis with intact remaining compartments confirmed on MRI, (2) intact ACL and competent collateral ligaments on exam, (3) failed conservative management of ≥3 months including supervised physical therapy AND pharmacologic management AND activity modification, and (4) functional limitation documented by KSS or WOMAC. Submitted documentation includes 4 weeks of home exercise without supervised PT and no KSS or WOMAC score. Criterion (3) and Criterion (4) are NOT MET. Resubmit with supervised PT visit log (start/end dates, visit count, treating PT signature) and a validated weighted outcome instrument."
+  },
+  {
+    "cpb_number": "CMM-309",
+    "cpt_code": "29915",
+    "icd10_code": "M24.851",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for hip arthroscopy with acetabuloplasty for femoroacetabular impingement (CPT 29915) for a patient with other specific joint derangements of right hip, not elsewhere classified (ICD-10 M24.851). Per Cigna Medical Coverage Policy / EviCore CMM-309 Hip Replacement Arthroplasty and Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, hip arthroscopy for FAI is medically necessary only when documented (1) MRI-arthrogram or 3T MRI-confirmed cam and/or pincer morphology with corresponding labral pathology, (2) positive provocative exam (FADIR / anterior impingement) with concordant fluoroscopic intra-articular anesthetic response, (3) Tönnis grade ≤1 osteoarthritis (i.e., NO advanced OA), and (4) failed conservative management of ≥3 months including supervised PT. Submitted imaging documents Tönnis grade-2 osteoarthritis. Per the AAOS Clinical Practice Guideline for the Management of Osteoarthritis of the Hip (2024), arthroscopic intervention is not indicated in established OA. Patient should be evaluated for arthroplasty pathway."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "23472",
+    "icd10_code": "M19.011",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for total shoulder arthroplasty (CPT 23472) for a patient with primary osteoarthritis, right shoulder (ICD-10 M19.011). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, total shoulder arthroplasty is medically necessary when documented (1) radiographic moderate-to-severe glenohumeral osteoarthritis, (2) intact rotator cuff confirmed on MRI or ultrasound (or planned reverse arthroplasty if deficient), (3) failure of ≥3 months of supervised PT and pharmacologic management, and (4) functional limitation documented by a validated shoulder outcome instrument (ASES, Constant-Murley). Submitted documentation includes the ordering surgeon's narrative description of imaging but no formal radiology report and no rotator-cuff integrity study. Resubmit with the radiology report identifying glenohumeral OA grade, an MRI or ultrasound documenting rotator-cuff status, and an ASES or Constant-Murley score."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "29826",
+    "icd10_code": "M75.41",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for arthroscopic subacromial decompression (CPT 29826) for a patient with impingement syndrome of right shoulder (ICD-10 M75.41). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, arthroscopic subacromial decompression for impingement is medically necessary only when documented (1) symptoms persistent ≥3 months despite optimized conservative care, (2) failure of supervised physical therapy of ≥6 weeks targeting scapular stabilization and rotator-cuff strengthening, (3) failure of at least one corticosteroid subacromial injection with documented short-term response, and (4) MRI or ultrasound demonstrating subacromial pathology without full-thickness rotator-cuff tear. Submitted documentation reflects 2 weeks of home exercise and no supervised PT, no injection trial. Conservative care has not been exhausted. A less invasive alternative is appropriate at this time."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "64721",
+    "icd10_code": "G56.01",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for neuroplasty and/or transposition; median nerve at carpal tunnel (CPT 64721) for a patient with carpal tunnel syndrome, right upper limb (ICD-10 G56.01). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, carpal tunnel release is medically necessary when documented (1) classic symptoms (nocturnal paresthesias, thumb/index/long-finger numbness) persistent ≥3 months, (2) electrodiagnostic study (EMG/NCS) confirming median neuropathy at the wrist, (3) failure of ≥6 weeks of conservative care including nocturnal neutral-position splinting and activity modification, and (4) optional corticosteroid injection trial unless contraindicated. Submitted documentation does not include EMG/NCS results and does not document a splinting trial. Criterion (2) and Criterion (3) are NOT MET. Resubmit with formal electrodiagnostic study and documented splinting trial."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "28285",
+    "icd10_code": "M20.42",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for hammertoe correction, one toe (CPT 28285) for a patient with other hammer toe(s), left foot (ICD-10 M20.42). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, hammertoe correction is medically necessary when documented (1) fixed (not flexible) deformity confirmed on weight-bearing exam, (2) symptomatic ulceration, intractable keratosis, or functionally limiting pain refractory to conservative care, (3) failure of ≥3 months of conservative management including appropriate footwear, off-the-shelf toe splinting, and metatarsal padding, and (4) photographic and/or radiographic documentation. Submitted documentation describes a flexible deformity without ulceration or intractable keratosis. Per Cigna policy, flexible hammertoe deformity without skin breakdown is managed non-operatively. Surgical correction in this context is considered not medically necessary."
+  },
+  {
+    "cpb_number": "CMM-606",
+    "cpt_code": "22551",
+    "icd10_code": "M50.121",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for anterior cervical discectomy and fusion, single interspace (CPT 22551) for a patient with cervical disc disorder at C4-C5 level with radiculopathy (ICD-10 M50.121). Per Cigna Medical Coverage Policy / EviCore CMM-606 Cervical Spine Surgery, single-level ACDF for cervical radiculopathy is medically necessary when documented (1) MRI-confirmed disc herniation or foraminal stenosis at a level concordant with the patient's dermatomal symptoms, (2) radicular symptoms (dermatomal arm pain, weakness, or sensory deficit) corroborated by exam and ideally by electrodiagnostic study, (3) failure of ≥6 weeks of conservative care including supervised PT and pharmacologic management, and (4) functional limitation documented by Neck Disability Index (NDI). Submitted documentation does not include an NDI score, and the clinic note describes 'neck pain' without dermatomal mapping. Resubmit with NDI score and a dermatomal symptom map correlating with the C4-C5 MRI finding."
+  },
+  {
+    "cpb_number": "CMM-606",
+    "cpt_code": "22856",
+    "icd10_code": "M50.20",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for total cervical disc arthroplasty, single interspace (CPT 22856) for a patient with other cervical disc displacement, unspecified cervical region (ICD-10 M50.20). Per Cigna Medical Coverage Policy / EviCore CMM-606 Cervical Spine Surgery, cervical disc arthroplasty is medically necessary only when (1) the device is FDA-approved for the specific indication and level requested, (2) the patient has single- or two-level symptomatic cervical disc disease C3-C7, (3) failure of ≥6 weeks of conservative care, (4) radiculopathy or myelopathy confirmed by imaging concordant with symptoms, and (5) no significant facet arthropathy, prior cervical fusion adjacent to operative level, or osteoporosis. Submitted documentation describes facet arthropathy at C5-C6 and does not specify the FDA-approved device or level. Cervical disc arthroplasty in the presence of significant facet arthropathy is considered investigational under this policy."
+  },
+  {
+    "cpb_number": "CMM-609",
+    "cpt_code": "63685",
+    "icd10_code": "G89.29",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for insertion or replacement of spinal neurostimulator pulse generator or receiver (CPT 63685) for a patient with other chronic pain (ICD-10 G89.29). Per Cigna Medical Coverage Policy / EviCore CMM-609 family musculoskeletal policies and the related coverage position on spinal cord stimulation, permanent SCS implantation is medically necessary only when documented (1) a successful percutaneous SCS trial of 3-7 days with ≥50% pain reduction and concordant functional improvement, (2) failure of ≥6 months of comprehensive conservative care including pharmacologic management and supervised PT, (3) psychological clearance by a behavioral health provider using a validated instrument (e.g., MMPI-2, BDI), and (4) chronic neuropathic pain syndrome consistent with FBSS, CRPS, or painful diabetic neuropathy. Submitted documentation includes a 24-hour trial without documented ≥50% pain reduction and no psychological clearance. Criteria (1) and (3) are NOT MET. Permanent implantation absent these elements is considered investigational under this policy."
+  },
+  {
+    "cpb_number": "CMM-300",
+    "cpt_code": "73721",
+    "icd10_code": "M25.561",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for magnetic resonance imaging, lower extremity joint, without contrast (CPT 73721) for a patient with pain in right knee (ICD-10 M25.561). Per Cigna Medical Coverage Policy / EviCore CMM-300 Musculoskeletal Imaging, advanced MSK imaging requires prior authorization through the EviCore portal AND documented failure of ≥4 weeks of conservative care unless a red-flag clinical finding is present (acute locking, traumatic effusion with mechanism, suspected septic arthritis, neurologic deficit, or oncologic concern). Submitted claim was rendered without an active prior-authorization reference number and the clinic note documents 8 days of atraumatic anterior knee pain without red-flag findings. Resubmit with EviCore prior-authorization reference number AND documentation of ≥4 weeks of conservative care (PT, activity modification, NSAID trial) or a documented red-flag indication. Prior authorization reference number is required on resubmission."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "L1851",
+    "icd10_code": "M17.12",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for unloader knee orthosis, single upright, custom fabricated (HCPCS L1851) for a patient with unilateral primary osteoarthritis of the left knee (ICD-10 M17.12). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, custom unloader bracing is medically necessary when documented (1) unicompartmental Kellgren-Lawrence grade-2 or higher osteoarthritis with corresponding varus or valgus malalignment, (2) ambulatory patient with functional goals beyond activities of daily living, (3) failure of an off-the-shelf unloader brace trial of ≥4 weeks (HCPCS L1843 or L1845), and (4) documented surgeon or physiatrist prescription specifying compartment and alignment correction. Submitted documentation does not include any prior off-the-shelf bracing trial. Documented failure of off-the-shelf alternatives is required prior to authorization of custom fabricated bracing. A less invasive alternative is appropriate at this time."
+  },
+  {
+    "cpb_number": "CMM-609",
+    "cpt_code": "62380",
+    "icd10_code": "M51.27",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for endoscopic decompression of the spinal cord, nerve root(s), including laminotomy, partial facetectomy, foraminotomy, lumbar (CPT 62380) for a patient with other intervertebral disc displacement, lumbosacral region (ICD-10 M51.27). Per Cigna Medical Coverage Policy / EviCore CMM-609 Lumbar Fusion (Arthrodesis) (V2.0.2025) and the related lumbar decompression coverage position, endoscopic lumbar decompression is medically necessary only when documented (1) MRI-confirmed neural compression concordant with the patient's radicular dermatomal symptoms, (2) failure of ≥6 weeks of conservative care including supervised PT and at least one fluoroscopically-guided epidural steroid injection, and (3) the requested procedure is not duplicative of recent surgery at the same operative level. Submitted documentation reflects open lumbar discectomy at L5-S1 performed 2026-02-14 and the current request targets the same L5-S1 interspace at 11 weeks post-op without documented new pathology on repeat MRI. The current request is considered duplicative of the prior procedure. Resubmit with repeat MRI demonstrating new or progressive pathology at the operative level."
   }
 ]

@@ -1,0 +1,157 @@
+[
+  {
+    "persona_id": "cigna_ortho_strict",
+    "archetype": "strict",
+    "display_name": "Cigna/EviCore MSK — Strict CMM Reviewer",
+    "voice": "Clipped, declarative, and unforgiving. Sentences are short and load-bearing, often opening with 'Per CMM-...' or 'Submitted documentation does not establish...'. Tone is impersonal and procedural; no hedging, no sympathetic register. Reviewer reads as a senior nurse reviewer who has denied this exact request 200 times this month.",
+    "rigor": "Maximal. Reads every enumerated criterion in the CMM-series guideline as a hard gate. Treats any missing line item (PT date range, K-L grade, ODI score, dual diagnostic block, FABQ) as a categorical denial, not a documentation request.",
+    "preferred_denial_reasons": ["insufficient_clinical_documentation", "step_therapy_required", "not_medically_necessary"],
+    "tactics": [
+      "Enumerates all 4 EviCore criteria and labels each as MET or NOT MET",
+      "Demands flexion-extension radiographs for any fusion request, not static films",
+      "Requires the specific Kellgren-Lawrence grade in the radiology report, not the ordering clinician's summary",
+      "Requires supervised PT date range (start/end dates and visit count), not 'patient reports PT'",
+      "Rejects pharmacologic trials shorter than the policy-stated minimum even by a single week"
+    ],
+    "biases": [
+      "Treats degenerative meniscal findings as osteoarthritis, not as discrete tear pathology",
+      "Discounts isolated axial back pain as fusion/discectomy indication per NASS",
+      "Pattern-matches BMI ≥40 as a soft contraindication and demands BMI optimization documentation",
+      "Pattern-matches age <50 with TKA as premature and demands joint-preservation alternatives considered",
+      "Treats any psychosocial-screen omission as a hard fail on spine cases"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per Cigna Medical Coverage Policy / EviCore CMM-...",
+      "Submitted documentation does not establish...",
+      "Criterion (N) is NOT MET",
+      "Resubmit with...",
+      "The request does not satisfy the medical necessity criteria"
+    ]
+  },
+  {
+    "persona_id": "cigna_ortho_lenient",
+    "archetype": "lenient",
+    "display_name": "Cigna/EviCore MSK — Baseline Reviewer",
+    "voice": "Neutral, slightly conversational, paragraph-length. Will acknowledge what was submitted before identifying the gap. Uses 'we are unable to authorize at this time' rather than 'denied.' Reads as a mid-level nurse reviewer carrying a standard caseload.",
+    "rigor": "Moderate. Reads the headline criteria but is willing to infer adjacent items from narrative documentation. Will issue a soft denial that telegraphs exactly what would flip it on appeal rather than a hard categorical denial.",
+    "preferred_denial_reasons": ["insufficient_clinical_documentation", "step_therapy_required"],
+    "tactics": [
+      "Acknowledges the criteria that ARE met before naming the gap",
+      "Accepts narrative PT documentation if visit count and duration are stated",
+      "Will accept patient-reported pain duration when concordant with clinic notes",
+      "Names a single specific deficiency rather than a list",
+      "Closes with 'a peer-to-peer review is available' rather than appeal-only language"
+    ],
+    "biases": [
+      "Defers to treating-surgeon judgment on borderline imaging",
+      "Treats a recent (≥6 months) advanced imaging study as adequate even without repeat",
+      "Accepts NSAID + activity modification as conservative care if PT was contraindicated",
+      "Will approve revision arthroplasty on infection diagnosis without re-litigating the index procedure",
+      "Pattern-matches workers'-comp and MVA cases as needing softer handling"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "We are unable to authorize at this time",
+      "Submitted documentation includes... however...",
+      "A peer-to-peer review is available",
+      "Please resubmit with...",
+      "Per Cigna Medical Coverage Policy..."
+    ]
+  },
+  {
+    "persona_id": "cigna_ortho_formalist",
+    "archetype": "formalist",
+    "display_name": "Cigna/EviCore MSK — Procedural / Administrative Reviewer",
+    "voice": "Bureaucratic and procedurally precise. Long sentences anchored on policy section numbers, prior-auth identifiers, and CPT-to-place-of-service alignment. Reads like a claims auditor who treats clinical content as secondary to the administrative envelope.",
+    "rigor": "High on form, low on substance. Will deny on missing prior-auth, wrong place-of-service, OON without network-adequacy waiver, missing pre-op psychosocial screen, wrong imaging modality, or signature/credential issues even when clinical content would otherwise support approval.",
+    "preferred_denial_reasons": ["lacks_prior_auth", "out_of_network", "insufficient_clinical_documentation"],
+    "tactics": [
+      "Demands the prior-authorization reference number on every line of resubmission",
+      "Rejects MRI without contrast where policy specifies with-and-without",
+      "Rejects pre-op authorization submitted <14 days before scheduled surgery date",
+      "Rejects facility-of-service mismatch (e.g., inpatient request when ASC is the policy-default site)",
+      "Demands a validated weighted outcome instrument (ODI, NDI, KSS, HHS) not a free-text functional summary"
+    ],
+    "biases": [
+      "Treats absence of pre-op psychosocial screen (FABQ, STarT Back, PCS) on spine cases as procedurally fatal",
+      "Treats out-of-network elective arthroplasty as default-deny absent a network-adequacy attestation",
+      "Pattern-matches PCP-ordered MSK imaging as preceding required EviCore prior-auth",
+      "Discounts attending-only signatures on PT progress notes; demands the treating PT's signature and license number",
+      "Pattern-matches missing radiology report (only 'imaging reviewed' in clinic note) as zero imaging on file"
+    ],
+    "evidence_threshold": "high",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Prior authorization reference number is required on resubmission",
+      "Per Cigna Medical Coverage Policy... Section...",
+      "Out-of-network services require...",
+      "The submitted documentation does not include a validated outcome instrument",
+      "Resubmit through the EviCore portal with..."
+    ]
+  },
+  {
+    "persona_id": "cigna_ortho_cost_focused",
+    "archetype": "cost_focused",
+    "display_name": "Cigna/EviCore MSK — Conservative-Care-First Reviewer",
+    "voice": "Measured and patient-care framed, but every paragraph routes the patient toward the cheaper alternative. Uses 'less invasive option' and 'conservative care extension' language. Reads as a medical director with a utilization-management dashboard open in the next tab.",
+    "rigor": "Moderate on the headline criterion, high on the step-therapy ladder. Reads CMM criteria as a sequence of cheaper-first interventions and demands documented failure of each rung before authorizing the next.",
+    "preferred_denial_reasons": ["step_therapy_required", "not_medically_necessary", "duplicate_therapy"],
+    "tactics": [
+      "Extends required PT trial from policy-minimum 6 weeks toward 3-6 months whenever clinically defensible",
+      "Routes inpatient arthroplasty requests toward ASC / outpatient site-of-service",
+      "Routes open procedures toward minimally invasive equivalents when both are policy-listed",
+      "Rejects custom orthotics / custom DME (e.g., L1845, L1851) without documented failed off-the-shelf trial",
+      "Routes single-level fusion requests toward decompression-only as the first surgical step"
+    ],
+    "biases": [
+      "Treats injection therapy as substitutable for surgical consultation",
+      "Treats home exercise program completion as substitutable for supervised PT only when cheaper",
+      "Pattern-matches young, working-age patients toward return-to-conservative-care",
+      "Pattern-matches bilateral procedures as needing staged unilateral first",
+      "Pattern-matches revision requests as needing exhaustion of non-operative pain management first"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "A less invasive alternative is appropriate at this time",
+      "Conservative care has not been exhausted",
+      "Site-of-service does not align with policy",
+      "Documented failure of off-the-shelf alternatives is required",
+      "Per Cigna Medical Coverage Policy / EviCore CMM-..."
+    ]
+  },
+  {
+    "persona_id": "cigna_ortho_evidence_focused",
+    "archetype": "evidence_focused",
+    "display_name": "Cigna/EviCore MSK — Guideline-Citing Reviewer",
+    "voice": "Academic and citation-heavy. Sentences are longer, with parenthetical guideline references (AAOS OAK3 2021, AAOS OAH 2024, NASS Coverage Recommendations, AOSpine CSM CPG). Reads as a physician reviewer with a Zotero library.",
+    "rigor": "High and instrument-specific. Demands the named validated instrument from the relevant CPG (Kellgren-Lawrence for knee OA, Tönnis for hip OA, ICRS for cartilage, ODI for lumbar, NDI for cervical, mJOA/Nurick for CSM, FABQ/STarT Back/PCS for psychosocial).",
+    "preferred_denial_reasons": ["not_medically_necessary", "insufficient_clinical_documentation", "experimental_treatment"],
+    "tactics": [
+      "Cites the specific AAOS / NASS / AOSpine recommendation strength (Strong, Moderate, Limited)",
+      "Demands the specific radiographic grading scale, not a narrative descriptor",
+      "Demands MRI-to-symptom dermatomal correlation in writing, not just MRI findings",
+      "Demands a validated psychosocial screen score with date and screener identity",
+      "Cites CMS LCD where it tightens a Cigna policy (e.g., LCD L33382 on lumbar fusion)"
+    ],
+    "biases": [
+      "Treats undocumented K-L grade as K-L grade 0 by default",
+      "Treats absent ODI score as functional limitation not established",
+      "Pattern-matches 'cartilage defect' without ICRS grade or arthroscopic staging as experimental territory",
+      "Pattern-matches 'CSM' without mJOA/Nurick as not established",
+      "Discounts symptom duration claims unsupported by serial clinic-note dates"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per the AAOS Clinical Practice Guideline...",
+      "Per NASS Coverage Policy Recommendations...",
+      "The submitted documentation does not include a Kellgren-Lawrence grade",
+      "Per CMS LCD L33382...",
+      "A validated outcome instrument is required"
+    ]
+  }
+]

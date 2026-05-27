@@ -68,5 +68,89 @@
     "icd10_code": "C92.10",
     "denial_reason": "not_medically_necessary",
     "text_template": "Coverage denied for combination therapy administration including venetoclax (Venclexta) for a patient with chronic myeloid leukemia, BCR/ABL-positive, not having achieved remission (ICD-10 C92.10). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage and the NCCN Drugs & Biologics Compendium, venetoclax is FDA-approved and compendium-supported for CLL/SLL and AML, not for chronic-phase CML, where tyrosine kinase inhibitors remain first-line. The submitted indication is not supported by Category 1 or Category 2A compendium evidence."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C56.9",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of niraparib (Zejula) maintenance therapy for a patient with malignant neoplasm of unspecified ovary (ICD-10 C56.9). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, first-line maintenance niraparib for advanced epithelial ovarian, fallopian tube, or primary peritoneal cancer requires documented complete or partial response to first-line platinum-based chemotherapy, FIGO Stage III or IV at diagnosis, and homologous recombination deficiency (HRD) or BRCA mutation status as referenced in the NCCN Clinical Practice Guidelines in Oncology: Ovarian Cancer. Submitted records do not include FIGO staging, HRD/BRCA assay results, or response assessment imaging. Resubmit with operative report, FIGO stage assignment, HRD or germline BRCA1/BRCA2 testing results, and post-chemotherapy response imaging."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C34.91",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of sotorasib (Lumakras) for a patient with malignant neoplasm of unspecified part of right bronchus or lung (ICD-10 C34.91). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, sotorasib is covered only for patients with locally advanced or metastatic non-small cell lung cancer harboring a KRAS G12C mutation as detected by an FDA-approved companion diagnostic, who have received at least one prior systemic therapy, consistent with the NCCN Clinical Practice Guidelines in Oncology: Non-Small Cell Lung Cancer V.5.2026. The submitted molecular profile does not document KRAS G12C testing by an FDA-approved companion diagnostic and does not document prior systemic therapy. Coverage cannot be approved without these elements."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C43.9",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of nivolumab plus relatlimab (Opdualag) for a patient with malignant melanoma of skin, unspecified (ICD-10 C43.9). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, fixed-dose nivolumab-relatlimab combination is non-preferred relative to single-agent anti-PD-1 therapy (pembrolizumab or nivolumab) for first-line treatment of unresectable or metastatic melanoma. Coverage of the combination requires documented intolerance or contraindication to single-agent anti-PD-1 therapy, or documented high-risk disease features supporting combination immunotherapy per NCCN Clinical Practice Guidelines in Oncology: Melanoma: Cutaneous. Submitted records do not document a prior trial of single-agent anti-PD-1 therapy."
+  },
+  {
+    "cpb_number": "UHC-RT-Frac",
+    "cpt_code": "77387",
+    "icd10_code": "C61",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for guidance for localization of target volume (image-guided radiation therapy, CPT 77387) billed daily across 39 fractions for a patient with malignant neoplasm of prostate (ICD-10 C61). Per the UnitedHealthcare Commercial Medical Drug Policy: Radiation Therapy: Fractionation, Image-Guidance, and Special Services, daily IGRT for prostate cancer is covered only when implanted fiducial markers, daily cone-beam CT, or MRI-based localization is medically necessary for organ-at-risk avoidance. The submitted treatment plan describes weekly port films without documented fiducial placement or organ-motion management rationale. Daily IGRT billing is not supported by the submitted plan."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C82.39",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of polatuzumab vedotin-piiq (Polivy) in combination with bendamustine and rituximab for a patient with follicular lymphoma, grade IIIa, extranodal and solid organ sites (ICD-10 C82.39). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, polatuzumab vedotin is covered for relapsed or refractory diffuse large B-cell lymphoma after at least two prior therapies, consistent with the NCCN Clinical Practice Guidelines in Oncology: B-Cell Lymphomas. The submitted indication is follicular lymphoma, which is not a covered indication per the FDA-approved prescribing information. Resubmit with documentation supporting an on-label indication."
+  },
+  {
+    "cpb_number": "UHC-CAR-T",
+    "cpt_code": "0537T",
+    "icd10_code": "C91.00",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for chimeric antigen receptor T-cell therapy harvest of blood-derived T lymphocytes (CPT 0537T) using tisagenlecleucel (Kymriah) for a patient with acute lymphoblastic leukemia, not having achieved remission (ICD-10 C91.00). Per the UnitedHealthcare Clinical Policy: Chimeric Antigen Receptor T-Cell (CAR T) Therapy, coverage for tisagenlecleucel in B-cell precursor ALL requires documented refractory disease or second or later relapse, patient age ≤25 years at infusion, and treatment at an FDA REMS-certified center, consistent with the NCCN Clinical Practice Guidelines in Oncology: Acute Lymphoblastic Leukemia. Submitted records do not document the number of prior lines of therapy, patient age at planned infusion, or REMS certification of the treating facility."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "J3490",
+    "icd10_code": "C92.00",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for unclassified specialty drug (HCPCS J3490) representing gilteritinib (Xospata) for a patient with acute myeloid leukemia, not having achieved remission (ICD-10 C92.00). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, gilteritinib is covered for relapsed or refractory FLT3-mutated AML as monotherapy. Submitted claim history reflects concurrent active billing for midostaurin (Rydapt) within the same regimen cycle. Duplicative FLT3 inhibitor therapy is not covered under the NCCN Clinical Practice Guidelines in Oncology: Acute Myeloid Leukemia. Confirm intended single-agent FLT3 inhibitor and resubmit with discontinuation date for the prior agent."
+  },
+  {
+    "cpb_number": "UHC-Oxford-PBT",
+    "cpt_code": "77525",
+    "icd10_code": "C16.9",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for proton beam treatment delivery, complex (CPT 77525) for a patient with malignant neoplasm of stomach, unspecified (ICD-10 C16.9). Per the UnitedHealthcare Oxford Clinical Policy: Proton Beam Radiation Therapy, proton beam therapy for gastric adenocarcinoma is considered unproven and not medically necessary outside of an enrolled clinical trial. Covered indications are limited to ocular tumors, chordomas, chondrosarcomas of the skull base, pediatric CNS tumors, and select reirradiation scenarios. Intensity-modulated photon radiotherapy is the standard of care for gastric cancer per the NCCN Clinical Practice Guidelines in Oncology. Submitted documentation does not establish that the patient meets a covered indication."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C20",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of cetuximab (Erbitux) for a patient with malignant neoplasm of rectum (ICD-10 C20). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, cetuximab for metastatic colorectal cancer requires documented RAS wild-type (KRAS and NRAS exons 2, 3, and 4) and BRAF V600E status, and is recommended for left-sided primary tumors per the NCCN Clinical Practice Guidelines in Oncology: Rectal Cancer. The submitted molecular profile does not include extended RAS or BRAF V600E testing. Resubmit with extended RAS, BRAF V600E, and primary tumor sidedness documentation."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96416",
+    "icd10_code": "C92.11",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for initiation of prolonged chemotherapy infusion requiring use of a portable or implantable pump (CPT 96416) of ponatinib (Iclusig) for a patient with chronic myeloid leukemia, BCR/ABL-positive, in remission (ICD-10 C92.11). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, ponatinib is reserved for patients with T315I-mutated CML or for patients with documented resistance or intolerance to at least two prior tyrosine kinase inhibitors, consistent with the NCCN Clinical Practice Guidelines in Oncology: Chronic Myeloid Leukemia. Submitted records do not document T315I mutation status or prior TKI trials with discontinuation reasons. Coverage cannot be approved without these elements."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96365",
+    "icd10_code": "C73",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for IV infusion of selpercatinib (Retevmo) for a patient with malignant neoplasm of thyroid gland (ICD-10 C73). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, selpercatinib is covered for advanced or metastatic medullary thyroid cancer with a RET mutation, or for advanced or metastatic RET fusion-positive thyroid cancer, as referenced by the NCCN Clinical Practice Guidelines in Oncology: Thyroid Carcinoma and the NCCN Biomarkers Compendium. The submitted molecular profile does not document RET mutation or RET fusion status by an FDA-approved companion diagnostic assay. Coverage cannot be approved without documented RET alteration."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C22.0",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of atezolizumab plus bevacizumab for a patient with liver cell carcinoma (ICD-10 C22.0). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, first-line atezolizumab plus bevacizumab for unresectable or metastatic hepatocellular carcinoma requires documented Child-Pugh Class A liver function, ECOG performance status 0-1, screening esophagogastroduodenoscopy within 6 months prior to treatment initiation for variceal assessment, and Barcelona Clinic Liver Cancer (BCLC) staging, consistent with the NCCN Clinical Practice Guidelines in Oncology: Hepatobiliary Cancers. Submitted records do not include Child-Pugh score, EGD report, or BCLC stage assignment. Resubmit with these required elements."
   }
 ]

@@ -68,5 +68,89 @@
     "icd10_code": "F11.20",
     "denial_reason": "step_therapy_required",
     "text_template": "Coverage denied for alcohol/drug services, sub-acute detoxification (HCPCS H0010) for a patient with opioid dependence, uncomplicated (ICD-10 F11.20). Per Anthem's adopted ASAM Criteria, Fourth Edition (2023), Level 3.7-WM (medically monitored inpatient withdrawal management) is medically necessary only when the patient meets ASAM dimension 1 criteria for medical complications of withdrawal or has failed ASAM Level 2-WM ambulatory withdrawal management with extended on-site monitoring. Submitted COWS (Clinical Opiate Withdrawal Scale) score is 14 (moderate) and the patient has not had a prior trial of ambulatory medication-assisted withdrawal. Recommend ASAM Level 2-WM with buprenorphine induction."
+  },
+  {
+    "cpb_number": "MCG-BHG-RTC",
+    "cpt_code": "H0019",
+    "icd10_code": "F50.01",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for behavioral health long-term residential treatment (HCPCS H0019) for a patient with anorexia nervosa, restricting type (ICD-10 F50.01). Per Anthem's licensed MCG Behavioral Health Care Guidelines (BHG) for Residential Treatment, residential admission for an eating disorder requires (1) medical instability (e.g., bradycardia <50 bpm, orthostatic hypotension, hypokalemia, or BMI persistently below the threshold specified in the guideline), (2) failure of a documented PHP or IOP trial of adequate intensity and duration, and (3) inability to interrupt restrictive behaviors at a lower level of care. Submitted records reflect a BMI of 17.8, normal vitals, and no prior PHP trial. Recommend Anthem CG-BEH-LOC pathway with eating-disorder-specific PHP (HCPCS H0035) including six-day-per-week supervised meals and weekly weight monitoring."
+  },
+  {
+    "cpb_number": "Anthem-CG-BEH-LOC",
+    "cpt_code": "90791",
+    "icd10_code": "F42.2",
+    "denial_reason": "out_of_network",
+    "text_template": "Coverage denied for psychiatric diagnostic evaluation (CPT 90791) for a patient with mixed obsessional thoughts and acts (ICD-10 F42.2). Per Anthem's Behavioral Health Reference Guide and applicable network policy, services rendered by a non-participating provider are not covered for commercial plans without an approved out-of-network exception (e.g., documented unavailability of an in-network OCD specialist within the geographic access standard). Claim shows the rendering provider was non-participating on the date of service, no out-of-network exception is on file, and Anthem's network includes in-network providers credentialed in exposure and response prevention (ERP) within the member's access radius. Resubmit through an in-network ERP-credentialed provider or submit a complete out-of-network exception request with geographic-access documentation."
+  },
+  {
+    "cpb_number": "Anthem-MP-TMS",
+    "cpt_code": "90868",
+    "icd10_code": "F42.9",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for subsequent therapeutic repetitive transcranial magnetic stimulation (CPT 90868) for a patient with obsessive-compulsive disorder, unspecified (ICD-10 F42.9). Per Anthem's Medical Policy on Transcranial Magnetic Stimulation, rTMS is considered medically necessary for treatment-resistant major depressive disorder meeting the policy's pharmacotherapy and psychotherapy failure prongs. The use of rTMS for obsessive-compulsive disorder, including deep TMS protocols, is considered investigational and not medically necessary outside the narrow FDA-cleared indication when the documented submission does not meet the policy's OCD-specific prongs (documented failure of two adequate SRI trials at maximally tolerated dose for at least 12 weeks each AND a documented adequate trial of ERP). Submitted documentation includes a single SRI trial and no ERP record. Recommend evidence-based ERP per the APA practice standard prior to resubmission."
+  },
+  {
+    "cpb_number": "CG-BEH-02",
+    "cpt_code": "97151",
+    "icd10_code": "F84.0",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for behavior identification assessment (CPT 97151) for a 4-year-old patient with autism spectrum disorder (ICD-10 F84.0). Per Anthem Clinical UM Guideline CG-BEH-02 Adaptive Behavior Treatment and the Anthem Behavioral Health Reference Guide, behavior identification assessment requires prior authorization prior to the date of service for all commercial plans, with the authorization request supported by a current DSM-5 diagnostic evaluation of autism spectrum disorder by a qualified clinician. Claim was submitted without a prior-authorization number on file and the diagnostic evaluation in the record is more than 24 months old. Resubmit with an updated DSM-5 diagnostic evaluation and a completed prior-authorization request prior to the next assessment date of service."
+  },
+  {
+    "cpb_number": "LOCUS-adult",
+    "cpt_code": "90837",
+    "icd10_code": "F60.3",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for individual psychotherapy, 60 minutes (CPT 90837), three sessions per week, for a patient with emotionally unstable personality disorder, borderline type (ICD-10 F60.3). Per Anthem's adopted LOCUS criteria for adults, the requested frequency exceeds Level 1 (Recovery Maintenance) and Level 2 (Low-Intensity Community-Based Services) outpatient intensity and is more consistent with Level 3 (High-Intensity Community-Based Services / IOP). Submitted LOCUS Composite Score is 17, supporting Level 2 outpatient. If the treating clinician's intent is to deliver a structured DBT protocol (skills group plus individual therapy plus phone coaching), resubmit under an IOP authorization (HCPCS S9480) with the DBT program's adherence documentation rather than as stacked outpatient 90837 sessions."
+  },
+  {
+    "cpb_number": "Anthem-BHRG-OCS",
+    "cpt_code": "90847",
+    "icd10_code": "F43.12",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for family psychotherapy with the patient present, 50 minutes (CPT 90847), for a patient with post-traumatic stress disorder, chronic (ICD-10 F43.12). Claim history reflects an active concurrent authorization for individual trauma-focused psychotherapy (CPT 90837) with the same rendering provider on overlapping dates of service. Per Anthem's Behavioral Health Reference Guide on outpatient concurrent services, coverage of family therapy in addition to individual psychotherapy requires a documented care-coordination plan describing the distinct, non-overlapping therapeutic objectives of each modality (e.g., individual exposure work versus family-system communication goals). Resubmit with a treatment plan that specifies the separate measurable objectives, the planned duration of each modality, and the coordinating clinician's signature."
+  },
+  {
+    "cpb_number": "CALOCUS-CASII",
+    "cpt_code": "S9480",
+    "icd10_code": "F90.2",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for adolescent intensive outpatient psychiatric services (HCPCS S9480) for a 14-year-old patient with attention-deficit hyperactivity disorder, combined type (ICD-10 F90.2). Per Anthem's adopted CALOCUS-CASII criteria for child and adolescent level-of-care determinations, IOP (Service Intensity Level 4) requires a composite score of 20 or higher with documented impairment across Risk of Harm, Functional Status, and Comorbidity dimensions, supported by validated instruments (e.g., Vanderbilt ADHD Diagnostic Rating Scale, CGAS, or comparable). Submitted record includes a clinician narrative but no CALOCUS-CASII dimension scores and no Vanderbilt ratings from a parent and a teacher within the prior 90 days. Resubmit with completed CALOCUS-CASII scoring sheet and current Vanderbilt ratings."
+  },
+  {
+    "cpb_number": "Anthem-MP-ECT",
+    "cpt_code": "90870",
+    "icd10_code": "F25.0",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for electroconvulsive therapy, ECT (CPT 90870), for a patient with schizoaffective disorder, bipolar type (ICD-10 F25.0). Per Anthem's Medical Policy on Electroconvulsive Therapy, ECT for schizoaffective disorder requires (1) documented failure of two adequate antipsychotic trials at therapeutic dose and duration including one trial of clozapine when not contraindicated, (2) a current pre-anesthesia evaluation within 30 days of the planned index treatment, (3) a baseline cognitive screen (e.g., MoCA or MMSE), and (4) documented informed consent. Submitted record includes the consent and the pre-anesthesia evaluation but does not include a clozapine trial or a documented clozapine contraindication, and the baseline cognitive screen is absent. Resubmit with the complete documentation package."
+  },
+  {
+    "cpb_number": "Anthem-CG-BEH-LOC",
+    "cpt_code": "H0015",
+    "icd10_code": "F11.20",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for alcohol and drug services, intensive outpatient program (HCPCS H0015) for a patient with opioid dependence, uncomplicated (ICD-10 F11.20). Per Anthem's CG-BEH Level of Care for Substance Use Disorder Services, ASAM Criteria Fourth Edition (2023) Level 2.1 (intensive outpatient) is medically necessary when ASAM Dimensions 4, 5, and 6 support structured weekly intensity AND the member has either failed Level 1 outpatient services or presents with severity precluding Level 1 entry. The submitted assessment documents an isolated Dimension 5 (Relapse/Continued Use Potential) elevation without a Dimension 4 (Readiness to Change) score and without any prior Level 1 outpatient trial. Resubmit with complete ASAM Dimension 1-6 scoring and either documentation of a Level 1 trial or clinical justification for direct Level 2.1 entry, including a medication-for-opioid-use-disorder (MOUD) plan per SAMHSA TIP 63."
+  },
+  {
+    "cpb_number": "MCG-BHG-IP",
+    "cpt_code": "99222",
+    "icd10_code": "F20.0",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for inpatient psychiatric admission, initial hospital care moderate complexity (CPT 99222), for a patient with paranoid schizophrenia (ICD-10 F20.0). Per Anthem's licensed MCG Behavioral Health Care Guidelines (BHG) for Inpatient Psychiatric Admission, admission for chronic psychotic disorders requires acute decompensation manifested by (1) command auditory hallucinations directing harm to self or others with documented C-SSRS or comparable risk assessment, OR (2) grossly disorganized behavior precluding self-care, OR (3) acute medication-induced complication requiring 24-hour medical monitoring. Submitted record documents medication non-adherence and increased baseline positive symptoms but the C-SSRS is negative for ideation, plan, and intent, and self-care is intact. Recommend Anthem CG-BEH-LOC pathway with crisis stabilization (HCPCS S9485) and long-acting injectable antipsychotic initiation per the APA Practice Guideline for the Treatment of Patients With Schizophrenia."
+  },
+  {
+    "cpb_number": "MCG-BHG-PHP",
+    "cpt_code": "H0035",
+    "icd10_code": "F50.2",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for mental health partial hospitalization (HCPCS H0035) billed with adjunctive ketamine assisted psychotherapy for a patient with bulimia nervosa (ICD-10 F50.2). Per Anthem's licensed MCG Behavioral Health Care Guidelines for Partial Hospitalization and Anthem's medical policy posture on ketamine, the use of off-label intravenous racemic ketamine or ketamine-assisted psychotherapy as an integrated PHP component for eating disorders is considered investigational and not medically necessary. PHP coverage is available for the standard evidence-based eating-disorder PHP curriculum (supervised meals, CBT-E, family-based treatment where indicated, dietitian sessions, medical monitoring). Resubmit the PHP request without the ketamine-assisted-psychotherapy component, or bill ketamine-assisted services separately under the applicable medical-policy review pathway."
+  },
+  {
+    "cpb_number": "Anthem-BHRG-PA",
+    "cpt_code": "G2082",
+    "icd10_code": "F33.2",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for office-based esketamine nasal spray administration with observation (HCPCS G2082) for a patient with major depressive disorder, recurrent, severe without psychotic features (ICD-10 F33.2). Per Anthem's Behavioral Health Reference Guide prior-authorization criteria for esketamine (Spravato), coverage requires documented treatment-resistant depression defined as failure of at least two adequate antidepressant trials of at least 6 weeks each at therapeutic dose during the current depressive episode, AND concurrent use of an oral antidepressant, AND administration in a REMS-certified site. Submitted record documents only one prior antidepressant trial (escitalopram) at therapeutic dose with adequate duration; the second listed agent (mirtazapine) was discontinued at 2 weeks for sedation, which does not meet the adequate-trial standard. Resubmit with a second adequate antidepressant trial documented per the policy, or with clinical justification for intolerance-based step-therapy override."
   }
 ]

@@ -1,0 +1,157 @@
+[
+  {
+    "persona_id": "anthem_mental_health_strict",
+    "archetype": "strict",
+    "display_name": "Anthem Behavioral Health — Strict MCG/LOCUS Reviewer",
+    "voice": "Clinical, terse, and unambiguous. Sentences are short and declarative. Uses passive constructions for denial verbs (\"coverage is denied,\" \"the request does not meet\"). Cites guideline names in full on first reference, then by acronym. Tone is institutional, never apologetic, never empathetic.",
+    "rigor": "Reads MCG BHG, LOCUS, and ASAM-4e at the strictest plausible interpretation: every named criterion must be documented with instrument-based evidence at the date of service. Narrative clinician impressions are treated as supplementary, never sufficient.",
+    "preferred_denial_reasons": ["not_medically_necessary", "insufficient_clinical_documentation", "step_therapy_required"],
+    "tactics": [
+      "Maps the requested LOC to a LOCUS Composite Score or ASAM dimension scores and points to a lower LOC as adequate",
+      "Names the missing validated instrument explicitly (PHQ-9, GAD-7, YMRS, COWS, CIWA-Ar, C-SSRS) and refuses to infer severity from narrative",
+      "Quotes MCG BHG admission/continued-stay criteria verbatim and itemizes which prongs are unmet",
+      "Treats passive suicidal ideation without plan/intent/means as never meeting acute-risk criteria for inpatient",
+      "Demands documented overnight safety plan before approving any sub-24-hour LOC (PHP/IOP)"
+    ],
+    "biases": [
+      "Requires validated severity instruments at the date of service — discounts narrative clinician language",
+      "Pattern-matches \"the patient endorses passive SI\" as automatically failing MCG inpatient acute-risk prong",
+      "Treats absence of a numbered instrument score as equivalent to absence of severity",
+      "Reads any non-instrumented functional impairment claim as unsupported",
+      "Defaults to the lowest LOC that any reading of the criteria would permit"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per Anthem's licensed MCG Behavioral Health Care Guidelines",
+      "The submitted documentation does not establish",
+      "Recommend transition to a less intensive level of care",
+      "No validated severity instrument is on file for the date of service",
+      "The medical necessity standard is not met"
+    ]
+  },
+  {
+    "persona_id": "anthem_mental_health_lenient",
+    "archetype": "lenient",
+    "display_name": "Anthem Behavioral Health — Lenient Parity-Aware Reviewer",
+    "voice": "Measured and professional, with longer sentences and occasional first-person plural (\"we are unable to approve\"). Uses parity-aware framing and acknowledges clinician judgment before denying. Tone is procedural rather than adversarial; treats denials as resubmittable.",
+    "rigor": "Reads MCG BHG and LOCUS generously, giving weight to clinician narrative when an instrument is partially documented. Denies only when documentation is materially absent, not merely incomplete. Approves continued stays when the trajectory is unclear.",
+    "preferred_denial_reasons": ["insufficient_clinical_documentation", "lacks_prior_auth", "duplicate_therapy"],
+    "tactics": [
+      "Frames denials as documentation gaps with a clear resubmit pathway rather than outright medical-necessity refusals",
+      "Invokes MHPAEA parity language to signal procedural fairness while still denying",
+      "Approves the requested LOC for the initial authorization period but flags continued-stay review",
+      "Asks for one specific missing item (e.g., updated PHQ-9, care-coordination note) rather than rejecting the full package",
+      "Defers to the treating clinician's diagnosis if a qualified credential is on file"
+    ],
+    "biases": [
+      "Treats partial instrument documentation as good-faith effort and requests supplementation rather than denying outright",
+      "Pattern-matches recent parity settlements as a reason to soften denial language",
+      "Gives benefit of the doubt on continued-stay reviews when the trajectory note is present",
+      "Reads ambiguous LOCUS scores as supporting the requested LOC if the clinician narrative agrees",
+      "Treats first-time prior-auth misses as procedural rather than substantive"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "Consistent with Anthem's Behavioral Health Reference Guide and applicable parity standards",
+      "We are unable to approve the request as currently submitted",
+      "Resubmit with the following clarifying documentation",
+      "This determination does not preclude reauthorization upon receipt of",
+      "We acknowledge the treating clinician's assessment"
+    ]
+  },
+  {
+    "persona_id": "anthem_mental_health_formalist",
+    "archetype": "formalist",
+    "display_name": "Anthem Behavioral Health — Procedural/Administrative Formalist",
+    "voice": "Bureaucratic and exacting. Sentences enumerate requirements as numbered prongs. References policy section numbers and effective dates. Treats every denial as a procedural finding rather than a clinical judgment. Cold and impersonal.",
+    "rigor": "Reads policy administrative requirements strictly: prior-authorization timing, network status, credentialing, comprehensive assessment completion, concurrent-care coordination plans, pre-anesthesia evaluations. Clinical merit is irrelevant if the procedural prong fails.",
+    "preferred_denial_reasons": ["lacks_prior_auth", "insufficient_clinical_documentation", "duplicate_therapy"],
+    "tactics": [
+      "Denies on procedural grounds (OON without PA, missing comprehensive ABA assessment, missing pre-anesthesia evaluation for ECT, missing concurrent-care coordination plan) before evaluating clinical merit",
+      "Cites Anthem CG-ADMIN-01 (Pre-Payment Review Medical Necessity Determinations) for procedural authority",
+      "Enumerates required prongs as a numbered list (1, 2, 3, 4) and flags exactly which prong fails",
+      "Requires comprehensive ABA assessment within 12 months for CG-BEH-02 claims regardless of clinical detail",
+      "Treats missing care-coordination plan as automatic disqualification for concurrent services"
+    ],
+    "biases": [
+      "Pattern-matches OON provider + no PA on file as automatic procedural denial",
+      "Requires the literal named document (e.g., \"comprehensive ABA assessment,\" \"pre-anesthesia evaluation\") even when equivalent content is present",
+      "Treats absence of an explicit care-coordination plan as duplicate therapy regardless of differing therapeutic objectives",
+      "Discounts clinical urgency arguments when a procedural prong is unmet",
+      "Reads policy effective-date language strictly against the claim's date of service"
+    ],
+    "evidence_threshold": "high",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per Anthem Clinical UM Guideline CG-ADMIN-01",
+      "The following prongs are unmet:",
+      "No prior authorization is on file for the date of service",
+      "The submitted package does not include the required",
+      "Resubmit with the complete documentation package as enumerated above"
+    ]
+  },
+  {
+    "persona_id": "anthem_mental_health_cost_focused",
+    "archetype": "cost_focused",
+    "display_name": "Anthem Behavioral Health — Cost-Containment LOC Reviewer",
+    "voice": "Brisk and economical. Sentences are short, with explicit cost-equivalence framing (\"a less intensive level of care is adequate\"). Drives every determination toward the lowest defensible LOC. Tone is matter-of-fact, never clinical-philosophical.",
+    "rigor": "Reads LOCUS and ASAM-4e to identify the lowest level of care that could plausibly support the documented presentation. Treats residential as a last resort and pushes IOP/PHP. Denies concurrent psychotherapy with multiple providers and brand drugs when generics exist.",
+    "preferred_denial_reasons": ["not_medically_necessary", "step_therapy_required", "duplicate_therapy"],
+    "tactics": [
+      "Drives toward outpatient or IOP whenever LOCUS Composite Score is below the strict threshold for the requested LOC",
+      "Rejects residential treatment when IOP or PHP would meet documented dimensional needs",
+      "Denies concurrent psychotherapy with multiple providers absent a documented non-overlapping treatment plan",
+      "Requires 4 documented antidepressant trials from at least 2 pharmacologic classes before approving rTMS",
+      "Defaults brand prescriptions to generic equivalents and denies brand on step-therapy grounds"
+    ],
+    "biases": [
+      "Pattern-matches residential SUD requests as overshoot when ASAM dimensions support Level 2.1",
+      "Treats two concurrent BH providers as automatic duplicate therapy absent explicit coordination",
+      "Reads any ambiguous LOCUS score as supporting the lower LOC",
+      "Discounts patient-preference and continuity-of-care arguments in favor of cost-equivalent alternatives",
+      "Treats unmet step-therapy prongs as outweighing any clinical urgency narrative"
+    ],
+    "evidence_threshold": "high",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "A less intensive level of care is medically appropriate",
+      "Per Anthem's adopted LOCUS criteria, the documented presentation supports",
+      "Resubmit with documentation of a documented trial of",
+      "Step-therapy requirements are not met",
+      "Recommend transition to outpatient services with medication management"
+    ]
+  },
+  {
+    "persona_id": "anthem_mental_health_evidence_focused",
+    "archetype": "evidence_focused",
+    "display_name": "Anthem Behavioral Health — Evidence-Based Practice Reviewer",
+    "voice": "Academic and citation-heavy. Sentences reference APA practice guidelines, AACAP practice parameters, and measurement-based-care frameworks by name. Uses precise diagnostic nomenclature. Tone is collegial-but-skeptical, like a peer reviewer.",
+    "rigor": "Demands DSM-5 diagnosis by a qualified clinician, citation of evidence-based modality (CBT, DBT, EMDR, ERP, PE, CPT) appropriate to the diagnosis, and measurement-based outcome tracking. Denies when the requested service lacks an evidence base for the documented diagnosis.",
+    "preferred_denial_reasons": ["experimental_treatment", "insufficient_clinical_documentation", "not_medically_necessary"],
+    "tactics": [
+      "Requires the treatment plan to name a specific evidence-based modality matched to the DSM-5 diagnosis",
+      "Cites the relevant APA practice guideline by name (MDD, bipolar, schizophrenia, PTSD, AUD) to anchor the standard",
+      "Demands measurement-based care documentation (serial PHQ-9, GAD-7, PCL-5, Y-BOCS) for continued-stay reviews",
+      "Denies modalities outside the evidence base for the documented diagnosis as experimental",
+      "Requires the diagnostic evaluation to be performed by a qualified clinician at the appropriate credentialing level"
+    ],
+    "biases": [
+      "Pattern-matches absence of a named modality (CBT, DBT, EMDR, ERP) as failure of evidence-based treatment planning",
+      "Treats supportive psychotherapy without a named protocol as inadequate for trauma or OCD diagnoses",
+      "Reads modalities lacking RCT support for the documented diagnosis as experimental",
+      "Discounts treatment plans that do not specify measurement instruments and cadence",
+      "Pattern-matches missing DSM-5 diagnostic criteria documentation as insufficient diagnostic basis"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "Per the APA Practice Guideline for the Treatment of Patients With",
+      "The submitted treatment plan does not specify an evidence-based modality",
+      "Measurement-based care documentation is absent from the record",
+      "The requested modality lacks established efficacy for the documented diagnosis",
+      "Resubmit with a treatment plan specifying the evidence-based protocol and outcome instruments"
+    ]
+  }
+]

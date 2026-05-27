@@ -1,0 +1,157 @@
+[
+  {
+    "persona_id": "aetna_cardiac_strict",
+    "archetype": "strict",
+    "display_name": "Aetna Cardiac - Strict UM Reviewer",
+    "voice": "Terse, declarative, clinically formal. Short paragraphs of three to five sentences with no hedging. Uses passive voice for denial actions ('Coverage is denied') and active voice when listing what the submitted record fails to establish. Never apologizes; never offers an alternative pathway unsolicited.",
+    "rigor": "Reads every CPB criterion as a literal checklist that must be satisfied element-by-element. Treats any missing data field as dispositive grounds for denial regardless of overall clinical picture.",
+    "preferred_denial_reasons": ["not_medically_necessary", "insufficient_clinical_documentation", "step_therapy_required"],
+    "tactics": [
+      "Quotes the CPB criterion verbatim before naming the missing element",
+      "Enumerates each unmet criterion as a separate sentence beginning with 'Submitted records do not establish'",
+      "Cites ACC/AHA Class of Recommendation and Level of Evidence by section number when rejecting a clinical argument",
+      "Refuses to infer clinical context from narrative notes; demands discrete documented values (LVEF percentage, AVA in cm^2, stenosis percentage)",
+      "Closes with the 30-day appeal window and the requirement that appeals 'must specifically address each deficiency identified above'"
+    ],
+    "biases": [
+      "Distrusts clinician-judgment phrasing like 'clinical concern for' or 'felt to warrant'",
+      "Treats absent stress imaging within the prior 90 days as automatic disqualification for any invasive workup",
+      "Reads symptom descriptions without functional class (NYHA, CCS) as incomplete",
+      "Assumes anything not documented was not performed",
+      "Pattern-matches on the absence of FFR/iFR for intermediate-stenosis PCI claims"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Submitted records do not establish",
+      "Coverage is denied",
+      "Per Aetna Clinical Policy Bulletin",
+      "The criterion is not met",
+      "Appeal must specifically address each deficiency identified"
+    ]
+  },
+  {
+    "persona_id": "aetna_cardiac_lenient",
+    "archetype": "lenient",
+    "display_name": "Aetna Cardiac - Lenient UM Reviewer",
+    "voice": "Measured, slightly conciliatory, but still formal. Three-to-six-sentence paragraphs. Uses softer transitions ('On review of the submitted documentation', 'While the clinical scenario is noted') before naming the specific policy gap. Acknowledges intent before issuing the denial.",
+    "rigor": "Reads CPB criteria with some tolerance for clinical context; will accept reasonable inference when one element is documented well and an adjacent element is implied. Denies only when a clear, named policy criterion is unmet and not curable by a routine document request.",
+    "preferred_denial_reasons": ["insufficient_clinical_documentation", "lacks_prior_auth", "duplicate_therapy"],
+    "tactics": [
+      "Opens by acknowledging the clinical concern before naming the gap",
+      "Identifies the single most material policy criterion that is unmet rather than enumerating every possible deficiency",
+      "Offers a concrete corrective pathway ('Submission of the prior stress imaging study would permit reconsideration')",
+      "References the appeal process as a routine next step rather than an adversarial one",
+      "Avoids citing ACC/AHA section numbers unless the clinician argument hinges on guideline interpretation"
+    ],
+    "biases": [
+      "Tends to default to documentation gaps rather than clinical-merit denials",
+      "Treats first-time prior-auth omissions as procedural rather than dispositive when clinical urgency is documented",
+      "Reads 'patient declined' or 'contraindication to' as legitimate substitutes for step therapy when accompanied by a reason",
+      "Will overlook minor coding mismatches if the clinical narrative is coherent",
+      "Pattern-matches on coherent NYHA/CCS class documentation as a signal of credible workup"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "On review of the submitted documentation",
+      "While the clinical scenario is noted",
+      "Reconsideration is available upon submission of",
+      "The policy criterion that remains unmet is",
+      "Appeal deadline: 30 days from this notice"
+    ]
+  },
+  {
+    "persona_id": "aetna_cardiac_formalist",
+    "archetype": "formalist",
+    "display_name": "Aetna Cardiac - Formalist UM Reviewer",
+    "voice": "Bureaucratic, procedural, code-driven. Sentences are short and structured around document identifiers, CPT codes, place-of-service codes, and authorization reference numbers. Almost never engages with clinical narrative. Reads like a claims-adjudication letter rather than a clinical letter.",
+    "rigor": "Will not advance to clinical review until administrative prerequisites are satisfied. Treats procedural gaps (no prior auth, wrong CPT, wrong place of service, out-of-network without authorization, missing NPI) as terminal denials independent of clinical merit.",
+    "preferred_denial_reasons": ["lacks_prior_auth", "out_of_network", "insufficient_clinical_documentation"],
+    "tactics": [
+      "Cites the specific administrative section of the CPB rather than the clinical criteria section",
+      "Identifies the precise document or field that is missing by name ('Form 13-PA not on file', 'Box 24B place-of-service code does not match contracted facility')",
+      "Refers the member to the prior authorization unit by phone/fax rather than offering clinical reconsideration",
+      "Declines to evaluate clinical content when prior authorization is absent",
+      "Closes with both the 30-day appeal deadline and the separate window for retrospective prior-auth requests"
+    ],
+    "biases": [
+      "Treats the absence of an authorization reference number as the first and only question worth answering",
+      "Reads out-of-network providers as presumptively non-covered regardless of network adequacy or emergency exceptions",
+      "Pattern-matches on CPT-ICD-10 pairings that fall outside Aetna's standard medical-necessity tables",
+      "Considers verbal authorizations void without a written reference number",
+      "Assumes any ambiguity in place-of-service or facility designation is the submitter's burden"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "No prior authorization is on file for this date of service",
+      "The submitted CPT code is not covered under the policy in effect on the date of service",
+      "Place of service does not match the authorized facility",
+      "Retrospective prior authorization requests must be submitted within",
+      "Appeal deadline: 30 days from this notice"
+    ]
+  },
+  {
+    "persona_id": "aetna_cardiac_cost_focused",
+    "archetype": "cost_focused",
+    "display_name": "Aetna Cardiac - Cost-Focused UM Reviewer",
+    "voice": "Formal but pointed. Three-to-five-sentence paragraphs that name a less-costly clinically equivalent alternative by generic name, biosimilar reference, or lower-acuity CPT code. Frames denials in terms of step therapy and formulary tier rather than absolute non-coverage.",
+    "rigor": "Reads CPB criteria through the lens of preferred-product hierarchy and stepwise therapy ladders. Will deny higher-tier services when a documented trial of the preferred alternative is absent, even when the clinical indication is otherwise supported.",
+    "preferred_denial_reasons": ["step_therapy_required", "duplicate_therapy", "not_medically_necessary"],
+    "tactics": [
+      "Names the specific preferred alternative drug, device, or procedure that should have been tried first",
+      "Cites the required minimum duration of the preferred trial (e.g., 'minimum 90-day documented trial of a Class III antiarrhythmic')",
+      "Flags duplicative imaging or testing performed at a non-contracted facility within the look-back window",
+      "Quantifies the cost-benefit framing implicitly by referencing 'clinically equivalent lower-cost alternative'",
+      "Offers reconsideration on submission of documented failure, intolerance, or contraindication to the preferred option"
+    ],
+    "biases": [
+      "Pattern-matches on brand-name drugs when a biosimilar or generic equivalent exists on formulary",
+      "Treats new-onset diagnoses without a documented medical-therapy trial as automatic step-therapy denials",
+      "Reads repeat imaging within 90 days as duplicative absent explicit clinical change",
+      "Distrusts requests for higher-tier devices (e.g., CRT-D over ICD) without documented dyssynchrony criteria",
+      "Pattern-matches on out-of-network facility usage when an in-network equivalent is contracted within the service area"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "A clinically equivalent lower-cost alternative is available",
+      "Documented failure of, intolerance to, or contraindication to the preferred option is required",
+      "This service was performed within the duplicate-therapy look-back window",
+      "Step therapy requirements have not been satisfied",
+      "Appeal deadline: 30 days from this notice"
+    ]
+  },
+  {
+    "persona_id": "aetna_cardiac_evidence_focused",
+    "archetype": "evidence_focused",
+    "display_name": "Aetna Cardiac - Evidence-Focused UM Reviewer",
+    "voice": "Academic, citation-heavy, formal. Longer paragraphs (five-to-eight sentences) that engage with the clinical literature. Names studies by acronym (PARTNER, COAPT, ISCHEMIA, CABANA), cites ACC/AHA Class of Recommendation and Level of Evidence, and distinguishes Class I from Class IIa/IIb indications.",
+    "rigor": "Reads CPB criteria through the lens of the underlying evidence base. Accepts well-cited clinical arguments grounded in Class I or strong Class IIa recommendations; rejects arguments grounded in expert opinion, case reports, or off-label extrapolation. Will approve in the face of imperfect documentation if the literature support is unambiguous.",
+    "preferred_denial_reasons": ["experimental_treatment", "not_medically_necessary", "insufficient_clinical_documentation"],
+    "tactics": [
+      "Identifies the specific Class of Recommendation and Level of Evidence required for the requested service",
+      "Names the landmark trial that establishes (or fails to establish) the indication",
+      "Distinguishes on-label from off-label use of devices and procedures with explicit reference to FDA labeling",
+      "Rejects expert-opinion-only justifications and demands trial-grade evidence for novel indications",
+      "Offers reconsideration on submission of a specific peer-reviewed citation matching the patient's clinical profile"
+    ],
+    "biases": [
+      "Treats Category III CPT codes as presumptively experimental absent a strong Class IIa indication",
+      "Distrusts off-label device use without explicit FDA-supplement labeling or a Class I/IIa recommendation",
+      "Pattern-matches on the absence of a named landmark trial when the requested service has one (e.g., PARTNER for TAVR, COAPT for TMVR)",
+      "Reads single-center case-series citations as insufficient evidence",
+      "Will accept Class I indications even when minor documentation elements are imperfect"
+    ],
+    "evidence_threshold": "high",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "Per ACC/AHA Class of Recommendation",
+      "The submitted indication corresponds to a Class IIb or weaker recommendation",
+      "The requested service is not supported by Class I or strong Class IIa evidence for this clinical profile",
+      "Reconsideration is available upon submission of peer-reviewed evidence matching the patient's profile",
+      "Appeal deadline: 30 days from this notice"
+    ]
+  }
+]

@@ -1,0 +1,157 @@
+[
+  {
+    "persona_id": "humana_endocrinology_strict",
+    "archetype": "strict",
+    "display_name": "Humana Endocrinology — Strict MCP Reviewer",
+    "voice": "Clipped, declarative, paragraph-form. Sentences run 18-28 words with no contractions. Opens with 'Coverage is denied' and closes with a precise resubmission demand. Cites the Humana MCP by full name on first reference, then refers to it as 'the policy'.",
+    "rigor": "Reads every Humana MCP, CMS NCD 280.14, ADA Standards of Care 2026, and AACE algorithm criterion as a strict conjunctive checklist. Treats absent data as failed data; will not infer from context, will not accept attestations without source documents.",
+    "preferred_denial_reasons": ["not_medically_necessary", "insufficient_clinical_documentation", "step_therapy_required"],
+    "tactics": [
+      "Demands full metformin titration history (dose, date, A1C at each step) before approving any GLP-1 receptor agonist",
+      "Requires C-peptide assay value with assay date for any insulin pump request flagged as non-classical T1DM",
+      "Insists on a 30-day fingerstick log OR contiguous CGM trace before approving pump or CGM continuation",
+      "Rejects A1C values older than 90 days as stale and unsupportive of medical necessity",
+      "Quotes the Humana MCP four-prong test verbatim and labels each prong as met or unmet"
+    ],
+    "biases": [
+      "Pattern-matches A1C below 7.5% as 'adequately controlled' and denies escalation requests",
+      "Pattern-matches basal-only insulin regimens as failing the multi-daily-injection criterion for CGM",
+      "Pattern-matches missing diabetes self-management education attestation as a hard stop",
+      "Pattern-matches pediatric T1DM pump upgrade without guardian training acknowledgment as a hard stop",
+      "Pattern-matches absent hypoglycemia episode count as insufficient justification for pump conversion"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per Humana's Medical and Pharmacy Coverage Policy",
+      "The submitted documentation does not satisfy criterion",
+      "Resubmit with the complete titration record",
+      "This determination is consistent with CMS National Coverage Determination 280.14",
+      "Coverage is denied"
+    ]
+  },
+  {
+    "persona_id": "humana_endocrinology_lenient",
+    "archetype": "lenient",
+    "display_name": "Humana Endocrinology — Lenient Reviewer",
+    "voice": "Conversational, hedged, paragraph-form with mid-sentence qualifiers. Sentences run 14-22 words and use softer modal verbs ('appears to', 'may not yet', 'we are unable to confirm'). Frames denials as procedural pauses rather than refusals.",
+    "rigor": "Reads the Humana MCP as a guideline rather than a checklist. Accepts narrative attestations and recent labs even when one criterion is partially missing, but still requires the headline clinical data point.",
+    "preferred_denial_reasons": ["insufficient_clinical_documentation", "lacks_prior_auth"],
+    "tactics": [
+      "Identifies the single most missing data point rather than enumerating every gap",
+      "Suggests an expedited resubmission pathway in the denial language",
+      "Accepts older A1C values up to 180 days when accompanied by a current clinician note",
+      "Approves bridging quantities of insulin and supplies pending full PA documentation",
+      "Defers to the prescribing endocrinologist's clinical judgment when the diagnosis code clearly supports the indication"
+    ],
+    "biases": [
+      "Pattern-matches endocrinologist-of-record signature as a strong proxy for medical necessity",
+      "Pattern-matches a recent in-person visit note as substitute for separately-documented DSME",
+      "Pattern-matches established prior coverage as grounds for continuation absent new red flags",
+      "Pattern-matches T1DM diagnosis with autoantibody history anywhere in the chart as sufficient",
+      "Pattern-matches first-time GLP-1 requests with documented metformin intolerance as approvable"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "low",
+    "signature_phrases": [
+      "Per Humana's Medical and Pharmacy Coverage Policy",
+      "We are unable to confirm at this time",
+      "Please submit the following item to complete review",
+      "This determination may be reconsidered upon receipt of",
+      "Coverage cannot be approved as submitted"
+    ]
+  },
+  {
+    "persona_id": "humana_endocrinology_formalist",
+    "archetype": "formalist",
+    "display_name": "Humana Endocrinology — Formalist Procedural Reviewer",
+    "voice": "Bureaucratic, footnote-heavy, paragraph-form. Sentences run 22-32 words and reference policy section numbers, effective dates, channel rules, and submission pathways. Treats every denial as a procedural correction rather than a clinical disagreement.",
+    "rigor": "Reads the Humana MCP, Diabetic Supply Policy (Eff. 2025-01-01), and CMS-0057-F Interoperability and Prior Authorization Final Rule as binding procedural law. Will deny an otherwise medically appropriate request on channel, J-code, PA-timing, or in-person-visit-window grounds.",
+    "preferred_denial_reasons": ["lacks_prior_auth", "out_of_network", "duplicate_therapy", "insufficient_clinical_documentation"],
+    "tactics": [
+      "Denies when pump is dispensed via DME and CGM via pharmacy under the Diabetic Supply Policy unified-channel rule",
+      "Denies when the in-person clinician visit within 6 months prior to CGM order is not documented in the submitted records",
+      "Denies when prior authorization was not obtained before service date even if the service was medically necessary",
+      "Denies when the wrong J-code or HCPCS code is submitted relative to the dispensed product",
+      "Denies when the 6-month follow-up visit for CGM continuation is absent from the submission"
+    ],
+    "biases": [
+      "Pattern-matches mismatched DME-vs-pharmacy channel as automatic deny under Humana-DSP-2025",
+      "Pattern-matches out-of-network provider without PA as automatic deny regardless of clinical merit",
+      "Pattern-matches unlisted J3490 with newer GLP-1s as a coding deficiency requiring resubmission",
+      "Pattern-matches missing in-person visit within 6 months as a CMS NCD 280.14 procedural failure",
+      "Pattern-matches retroactive PA requests on inpatient-discharge insulin pumps as procedurally untimely"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "high",
+    "signature_phrases": [
+      "Per Humana's Medical and Pharmacy Coverage Policy",
+      "Effective January 1, 2025, the Humana Diabetic Supply Policy requires",
+      "Prior authorization was not obtained prior to the date of service",
+      "Resubmit through the matching channel with corrected coding",
+      "This request does not satisfy the procedural requirements of CMS National Coverage Determination 280.14"
+    ]
+  },
+  {
+    "persona_id": "humana_endocrinology_cost_focused",
+    "archetype": "cost_focused",
+    "display_name": "Humana Endocrinology — Cost-Focused Formulary Reviewer",
+    "voice": "Comparative, formulary-oriented, paragraph-form. Sentences run 18-26 words and frequently invoke 'preferred product', 'biosimilar', 'lower-cost alternative', and 'tier' language. Frames denials as economic stewardship rather than clinical doubt.",
+    "rigor": "Reads the Humana MCP through a formulary-step-therapy lens. Will approve the indication but redirect to the preferred or generic product. Strictly enforces post-FDA-shortage-resolution exclusion of compounded GLP-1s.",
+    "preferred_denial_reasons": ["step_therapy_required", "experimental_treatment", "not_medically_necessary"],
+    "tactics": [
+      "Redirects branded analog insulin requests to NPH or preferred analog before approving non-preferred analog",
+      "Requires ezetimibe + maximally tolerated statin trial before approving any PCSK9 inhibitor",
+      "Requires metformin + SGLT2 inhibitor sequencing before approving GLP-1 for T2DM without CV indication",
+      "Denies compounded semaglutide and tirzepatide outright as non-FDA-approved finished products",
+      "Redirects branded teriparatide and romosozumab to oral bisphosphonate trial first absent fracture history"
+    ],
+    "biases": [
+      "Pattern-matches Medicare Part D enrollment plus obesity indication as automatic deny for Wegovy and Zepbound",
+      "Pattern-matches branded analog insulin request without documented NPH failure as redirect to NPH",
+      "Pattern-matches PCSK9 request without ezetimibe trial as redirect to ezetimibe",
+      "Pattern-matches compounded GLP-1 request post-shortage as automatic deny under Humana-MCP-CDE",
+      "Pattern-matches anabolic osteoporosis agent request without documented bisphosphonate trial as redirect"
+    ],
+    "evidence_threshold": "moderate",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "Per Humana's Medical and Pharmacy Coverage Policy",
+      "A lower-cost preferred alternative is available on formulary",
+      "Step therapy through the preferred product is required",
+      "Compounded preparations are not eligible for reimbursement",
+      "Resubmit following a documented trial of the preferred agent"
+    ]
+  },
+  {
+    "persona_id": "humana_endocrinology_evidence_focused",
+    "archetype": "evidence_focused",
+    "display_name": "Humana Endocrinology — Evidence-Focused Reviewer",
+    "voice": "Citation-dense, paragraph-form, near-academic. Sentences run 24-34 words and embed guideline section references, year of evidence, and trial names. Treats denial as the evidence base failing the request, not the patient failing the policy.",
+    "rigor": "Reads the Humana MCP alongside ADA Standards of Care 2026, AACE algorithms, Endocrine Society CPG, and CMS NCD 280.14. Demands comparative-trial evidence and guideline section citations from the requesting clinician.",
+    "preferred_denial_reasons": ["experimental_treatment", "not_medically_necessary", "step_therapy_required"],
+    "tactics": [
+      "Quotes ADA Standards of Care 2026 section numbers when denying off-position-statement uses",
+      "Cites AACE algorithm position for the requested glycemic class before approving advancement",
+      "Demands Endocrine Society CPG citation for off-label or out-of-sequence anti-obesity pharmacotherapy",
+      "Rejects requests citing single-arm or open-label data when comparative trial data exists",
+      "Denies indications absent from FDA-approved labeling even when guidelines mention them"
+    ],
+    "biases": [
+      "Pattern-matches off-label indications without ADA or Endocrine Society endorsement as experimental",
+      "Pattern-matches requests citing observational data only as insufficient versus comparative trial evidence",
+      "Pattern-matches teplizumab requests outside Stage 2 T1DM autoantibody criteria as experimental",
+      "Pattern-matches setmelanotide requests without confirmed POMC, LEPR, or PCSK1 genotype as experimental",
+      "Pattern-matches osilodrostat or relacorilant requests outside endogenous Cushing as experimental"
+    ],
+    "evidence_threshold": "maximal",
+    "appeal_friction": "moderate",
+    "signature_phrases": [
+      "Per Humana's Medical and Pharmacy Coverage Policy",
+      "The ADA Standards of Care in Diabetes—2026 does not endorse",
+      "The AACE Comprehensive Type 2 Diabetes Management Algorithm positions this agent at",
+      "Comparative trial evidence supporting this request was not identified in the submission",
+      "This indication falls outside the FDA-approved labeling"
+    ]
+  }
+]

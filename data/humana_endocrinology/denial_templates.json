@@ -68,5 +68,96 @@
     "icd10_code": "E10.10",
     "denial_reason": "insufficient_clinical_documentation",
     "text_template": "Coverage denied for hybrid closed-loop insulin pump system upgrade (HCPCS E0784 with associated control algorithm software) for a pediatric patient with type 1 diabetes mellitus with ketoacidosis without coma (ICD-10 E10.10). Per Humana's Medical and Pharmacy Coverage Policy and the ADA Standards of Care in Diabetes\u20142026, automated insulin delivery (AID) systems are recommended for individuals with type 1 diabetes; documentation of (1) confirmed type 1 diabetes by autoantibody or C-peptide testing, (2) completed CGM training, (3) ongoing diabetes self-management education with the integrated system, and (4) parent/guardian participation in system management for pediatric patients is required. Submitted documentation lacks the autoantibody/C-peptide confirmation and the parent/guardian training acknowledgment."
+  },
+  {
+    "cpb_number": "Humana-MCP-SGLT2",
+    "cpt_code": "J3490",
+    "icd10_code": "E11.22",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for empagliflozin (Jardiance) for a patient with type 2 diabetes mellitus with diabetic chronic kidney disease (ICD-10 E11.22). Per Humana's Medical and Pharmacy Coverage Policy on SGLT-2 Inhibitors and the ADA Standards of Care in Diabetes\u20142026 Section 11 (Chronic Kidney Disease and Risk Management), SGLT-2 initiation in T2DM with CKD requires (1) confirmed T2DM diagnosis, (2) documented metformin trial \u22653 months at maximally tolerated dose unless eGFR <30 mL/min/1.73m\u00b2 contraindicates, (3) baseline eGFR \u226520 mL/min/1.73m\u00b2, and (4) most recent A1C within 90 days. Submitted documentation reflects metformin 1000 mg daily without titration toward 2000 mg and no baseline eGFR value within 60 days. Resubmit with full metformin titration record and a current eGFR and UACR."
+  },
+  {
+    "cpb_number": "Humana-MCP-CGM",
+    "cpt_code": "K0553",
+    "icd10_code": "E10.40",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for therapeutic CGM supply allowance (HCPCS K0553) for a patient with type 1 diabetes mellitus with diabetic neuropathy, unspecified (ICD-10 E10.40). Per Humana's Medical and Pharmacy Coverage Policy on Continuous Glucose Monitors and CMS National Coverage Determination 280.14, the therapeutic CGM benefit requires (1) documented insulin treatment, (2) demonstrated need for frequent therapy adjustments based on glucose readings, (3) in-person clinician visit within 6 months prior to the CGM order with documented evaluation of the diabetes treatment plan, and (4) ongoing 6-month follow-up. The submitted record includes a telehealth-only encounter without a documented in-person evaluation within the 6-month window. Resubmit with a dated in-person clinician note evaluating the current insulin regimen."
+  },
+  {
+    "cpb_number": "Humana-MCP-AOGLP1",
+    "cpt_code": "J3490",
+    "icd10_code": "E66.813",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for tirzepatide (Zepbound) 5 mg weekly for a patient with class 3 severe obesity (ICD-10 E66.813, BMI 42). Per Humana's Medical and Pharmacy Coverage Policy on Anti-Obesity GLP-1 Receptor Agonists and the Endocrine Society Clinical Practice Guideline on Pharmacological Management of Obesity, prior authorization for Zepbound requires (1) baseline BMI \u226530 or \u226527 with at least one weight-related comorbidity, (2) participation in a structured lifestyle/behavioral weight-management program for \u22656 months with documented food log, activity log, and weigh-ins, and (3) trial of phentermine or naltrexone-bupropion unless contraindicated. Submitted documentation lacks the structured program records and reflects no prior anti-obesity pharmacotherapy trial. Resubmit with 6 months of structured-program documentation and a prior-agent trial summary."
+  },
+  {
+    "cpb_number": "Humana-MCP-PCSK9",
+    "cpt_code": "J3490",
+    "icd10_code": "E78.0",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for alirocumab (Praluent) for a patient with pure hypercholesterolemia (ICD-10 E78.0). Per Humana's Medical and Pharmacy Coverage Policy on PCSK9 Inhibitors, coverage requires (1) clinical ASCVD or heterozygous familial hypercholesterolemia confirmed by Dutch Lipid Clinic Network score or genetic testing, (2) maximally tolerated high-intensity statin (atorvastatin 40-80 mg or rosuvastatin 20-40 mg) for \u22653 months, (3) ezetimibe 10 mg daily for \u226512 weeks unless contraindicated, and (4) LDL-C above target after the above. Submitted records reflect rosuvastatin 10 mg daily, which does not satisfy the high-intensity tier, and no ezetimibe trial. Resubmit with documented high-intensity statin titration and a 12-week ezetimibe trial."
+  },
+  {
+    "cpb_number": "Humana-MCP-CGM",
+    "cpt_code": "A9276",
+    "icd10_code": "E11.65",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for continuous glucose monitor disposable sensor (HCPCS A9276) for a patient with type 2 diabetes mellitus with hyperglycemia (ICD-10 E11.65). Per Humana's Medical and Pharmacy Coverage Policy on Continuous Glucose Monitors and CMS National Coverage Determination 280.14, therapeutic CGM coverage for T2DM requires submitted documentation of (1) an in-person clinician evaluation completed within the 6 months prior to the CGM order, (2) the current insulin regimen including agent, dose, and frequency, and (3) a documented plan for ongoing 6-month follow-up evaluations to assess CGM benefit. Submitted records reflect a telehealth-only evaluation without an in-person visit within the required window and do not document the planned 6-month follow-up cadence. Resubmit with the in-person clinician note and the follow-up plan."
+  },
+  {
+    "cpb_number": "Humana-MCP-CDE",
+    "cpt_code": "J3490",
+    "icd10_code": "E11.65",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for compounded tirzepatide injectable preparation for a patient with type 2 diabetes mellitus with hyperglycemia (ICD-10 E11.65). Per Humana's Medical and Pharmacy Coverage Policies on compounded drug exclusion and FDA guidance on compounded GLP-1 receptor agonists, compounded versions of FDA-approved drugs are not covered when the FDA-approved finished product is commercially available. Following resolution of the prior FDA shortage status of tirzepatide, compounded preparations are not eligible for reimbursement as they are not FDA-approved finished products and have not been evaluated for safety, efficacy, or quality through the FDA approval process. Resubmit a request for the FDA-approved branded product (Mounjaro) through the standard prior authorization pathway."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "J3590",
+    "icd10_code": "M81.0",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for abaloparatide (Tymlos) for a postmenopausal patient with age-related osteoporosis without current pathological fracture (ICD-10 M81.0). Per Humana's Medical and Pharmacy Coverage Policy on anabolic osteoporosis agents and the Endocrine Society Clinical Practice Guideline on osteoporosis pharmacotherapy, anabolic therapy with abaloparatide requires (1) DXA T-score \u2264-2.5 at the spine or hip, (2) documented trial of oral bisphosphonate therapy for \u226512 months at adequate dose with continued progression or intolerance, and (3) FRAX 10-year major osteoporotic fracture risk \u226520% or hip fracture risk \u22653%. Submitted documentation reflects no prior oral bisphosphonate trial. Resubmit with documented alendronate or risedronate trial or a documented contraindication."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "J0897",
+    "icd10_code": "M81.0",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for denosumab (Prolia) 60 mg subcutaneous every 6 months (HCPCS J0897) for a postmenopausal patient with age-related osteoporosis without current pathological fracture (ICD-10 M81.0). Per Humana's Medical and Pharmacy Coverage Policy on osteoporosis biologics, prior authorization requires (1) DXA T-score \u2264-2.5 at the spine, total hip, or femoral neck within 24 months, (2) documented baseline serum calcium and 25-hydroxyvitamin D with replacement if deficient, and (3) documented plan for sequential therapy following denosumab discontinuation given the rebound bone-loss risk. Submitted records lack a current 25-hydroxyvitamin D level and a documented sequential-therapy plan. Resubmit with both items completed."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "J2941",
+    "icd10_code": "E23.0",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for somatropin (HCPCS J2941) for an adult patient with hypopituitarism (ICD-10 E23.0). Per Humana's Medical and Pharmacy Coverage Policy on adult growth hormone deficiency and the Endocrine Society Clinical Practice Guideline on adult GHD, prior authorization requires (1) documented organic pituitary disease or history of pituitary surgery or radiation, (2) confirmatory dynamic stimulation testing (insulin tolerance test, glucagon stimulation, or macimorelin) with peak GH below threshold, (3) baseline IGF-1 below the age-adjusted reference range, and (4) documented evaluation of other pituitary axes with replacement as needed. Submitted documentation includes a single low IGF-1 without confirmatory stimulation testing. Resubmit with the dynamic stimulation test result."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "82533",
+    "icd10_code": "E24.0",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for 24-hour urinary free cortisol assay billed alongside repeat serum cortisol (CPT 82533) for a patient with pituitary-dependent Cushing's syndrome (ICD-10 E24.0) already on established medical therapy. Per Humana's Medical and Pharmacy Coverage Policy on endocrine laboratory testing and the Endocrine Society Clinical Practice Guideline on Cushing's syndrome, repeat confirmatory cortisol testing in a patient with an established biochemical diagnosis on stable therapy is not medically necessary in the absence of documented clinical change. Submitted records reflect stable disease on current therapy with no documented symptom recurrence. Resubmit only if clinical deterioration is documented or if therapy adjustment requires biochemical reassessment."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "84146",
+    "icd10_code": "E22.1",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for cabergoline brand-name dispensing for a patient with hyperprolactinemia (ICD-10 E22.1) without documented trial of generic cabergoline. Per Humana's Medical and Pharmacy Coverage Policy on dopamine agonists for hyperprolactinemia and the Endocrine Society Clinical Practice Guideline on hyperprolactinemia, first-line therapy is generic cabergoline; brand-name dispensing requires (1) documented trial of generic cabergoline \u22653 months with inadequate prolactin suppression or intolerance, or (2) documented bioequivalence concern with prescriber attestation. Submitted documentation reflects a new diagnosis without a generic trial. Resubmit following a 3-month generic cabergoline trial with paired baseline and follow-up prolactin (CPT 84146) values."
+  },
+  {
+    "cpb_number": "Humana-MCP-GLP1-T2D",
+    "cpt_code": "J3490",
+    "icd10_code": "E11.21",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for liraglutide (Victoza) for a patient with type 2 diabetes mellitus with diabetic nephropathy (ICD-10 E11.21). Claim history reflects an active fill of semaglutide (Ozempic) within the prior 21 days. Per Humana's Medical and Pharmacy Coverage Policy on GLP-1 receptor agonists for type 2 diabetes, concurrent therapy with two GLP-1 receptor agonists is not medically necessary, is not supported by the ADA Standards of Care in Diabetes\u20142026, and is contraindicated by the FDA-approved labeling for both products. Resubmit with documented discontinuation of semaglutide, including the discontinuation date and the clinical rationale for switching agents."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "84443",
+    "icd10_code": "E03.9",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for repeat thyroid-stimulating hormone assay (CPT 84443) at 4-week interval for a patient with hypothyroidism, unspecified (ICD-10 E03.9) on stable levothyroxine therapy. Per Humana's Medical and Pharmacy Coverage Policy on thyroid function testing and the AACE Clinical Practice Guideline for the evaluation and treatment of hypothyroidism, TSH monitoring on stable replacement therapy is appropriate at 6-8 week intervals after a dose change and every 6-12 months once euthyroid. Submitted documentation reflects no recent dose change and a prior TSH within reference range 4 weeks earlier. Resubmit at the appropriate 6-month surveillance interval or document the clinical indication for early retesting."
   }
 ]
