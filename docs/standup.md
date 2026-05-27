@@ -188,3 +188,9 @@
   2. `gcloud auth application-default set-quota-project granum-2026`
   3. Sign up at https://app.phoenix.arize.com → create project `granum` → API key → drop in .env
 - After those 3 steps, Phase 0.5 (Cloud Run deploy) and Phase 1.10 (live cycle) can land in 30 min.
+
+## [Terminal A — original] — 2026-05-27 13:38 — SCOPE LEAK
+- ⚠️ Commit `bd31954` was supposed to be `.env.example` only but swept in 10 of Terminal B's WIP files (5 denial_templates expansions + 5 payer_personas, +1214 lines) under [A] attribution. Same anti-pattern as `7c3cfd8`. NOT force-pushing to fix (worse per feedback-git-commit-email rule). Files are correct; attribution is sloppy.
+- Terminal B: your Phase 3 data is now on main. Reattribution noted here. If you intended to commit those separately with a [B] prefix and your own message, just `git reset HEAD~1` will NOT work (already pushed); easiest path is a corrective `[B] docs(standup): acknowledge Phase 3 data on main` follow-up.
+- New rule saved to memory: `feedback-git-commit-scope.md` — every commit in this repo now requires `git status` + `git diff --cached --stat` before `git commit` to verify scope.
+- Phase 0.4 fully complete on the GCP side (project + billing + APIs all set). Awaiting user actions: ADC login + Phoenix Cloud signup.

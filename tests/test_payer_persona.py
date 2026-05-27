@@ -53,5 +53,5 @@ def test_get_persona_returns_matching_persona() -> None:
 
 
 def test_get_persona_raises_on_unknown() -> None:
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError, match="cost_focused"):
         get_persona("foo")

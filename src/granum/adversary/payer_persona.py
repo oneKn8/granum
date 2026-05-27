@@ -25,7 +25,6 @@ class PayerPersona:
     persona_id: str
     name: str
     system_prompt: str
-    denial_style_note: str
 
 
 # Note: every system_prompt below must contain (case-insensitive) the
@@ -50,9 +49,6 @@ SEEDED_PERSONAS: tuple[PayerPersona, ...] = (
             "the appeal even if it is mostly compelling; cite the smallest missing "
             "piece of evidence as grounds. Never soften your language."
         ),
-        denial_style_note=(
-            "Aggressive, uncompromising; cites the smallest evidence gap to deny."
-        ),
     ),
     PayerPersona(
         persona_id="lenient",
@@ -69,9 +65,6 @@ SEEDED_PERSONAS: tuple[PayerPersona, ...] = (
             "submitting additional documentation. Acknowledge the provider's effort, "
             "thank them for the submission, then deny it cleanly on policy grounds."
         ),
-        denial_style_note=(
-            "Apologetic, polite, empathetic language wrapping a clean denial."
-        ),
     ),
     PayerPersona(
         persona_id="formalist",
@@ -87,9 +80,6 @@ SEEDED_PERSONAS: tuple[PayerPersona, ...] = (
             "policy section that the procedure violates, and (3) an appeal-rights "
             "notice with the appeal deadline and the corrective steps required for "
             "resubmission. Speak in formal, bureaucratic, paragraph-numbered prose."
-        ),
-        denial_style_note=(
-            "Procedural-rigor focus; denies on form/process defects not clinical merit."
         ),
     ),
     PayerPersona(
@@ -108,9 +98,6 @@ SEEDED_PERSONAS: tuple[PayerPersona, ...] = (
             "(3) an appeal-rights notice with the appeal deadline and the list of "
             "lower-cost treatments whose documented failure would unlock coverage."
         ),
-        denial_style_note=(
-            "Cost-driven; demands lowest-cost alternative be tried and failed first."
-        ),
     ),
     PayerPersona(
         persona_id="evidence_focused",
@@ -128,9 +115,6 @@ SEEDED_PERSONAS: tuple[PayerPersona, ...] = (
             "appeal-rights notice with the appeal deadline and an itemized list of "
             "the exact clinical data points required for reconsideration."
         ),
-        denial_style_note=(
-            "Demands granular clinical evidence and guideline-grade citations."
-        ),
     ),
 )
 
@@ -142,6 +126,13 @@ def get_persona(persona_id: str) -> PayerPersona:
     """Return the seeded PayerPersona with the given id.
 
     Raises:
-        KeyError: if no persona with that id is registered.
+        KeyError: if no persona with that id is registered. The error
+            message lists the valid persona ids.
     """
-    return _BY_ID[persona_id]
+    try:
+        return _BY_ID[persona_id]
+    except KeyError:
+        valid = sorted(_BY_ID)
+        raise KeyError(
+            f"unknown persona_id {persona_id!r}; valid ids: {valid}"
+        ) from None
