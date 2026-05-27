@@ -118,3 +118,9 @@
 - KNOWN ISSUE: with `tree<TreeDatum>().nodeSize([44, 220])`, the 8-generation Aetna lineage extends ~1760px wide vs a ~745px viewport so the alive + champion nodes are initially offscreen-right. Attempted a fit-to-content fix (smaller spacing + auto-zoom to bbox); it was reverted on disk twice despite user confirmation. Leaving as-is; users can wheel-zoom + drag-pan via d3-zoom. Not blocking but worth resolving before final video capture.
 - NEXT: when Terminal A publishes `docs/api-contract.md`, swap `web/lib/mock-data.ts` for a real `/api/cell/[cell]` fetcher. Run `web-quality-audit` skill (Core Web Vitals) after integration. Generate the actual OG PNGs via Playwright once a real URL is deployed.
 - FILES TOUCHED THIS SESSION: `docs/{design-references.md, demo-script.md, storyboard.md}`, `web/**` (full Next.js app), `scripts/demo.sh`.
+
+## [Terminal A] — 2026-05-27 12:57
+- DONE: Phase 1.9 (deterministic mutation proposer — Phase 1 core complete except live cycle)
+- IN PROGRESS: none (waiting on user actions for Phase 0.4 to complete Phase 0.5 + 1.10)
+- BLOCKED: Phase 0.5 (Cloud Run deploy) + Phase 1.10 (live cycle) — both need user actions on GCP billing + ADC + Phoenix Cloud API key
+- NEXT: Once 0.4 unblocked, run Phase 0.5 + 1.10 in sequence
