@@ -10,6 +10,44 @@ This file is the cold-resume document. Read it top-to-bottom and you have full c
 
 ---
 
+## ⚠️ STEP ZERO — Set up git worktrees BEFORE any other work
+
+In the 2026-05-27 session, three scope leaks occurred where one terminal's commit swept in other terminals' WIP files. Root cause: all three Claude sessions ran in the SAME working directory at `/home/oneknight/projects/hackathon/granum/`, sharing one git index. The leaks weren't bugs — they were the predictable consequence of shared-index multi-terminal work.
+
+**Fix for the next session: each terminal works in its own `git worktree`.** Separate working dir + separate index per terminal. No sweep possible.
+
+Before any of the three terminals starts work, ONE terminal (recommend Terminal A) runs:
+
+```bash
+cd /home/oneknight/projects/hackathon/granum
+git worktree add ../granum-A -b session-A main   # Terminal A's worktree on a new branch
+git worktree add ../granum-B -b session-B main   # Terminal B's worktree
+git worktree add ../granum-C -b session-C main   # Terminal C's worktree
+git worktree list
+```
+
+Then each terminal `cd`'s to its own worktree:
+- Terminal A: `cd /home/oneknight/projects/hackathon/granum-A`
+- Terminal B: `cd /home/oneknight/projects/hackathon/granum-B`
+- Terminal C: `cd /home/oneknight/projects/hackathon/granum-C`
+
+Each runs work on its own branch (`session-A`, `session-B`, `session-C`). Periodically rebase against main, then push the branch + open a merge to main when a phase completes:
+
+```bash
+# inside e.g. granum-A
+git fetch origin
+git rebase origin/main
+git push -u origin session-A
+gh pr create --base main --head session-A --title "Phase 3: …" --body "…"
+gh pr merge --merge --auto    # or --rebase
+```
+
+Or for trivial commits (standup updates, env tweaks), just `git push origin session-A:main` if branch is fast-forward. PRs are safer for code changes.
+
+When a worktree is no longer needed: `git worktree remove ../granum-A` (and `git branch -d session-A` once merged).
+
+---
+
 ## Read these first (in order)
 
 1. This file
@@ -19,17 +57,21 @@ This file is the cold-resume document. Read it top-to-bottom and you have full c
 5. `docs/api-contract.md` — JSON shapes for the FastAPI server
 6. `research/phoenix-mcp-audit.md` — empirical Phoenix MCP capability matrix; locks Path B for apoptosis
 7. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-git-commit-email.md` — **CRITICAL** git identity rule
+8. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-personal-cloud-identities.md` — safe email matrix for git/gcloud/gh
+9. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-git-commit-scope.md` — **CRITICAL** scope-leak rule + the worktree fix
 
 ---
 
 ## Hard rules that bit us in this session — do not repeat
 
-1. **Never override `git user.email` on commit.** Repo's local config is authoritative: `shifatislamsanto764@gmail.com` (Shifat's personal identity, linked to `oneKn8`). Do NOT pass `-c user.email=contact@rhemicai.com` or any other override. The `contact@rhemicai.com` address from auto-memory is the Rhemic AI ORG email, NOT personal-repo identity. Terminal B violated this in this session; force-push fixed it but bad SHAs persist in GitHub GC window.
-2. **`env -u PYTHONPATH` prefix needed for local pytest runs** on this machine. ROS Humble pollutes Python path. CI doesn't have this problem.
-3. **`git status` before `git add`** to avoid sweeping unstaged files from other terminals into your commit. Terminal A's `7c3cfd8` did this — content fine, attribution wrong. See `5931687` for the corrective note.
-4. **Phoenix prompt versions are immutable.** No `delete-prompt-version`. Apoptosis is Path B: REST removes `production` tag, MCP adds `tombstoned` tag. `PhoenixClient.tombstone(prompt_id, version_id)` does both.
-5. **`add-prompt-version-tag` is move-semantic** in Phoenix MCP — re-tagging strips from prior version. Atomic champion-swap primitive.
-6. **For novelty work,** read `~/.claude/projects/.../memory/feedback-explore-like-human-not-weights.md` BEFORE brainstorming. Don't generate ideas from Claude reflexes; spawn research into far fields.
+1. **Set up worktrees FIRST.** See Step Zero above. Three scope leaks happened in this session because we didn't.
+2. **Never override `git user.email` on commit.** Repo's local config is authoritative: `shifatislamsanto764@gmail.com` (Shifat's personal identity, linked to `oneKn8`). Do NOT pass `-c user.email=contact@rhemicai.com` or any other override. The `contact@rhemicai.com` address from auto-memory is the Rhemic AI ORG email, NOT personal-repo identity. Terminal B violated this in this session; force-push fixed it but bad SHAs persist in GitHub GC window.
+3. **`env -u PYTHONPATH` prefix needed for local pytest runs** on this machine. ROS Humble pollutes Python path. CI doesn't have this problem.
+4. **Always `git status` + `git diff --cached --stat` BEFORE `git commit`.** Even with worktrees, verify exact staged scope before every commit. `git add <file>` alone is NOT sufficient.
+5. **Phoenix prompt versions are immutable.** No `delete-prompt-version`. Apoptosis is Path B: REST removes `production` tag, MCP adds `tombstoned` tag. `PhoenixClient.tombstone(prompt_id, version_id)` does both.
+6. **`add-prompt-version-tag` is move-semantic** in Phoenix MCP — re-tagging strips from prior version. Atomic champion-swap primitive.
+7. **For novelty work,** read `~/.claude/projects/.../memory/feedback-explore-like-human-not-weights.md` BEFORE brainstorming. Don't generate ideas from Claude reflexes; spawn research into far fields.
+8. **GCP setup is DONE on the cloud side.** Project `granum-2026`, billing `01D7E1-9DABE7-254A06` OPEN, all 6 APIs enabled. Remaining for live cycle: user runs `gcloud auth application-default login` + signs up at app.phoenix.arize.com for Phoenix Cloud API key. See `.env.example` for the canonical env vars.
 
 ---
 
