@@ -169,3 +169,22 @@
 - IN PROGRESS: Phase 3 (Red Queen co-evolution) — 9 tasks broken out + tracked via TaskCreate; Phase 4 (cross-cell transfer) — 4 tasks queued. Subagent-driven-development workflow (implementer → spec reviewer → code-quality reviewer per task).
 - BLOCKED: Phase 0.5 + 1.10 still gated on user GCP/Phoenix actions (unchanged).
 - NEXT: dispatch Task 3.1 (PayerPersona + 5 seeded personas — strict/lenient/formalist/cost-focused/evidence-focused), mock-driven TDD, no cloud needed.
+
+## [Terminal B] — 2026-05-27 14:00
+- DONE: Phase 3 data expansion. Added `data/<cell>/payer_personas.json` (5 personas: strict/lenient/formalist/cost_focused/evidence_focused) and expanded `data/<cell>/denial_templates.json` from 10 → 22+ patterns for all 5 cells. Personas ground Phase 3.1 Red Queen payer-adversary population (failure mode F3.4 — diversity floor). Expansion gives Terminal A 110+ denial-pattern fixtures across the cell registry.
+- COUNTS: aetna_cardiac 22, united_oncology 22, anthem_mental_health 22, cigna_ortho 22, humana_endocrinology 23. Persona count == 5 in every cell with the required archetype set. Zero duplicate `(cpt, icd10, denial_reason)` triples per cell.
+- CITATIONS: every new `cpb_number` is grounded in the cell's existing `valid_citations.json` (no invented CPB numbers). All CPT/HCPCS/ICD-10 codes are real per the per-cell allowed-code list in the agent briefs.
+- IN PROGRESS: none for Terminal B Phase 3 data scope.
+- BLOCKED: none. Hand off to Terminal A for Phase 3.1 (payer-agent prompt templates + ADK adversary loading these personas).
+- NEXT: standing by. Possible follow-ups when Terminal A asks: a 6th "regulator" persona, cross-cell persona-archetype drift, or appeal-side `data/<cell>/appeal_personas.json` mirror for the writer population.
+- BOUNDARIES RESPECTED: no `.py`, no `web/`, no `tests/`, no `docs/{demo-script,submission}.md` (Terminal C lane). Only files written: `data/<cell>/payer_personas.json` (5 new) and append-only edits to `data/<cell>/denial_templates.json` (5 modified).
+
+## [Terminal A — original] — 2026-05-27 13:30
+- DONE: Phase 0.4 cloud setup. `granum-2026` project created under shifatislamsanto764@gmail.com, billing 01D7E1-9DABE7-254A06 (OPEN) linked, all 6 APIs enabled (aiplatform, run, cloudbuild, artifactregistry, secretmanager, cloudscheduler). `.env.example` updated with project ID.
+- PARALLEL Terminal A (second session) already kicked off Phase 3.1 (payer-persona module, commit b1015b3) — coordinating via standup, NOT stepping on adversary/ files.
+- ACK: Terminal B mid-flight on Phase 3 data (payer_personas.json across cells + denial_templates expansion in working tree).
+- REMAINING USER ACTIONS to fully unblock Phase 0.5 + 1.10:
+  1. `gcloud auth application-default login` (browser interactive)
+  2. `gcloud auth application-default set-quota-project granum-2026`
+  3. Sign up at https://app.phoenix.arize.com → create project `granum` → API key → drop in .env
+- After those 3 steps, Phase 0.5 (Cloud Run deploy) and Phase 1.10 (live cycle) can land in 30 min.
