@@ -1,0 +1,207 @@
+[
+  {
+    "id": "Aetna CPB 0119",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/100_199/0119.html"
+  },
+  {
+    "id": "Aetna CPB 0286",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/200_299/0286.html"
+  },
+  {
+    "id": "Aetna CPB 0353",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/300_399/0353.html"
+  },
+  {
+    "id": "Aetna CPB 0535",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/500_599/0535.html"
+  },
+  {
+    "id": "Aetna CPB 0218",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/200_299/0218.html"
+  },
+  {
+    "id": "Aetna CPB 0237",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/200_299/0237.html"
+  },
+  {
+    "id": "Aetna CPB 0379",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/300_399/0379.html"
+  },
+  {
+    "id": "Aetna CPB 0648",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/600_699/0648.html"
+  },
+  {
+    "id": "Aetna CPB 0149",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/100_199/0149.html"
+  },
+  {
+    "id": "Aetna CPB 0172",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/100_199/0172.html"
+  },
+  {
+    "id": "Aetna CPB 0585",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/500_599/0585.html"
+  },
+  {
+    "id": "Aetna CPB 0633",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/600_699/0633.html"
+  },
+  {
+    "id": "Aetna CPB 0671",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/600_699/0671.html"
+  },
+  {
+    "id": "Aetna CPB 0703",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/700_799/0703.html"
+  },
+  {
+    "id": "Aetna CPB 0747",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/700_799/0747.html"
+  },
+  {
+    "id": "Aetna CPB 0802",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/800_899/0802.html"
+  },
+  {
+    "id": "Aetna CPB 0828",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/800_899/0828.html"
+  },
+  {
+    "id": "Aetna CPB 0865",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/800_899/0865.html"
+  },
+  {
+    "id": "Aetna CPB 0901",
+    "kind": "policy",
+    "url": "https://www.aetna.com/cpb/medical/data/900_999/0901.html"
+  },
+  {
+    "id": "ACC/AHA 2021",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029"
+  },
+  {
+    "id": "ACC/AHA 2021 §6.2",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029"
+  },
+  {
+    "id": "ACC/AHA 2021 §7.1",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029"
+  },
+  {
+    "id": "ACC/AHA 2021 §4.3",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001029"
+  },
+  {
+    "id": "ACC/AHA 2023",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001168"
+  },
+  {
+    "id": "ACC/AHA 2023 §5.1",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001168"
+  },
+  {
+    "id": "ACC/AHA 2022",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001063"
+  },
+  {
+    "id": "ACC/AHA 2020",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000923"
+  },
+  {
+    "id": "ACC/AHA 2020 §7.3",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000923"
+  },
+  {
+    "id": "ACC/AHA 2019",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000665"
+  },
+  {
+    "id": "AHA/ACC/HRS 2019",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000665"
+  },
+  {
+    "id": "ACC/AHA 2018",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000625"
+  },
+  {
+    "id": "AHA/ACC 2017",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/HYP.0000000000000065"
+  },
+  {
+    "id": "ACC/AHA 2014",
+    "kind": "guideline",
+    "url": "https://www.ahajournals.org/doi/10.1161/CIR.0000000000000040"
+  },
+  {
+    "id": "ESC/EACTS 2021",
+    "kind": "guideline",
+    "url": "https://academic.oup.com/eurheartj/article/43/7/561/6358460"
+  },
+  {
+    "id": "ESC 2023",
+    "kind": "guideline",
+    "url": "https://academic.oup.com/eurheartj/article/44/38/3720/7243210"
+  },
+  {
+    "id": "HRS 2017",
+    "kind": "guideline",
+    "url": "https://www.heartrhythmjournal.com/article/S1547-5271(17)31249-3/fulltext"
+  },
+  {
+    "id": "29 CFR 2560.503-1",
+    "kind": "regulation",
+    "url": "https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XXV/subchapter-L/part-2560/section-2560.503-1"
+  },
+  {
+    "id": "42 CFR 422.582",
+    "kind": "regulation",
+    "url": "https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-B/part-422/subpart-M/section-422.582"
+  },
+  {
+    "id": "42 CFR 422.590",
+    "kind": "regulation",
+    "url": "https://www.ecfr.gov/current/title-42/chapter-IV/subchapter-B/part-422/subpart-M/section-422.590"
+  },
+  {
+    "id": "45 CFR 164.514",
+    "kind": "regulation",
+    "url": "https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-C/part-164/subpart-E/section-164.514"
+  },
+  {
+    "id": "45 CFR 147.136",
+    "kind": "regulation",
+    "url": "https://www.ecfr.gov/current/title-45/subtitle-A/subchapter-B/part-147/section-147.136"
+  }
+]
