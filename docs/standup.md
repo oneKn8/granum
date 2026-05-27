@@ -67,3 +67,9 @@
 - BLOCKED: Phase 0.5 + 1.10 still gated on user actions (ADC login, billing, Phoenix API key)
 - NEXT: Phase 1.4 (negative selection / citation verifier)
 - NOTE: Spec asked for >=6 distinct CPB numbers; the pattern bank only contains 4 (0119, 0286, 0353, 0535) and the boundary rule "do not invent CPB numbers" overrides — we stay at 4. If broader CPB coverage is needed later, expand the Phase 1.1 pattern bank first, then revisit the gold set.
+
+## [Terminal A] — 2026-05-27 12:38
+- DONE: Phase 1.3 (Phoenix client wrapper with Path B apoptosis — REST for tag removal, MCP for everything else). `src/granum/tools/phoenix_client.py` exposes `PhoenixClient` with `upsert_prompt`, `add_version_tag`, `remove_version_tag` (REST), `tombstone` (atomic two-step: REST remove `production` + MCP add `tombstoned`, 404-tolerant), `list_active_prompts` (client-side tombstoned filter), `add_dataset_examples`, `get_spans`. 7/7 new tests pass with mocked MCP+REST transports, full suite 15/15, ruff + mypy clean. Sole seam between Granum and Phoenix — no other Granum module references Phoenix tool names or REST paths.
+- IN PROGRESS: Phase 1.4 (negative selection citation verifier)
+- BLOCKED: Phase 0.5 + 1.10 (user actions)
+- NEXT: Phase 1.5 (mutation operators)
