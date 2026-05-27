@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/* -------- Theme tokens (Tailwind 4) -------- */
+/* All tokens registered with @theme become first-class Tailwind utilities. */
+/* Source of truth: web/DESIGN.md (Germinal Lab — Cinematic Dark). */
+
+@theme {
+  /* Surfaces — violet-tinted near-black, slide-mount feel */
+  --color-bg-0: oklch(0.16 0.020 285);
+  --color-bg-1: oklch(0.21 0.025 285);
+  --color-bg-2: oklch(0.26 0.030 285);
+  --color-bg-3: oklch(0.32 0.035 285);
+
+  /* Foregrounds */
+  --color-fg-0: oklch(0.96 0.005 285);
+  --color-fg-1: oklch(0.74 0.020 285);
+  --color-fg-2: oklch(0.58 0.015 285);
+  --color-fg-tomb: oklch(0.42 0.010 285);
+
+  /* Semantic biology-stain accents */
+  --color-survivor: oklch(0.74 0.16 230);
+  --color-champion: oklch(0.80 0.18 65);
+  --color-mutant: oklch(0.68 0.22 320);
+  --color-apoptosis: oklch(0.60 0.22 25);
+
+  /* Strokes */
+  --color-stroke-1: oklch(0.30 0.030 285 / 0.6);
+  --color-stroke-2: oklch(0.40 0.040 285 / 0.4);
+
+  /* Type scale (modular ratio 1.25) */
+  --text-xs: 0.75rem;   --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;    --text-base--line-height: 1.625rem;
+  --text-lg: 1.25rem;   --text-lg--line-height: 1.75rem;
+  --text-xl: 1.75rem;   --text-xl--line-height: 2.125rem;
+  --text-2xl: 2.5rem;   --text-2xl--line-height: 3rem;
+  --text-3xl: 4rem;     --text-3xl--line-height: 4.25rem;
+
+  /* Font families bind to next/font CSS variables set on <html> in layout.tsx */
+  --font-serif: var(--font-plex-serif), ui-serif, Georgia, serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Motion */
+  --ease-out-apple: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* -------- Base reset -------- */
+
+html, body {
+  background: var(--color-bg-0);
+  color: var(--color-fg-0);
+  font-family: var(--font-sans);
+  /* Use 100dvh, never 100vh. */
+  min-height: 100dvh;
+}
+
+body {
+  font-feature-settings: "ss01", "cv11", "cv02";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Selection — eosin blue */
+::selection {
+  background: oklch(0.74 0.16 230 / 0.32);
+  color: var(--color-fg-0);
+}
+
+/* Hairline strokes everywhere */
+* {
+  border-color: var(--color-stroke-1);
+}
+
+/* Typography defaults — balance hero headlines, pretty body */
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  text-wrap: balance;
+  font-feature-settings: "ss01", "kern";
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: var(--text-3xl);
+  line-height: var(--text-3xl--line-height);
+  font-weight: 500;
+}
+
+p, li, blockquote {
+  text-wrap: pretty;
+  hyphens: auto;
+}
+
+/* Mono for any element that wants it */
+.font-mono, code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* Reduced motion — honored everywhere */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus ring — eosin blue, never default Chrome blue */
+:focus-visible {
+  outline: 2px solid var(--color-survivor);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* Lineage tree primitives */
+.lineage-node {
+  transition: opacity 600ms ease-out, filter 600ms ease-out, transform 200ms var(--ease-out-apple);
+}
+
+.lineage-node[data-status="tombstoned"] {
+  opacity: 0.35;
+  filter: saturate(0);
+}
+
+.lineage-node[data-status="champion"] {
+  filter: drop-shadow(0 0 8px oklch(0.80 0.18 65 / 0.5));
+}
+
+.lineage-edge {
+  stroke: var(--color-stroke-2);
+  stroke-width: 1;
+  fill: none;
+  transition: stroke 200ms ease-out, opacity 600ms ease-out;
+}
+
+.lineage-edge[data-status="tombstoned"] {
+  stroke-dasharray: 2 3;
+  opacity: 0.35;
+}
+
+/* Hide scrollbar in lineage scroll regions while keeping scroll */
+.tree-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-stroke-2) transparent;
+}
