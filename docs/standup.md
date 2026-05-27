@@ -85,3 +85,9 @@
 - IN PROGRESS: Phase 1.6 (LLM-as-judge)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 1.7 (tournament)
+
+## [Terminal A] — 2026-05-27 12:47
+- DONE: Phase 1.6 (LLM-as-judge — 5-axis rubric, median-of-3, English feedback per Arize prompt-learning thesis)
+- IN PROGRESS: Phase 1.7 (tournament engine)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 1.8 (germinal cycle orchestrator)
