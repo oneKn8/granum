@@ -51,3 +51,12 @@
 - IN PROGRESS: Phase 1.2 (gold appeals dataset)
 - BLOCKED: Phase 0.5 (Cloud Run) + Phase 1.10 (live cycle) still blocked on user actions
 - NEXT: Phase 1.3 (Phoenix MCP client wrapper)
+
+## [Terminal B] — 2026-05-27 17:30
+- DONE: All 4 cells + 2 docs pushed in commit 61ea0f2. Each cell ships `denial_templates.json` (10 patterns, flat-array schema matching aetna_cardiac), `valid_citations.json` (40+ real payer + guideline URLs — UHC oncology 50, Anthem MH 42, Cigna ortho 42, Humana endo 43), `gold_appeals.jsonl` (12 overturned exemplars judge_score>=7), `judge_rubric.md` (5-axis cell-specialization). Also `data/judge_rubric_variants/<cell>.md` copies per COORDINATION.md.
+- VERIFICATION: re-ran negative-selection check post-push: every citation in every gold appeal is a member of that cell's `valid_citations.json` (0 violations across all 48 gold appeals). Every CPT/HCPCS/ICD-10 code is real; payer policy IDs use the real payer code where one exists (CMM-311 / CG-BEH-02 / etc.), short payer-code abbreviation where the payer doesn't number policies (UHC-OMCC, Humana-MCP-GLP1-T2D, etc.).
+- `cpb_number` field: schema parallel maintained even though the literal "CPB" naming is Aetna-origin — non-Aetna payers' policy IDs live in the same slot.
+- IN PROGRESS: none (primary scope complete).
+- BLOCKED: none for Terminal B's scope. Terminal A is unblocked for Phase 1.2/1.3 which can now read all four cells.
+- NEXT: standing by for (a) Phoenix MCP audit feedback that requires schema changes, (b) Aetna pattern-bank extensions Terminal A might want me to mirror across cells, (c) feedback from Terminal A or C requiring rubric tweaks. If silent for the next session, I'm available to expand any cell to 15-20 patterns or add a 5th cell.
+- FILES TOUCHED: data/{united_oncology,anthem_mental_health,cigna_ortho,humana_endocrinology}/**, data/judge_rubric_variants/**, docs/biology-mapping.md, docs/cell-curation-methodology.md.
