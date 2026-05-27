@@ -4,7 +4,6 @@ from unittest.mock import AsyncMock, MagicMock
 from granum.center.driver import MultiCellDriver, RoundResult
 from granum.center.cell import Cell, CellRegistry
 from granum.center.cycle import CycleOutcome
-from granum.center.judge import JudgeScore
 from granum.data.denials import Denial, DenialReason
 
 
