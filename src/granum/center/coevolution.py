@@ -23,6 +23,7 @@ from typing import Protocol
 from opentelemetry import trace
 
 from granum.adversary.payer_agent import PayerAgent
+from granum.adversary.payer_persona import SEEDED_PERSONAS
 from granum.center.defensibility_judge import DefensibilityJudge
 from granum.center.mutation import Mutation, apply_mutation
 from granum.center.triangular_tournament import (
@@ -56,6 +57,7 @@ class CoEvolutionRoundResult:
     payer_mutant_ids: tuple[str, ...]
     defensibility_composite: float
     english_feedback: str
+    adversary_reset_fired: bool = False
 
 
 def _extract_persona_id(prompt_name: str) -> str:
@@ -90,7 +92,17 @@ class CoEvolutionDriver:
         gold_path: str | Path,
         mutation_proposer: _MutationProposer,
         mutation_count: int = 2,
+        mutation_rate_cap: float = 0.15,
+        adversary_reset_every: int = 5,
     ) -> None:
+        if not (0.0 <= mutation_rate_cap <= 1.0):
+            raise ValueError(
+                f"mutation_rate_cap must be in [0.0, 1.0]; got {mutation_rate_cap!r}"
+            )
+        if adversary_reset_every < 1:
+            raise ValueError(
+                f"adversary_reset_every must be >= 1; got {adversary_reset_every!r}"
+            )
         self._phoenix = phoenix
         self._payer_agent = payer_agent
         self._judge = judge
@@ -98,7 +110,13 @@ class CoEvolutionDriver:
         self._gold = load_gold_appeals(gold_path)
         self._propose_mutations = mutation_proposer
         self._mutation_count = mutation_count
+        self._mutation_rate_cap = mutation_rate_cap
+        self._adversary_reset_every = adversary_reset_every
         self._round_index = 0
+
+    def _effective_mutation_count(self, population_size: int) -> int:
+        cap = max(1, int(population_size * self._mutation_rate_cap))
+        return min(self._mutation_count, cap)
 
     async def round(self) -> CoEvolutionRoundResult:
         with _tracer.start_as_current_span("granum.coevolution.round") as span:
@@ -177,12 +195,15 @@ class CoEvolutionDriver:
                 )
 
             # 6. Clonal expansion — writer winner
+            writer_effective_count = self._effective_mutation_count(
+                len(writer_refs)
+            )
             with _tracer.start_as_current_span(
                 "granum.coevolution.clonal_expansion_writers"
             ):
                 writer_mutant_ids: list[str] = []
                 writer_mutations = self._propose_mutations(
-                    parent=writer_winner_body, n=self._mutation_count
+                    parent=writer_winner_body, n=writer_effective_count
                 )
                 for i, mutation in enumerate(writer_mutations):
                     try:
@@ -202,13 +223,17 @@ class CoEvolutionDriver:
                     writer_mutant_ids.append(pv.prompt_id)
 
             # 6b. Clonal expansion — payer winner
+            payer_effective_count = self._effective_mutation_count(
+                len(payer_refs)
+            )
             with _tracer.start_as_current_span(
                 "granum.coevolution.clonal_expansion_payers"
             ):
                 payer_mutant_ids: list[str] = []
+                payer_mutant_versions: list[tuple[str, str]] = []
                 payer_winner_body = payer_by_id[payer_winner_id].body
                 payer_mutations = self._propose_mutations(
-                    parent=payer_winner_body, n=self._mutation_count
+                    parent=payer_winner_body, n=payer_effective_count
                 )
                 for i, mutation in enumerate(payer_mutations):
                     try:
@@ -228,6 +253,7 @@ class CoEvolutionDriver:
                         name=name, body=mutant_body, tags=("experimental",)
                     )
                     payer_mutant_ids.append(pv.prompt_id)
+                    payer_mutant_versions.append((pv.prompt_id, pv.version_id))
 
             # Compute winner's mean defensibility composite across all the
             # payers it faced — the judge produces per-pair composite scores;
@@ -262,6 +288,52 @@ class CoEvolutionDriver:
                     }],
                 )
 
+            # 8. Adversary reset check — fires when (round_index + 1) is a
+            # multiple of adversary_reset_every. Wipes the FULL current payer
+            # population (active payers + just-spawned mutants, dedup'd
+            # against tournament-loser tombstones) and re-seeds from
+            # SEEDED_PERSONAS.
+            adversary_reset_fired = (
+                (self._round_index + 1) % self._adversary_reset_every == 0
+            )
+            if adversary_reset_fired:
+                with _tracer.start_as_current_span(
+                    "granum.coevolution.adversary_reset"
+                ):
+                    # Collect every payer (id, version) pair currently active
+                    # after this round's mutations: the original payers plus
+                    # the just-upserted mutants. Dedup against losers already
+                    # tombstoned in step 4.
+                    already_tombstoned = {
+                        (lid, lver)
+                        for lid, lver, _ in result.payer_losers
+                    }
+                    full_payer_pop: list[tuple[str, str]] = []
+                    for pv in payers:
+                        full_payer_pop.append((pv.prompt_id, pv.version_id))
+                    # Just-spawned payer mutants from this round's clonal
+                    # expansion — captured during step 6b.
+                    for pid, ver in payer_mutant_versions:
+                        full_payer_pop.append((pid, ver))
+                    seen: set[tuple[str, str]] = set()
+                    for pid, ver in full_payer_pop:
+                        if (pid, ver) in already_tombstoned:
+                            continue
+                        if (pid, ver) in seen:
+                            continue
+                        seen.add((pid, ver))
+                        await self._phoenix.tombstone(pid, ver)
+                    # Re-seed from baseline personas.
+                    for persona in SEEDED_PERSONAS:
+                        await self._phoenix.upsert_prompt(
+                            name=(
+                                f"{self._cell}_payer/"
+                                f"baseline_{persona.persona_id}"
+                            ),
+                            body=persona.system_prompt,
+                            tags=("experimental",),
+                        )
+
             outcome = CoEvolutionRoundResult(
                 cell=self._cell,
                 round_index=self._round_index,
@@ -273,6 +345,7 @@ class CoEvolutionDriver:
                 payer_mutant_ids=tuple(payer_mutant_ids),
                 defensibility_composite=composite,
                 english_feedback=english_feedback,
+                adversary_reset_fired=adversary_reset_fired,
             )
             self._round_index += 1
             return outcome
