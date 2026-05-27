@@ -130,3 +130,9 @@
 - IN PROGRESS: Phase 2.5 (immune memory primitive)
 - BLOCKED: Phase 0.5 + 1.10 (user actions)
 - NEXT: Phase 2.7 (antigen drift)
+
+## [Terminal A] — 2026-05-27 13:02
+- DONE: Phase 2.5 (immune memory — memory_cell tagging + reactivate on 2 consecutive extinctions)
+- IN PROGRESS: Phase 2.7 (antigen drift)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 2.8 (multi-cell driver)
