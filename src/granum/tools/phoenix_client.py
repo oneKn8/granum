@@ -139,6 +139,27 @@ class PhoenixClient:
             )
         return result
 
+    async def list_coevolution_state(
+        self, *, cell: str
+    ) -> tuple[list[PromptVersion], list[PromptVersion]]:
+        """Return (writers, payers) — both active populations for a co-evolving cell.
+
+        Writers: prompts under name prefix ``{cell}/``.
+        Payers: prompts under name prefix ``{cell}_payer/``.
+
+        Convenience wrapper around two :meth:`list_active_prompts` calls.
+        Tombstoned versions are already filtered by ``list_active_prompts``.
+
+        Note on prefix safety: Phoenix's ``list-prompts`` ``namePrefix`` is a
+        true prefix match on the full prompt name. Because writer prompts
+        are named ``{cell}/...`` and payer prompts are named ``{cell}_payer/...``,
+        the prefix ``{cell}/`` does NOT match payer names (the next char is
+        ``_`` vs ``/``), so writers and payers never bleed into each other.
+        """
+        writers = await self.list_active_prompts(name_prefix=f"{cell}/")
+        payers = await self.list_active_prompts(name_prefix=f"{cell}_payer/")
+        return writers, payers
+
     # === Datasets ===
 
     async def add_dataset_examples(
@@ -148,6 +169,36 @@ class PhoenixClient:
         await self._mcp.call_tool(
             "add-dataset-examples",
             {"datasetName": dataset_name, "examples": examples},
+        )
+
+    async def add_coevolution_example(
+        self,
+        *,
+        cell: str,
+        round_index: int,
+        writer_id: str,
+        payer_id: str,
+        defensibility_composite: float,
+        english_feedback: str,
+    ) -> None:
+        """Writeback one co-evolution round outcome to the cell's coevolution dataset.
+
+        Dataset name: ``granum/{cell}/coevolution``. Schema parallels the
+        per-cell ``granum/{cell}/outcomes`` dataset (used by single-population
+        :class:`GerminalCycle`) but with both writer + payer winner ids in
+        each row.
+        """
+        await self.add_dataset_examples(
+            dataset_name=f"granum/{cell}/coevolution",
+            examples=[
+                {
+                    "round_index": round_index,
+                    "writer_winner_id": writer_id,
+                    "payer_winner_id": payer_id,
+                    "defensibility_composite": defensibility_composite,
+                    "english_feedback": english_feedback,
+                }
+            ],
         )
 
     # === Spans / traces ===

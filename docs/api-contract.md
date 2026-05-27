@@ -139,21 +139,55 @@ Full payload for one cell view — strategies (full lineage), rounds, fitness cu
 
 Two-population view introduced in Phase 3. Returns the appeal-writer population AND the adversarial payer-agent population for this cell.
 
-**Response shape:** matches `CoEvolutionState`:
+**Response shape:** matches `CoEvolutionState`. Each entry in `writers` / `payers` follows the existing `BCellStrategy` shape from `/api/cells/{cell}.strategies`, **plus** one extra field `lineageKind: "writer" | "payer"` so the frontend can render distinct styling per lineage type.
+
+Concrete sample payload:
 
 ```json
 {
   "cell": "aetna_cardiac",
   "writers": [
-    /* same BCellStrategy shape as /api/cells/{cell}.strategies */
+    {
+      "id": "bc_ae_writer_001",
+      "cell": "aetna_cardiac",
+      "lineage_kind": "writer",
+      "generation": 0,
+      "parentId": null,
+      "label": "L0 — baseline writer",
+      "promptBody": "Per Aetna CPB 0119 §IV.A we appeal...",
+      "mutationNote": null,
+      "fitness": 5.0,
+      "tag": "production",
+      "status": "alive",
+      "createdAt": "2026-05-27T13:00:00Z",
+      "killedAt": null,
+      "citations": ["Aetna CPB 0119"]
+    }
   ],
   "payers": [
-    /* BCellStrategy shape; lineage of payer-adversary system prompts */
+    {
+      "id": "bc_ae_payer_strict_001",
+      "cell": "aetna_cardiac",
+      "lineage_kind": "payer",
+      "generation": 0,
+      "parentId": null,
+      "label": "L0 — strict adversary",
+      "promptBody": "You are a strict Aetna reviewer. Reject the appeal unless...",
+      "mutationNote": null,
+      "fitness": 5.5,
+      "tag": "production",
+      "status": "alive",
+      "createdAt": "2026-05-27T13:00:00Z",
+      "killedAt": null,
+      "citations": []
+    }
   ]
 }
 ```
 
-**Source:** Phoenix prompt registry queried with two name prefixes: `{cell}/` (writers) and `{cell}_payer/` (adversaries).
+**Source:** Phoenix prompt registry queried with two name prefixes: `{cell}/` (writers) and `{cell}_payer/` (adversaries). Server-side this is implemented via `PhoenixClient.list_coevolution_state(cell=...)` which returns the two populations as a `(writers, payers)` tuple.
+
+**Fitness semantics:** For writers, `fitness` is `mean(defensibility_composite)` across that prompt's appearances in the `granum/{cell}/coevolution` dataset (higher = better appeals). For **payers**, `fitness` represents `mean(10 - defensibility_composite)` — i.e., how well the payer **exposed weakness** in the writers it faced. A payer with high fitness reliably forces low defensibility scores; both populations are therefore comparable on the same 0-10 scale where higher is fitter.
 
 ---
 
@@ -254,6 +288,7 @@ Cloud Run service allows GET from `https://*.vercel.app` (Terminal C's deploymen
 - Adding new optional fields: non-breaking.
 - Removing or renaming fields: breaking — requires bump to `/api/v2/`.
 - v0.1 → v1.0 in scope: rename `bc_*` ids to UUID, add per-strategy `traceLink` (Phoenix trace URL).
+- **`lineageKind` is a new v0.1 field added 2026-05-27** for Phase 3 co-evolution rendering. Present on every entry in `CoEvolutionState.writers` and `CoEvolutionState.payers`. Always one of `"writer"` or `"payer"`. The single-population `/api/cells/{cell}.strategies` array does NOT carry this field (no ambiguity there — they are all writers).
 
 ---
 

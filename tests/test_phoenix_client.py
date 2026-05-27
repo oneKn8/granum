@@ -119,3 +119,105 @@ async def test_add_dataset_examples_via_mcp():
     mock_mcp.call_tool.assert_called_once()
     args = mock_mcp.call_tool.call_args[0]
     assert args[0] == "add-dataset-examples"
+
+
+# === Co-evolution: dual-lineage state + writeback ===
+
+
+@pytest.mark.asyncio
+async def test_list_coevolution_state_returns_writers_and_payers_separately():
+    """Returns (writers, payers) tuple from two separate prefix queries."""
+    mock_mcp = AsyncMock()
+
+    async def call_tool(name: str, arguments: dict) -> dict:
+        prefix = arguments.get("namePrefix", "")
+        if prefix == "aetna_cardiac/":
+            return {
+                "prompts": [
+                    {"promptId": "pw1", "versionId": "v1", "tags": ["production"], "body": "writer1", "name": "aetna_cardiac/bcell_1"},
+                    {"promptId": "pw2", "versionId": "v1", "tags": ["production"], "body": "writer2", "name": "aetna_cardiac/bcell_2"},
+                ]
+            }
+        if prefix == "aetna_cardiac_payer/":
+            return {
+                "prompts": [
+                    {"promptId": "pp1", "versionId": "v1", "tags": ["production"], "body": "payer1", "name": "aetna_cardiac_payer/strict"},
+                ]
+            }
+        return {"prompts": []}
+
+    mock_mcp.call_tool.side_effect = call_tool
+    mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    writers, payers = await client.list_coevolution_state(cell="aetna_cardiac")
+    assert [w.prompt_id for w in writers] == ["pw1", "pw2"]
+    assert [p.prompt_id for p in payers] == ["pp1"]
+
+
+@pytest.mark.asyncio
+async def test_list_coevolution_state_uses_correct_prefixes():
+    """Verifies the two list-prompts calls use {cell}/ and {cell}_payer/ prefixes."""
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {"prompts": []}
+    mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    await client.list_coevolution_state(cell="aetna_cardiac")
+    assert mock_mcp.call_tool.call_count == 2
+    prefixes_called = [
+        call.args[1]["namePrefix"] for call in mock_mcp.call_tool.call_args_list
+    ]
+    assert "aetna_cardiac/" in prefixes_called
+    assert "aetna_cardiac_payer/" in prefixes_called
+
+
+@pytest.mark.asyncio
+async def test_add_coevolution_example_writes_correct_dataset_name():
+    """Writeback targets the granum/{cell}/coevolution dataset."""
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = None
+    mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    await client.add_coevolution_example(
+        cell="aetna_cardiac",
+        round_index=3,
+        writer_id="pw_winner",
+        payer_id="pp_winner",
+        defensibility_composite=7.2,
+        english_feedback="Writer cited CPB 0119 §IV.A directly.",
+    )
+    mock_mcp.call_tool.assert_called_once()
+    args = mock_mcp.call_tool.call_args[0]
+    assert args[0] == "add-dataset-examples"
+    assert args[1]["datasetName"] == "granum/aetna_cardiac/coevolution"
+
+
+@pytest.mark.asyncio
+async def test_add_coevolution_example_payload_schema():
+    """Payload contains exactly the 5 required keys with correct values."""
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = None
+    mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    await client.add_coevolution_example(
+        cell="aetna_cardiac",
+        round_index=3,
+        writer_id="pw_winner",
+        payer_id="pp_winner",
+        defensibility_composite=7.2,
+        english_feedback="Writer cited CPB 0119 §IV.A directly.",
+    )
+    examples = mock_mcp.call_tool.call_args[0][1]["examples"]
+    assert len(examples) == 1
+    row = examples[0]
+    assert set(row.keys()) == {
+        "round_index",
+        "writer_winner_id",
+        "payer_winner_id",
+        "defensibility_composite",
+        "english_feedback",
+    }
+    assert row["round_index"] == 3
+    assert row["writer_winner_id"] == "pw_winner"
+    assert row["payer_winner_id"] == "pp_winner"
+    assert row["defensibility_composite"] == 7.2
+    assert row["english_feedback"] == "Writer cited CPB 0119 §IV.A directly."
