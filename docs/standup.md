@@ -30,3 +30,18 @@
   - **Billing is not active on either existing GCP project** — `gcloud services enable run/cloudbuild/artifactregistry/secretmanager/cloudscheduler` returns `UREQ_PROJECT_BILLING_NOT_OPEN` (lumentra) / `UREQ_PROJECT_BILLING_NOT_FOUND` (call-agent). Hackathon $100 GCP credit form (https://rapid-agent.devpost.com/resources) likely not yet submitted; SLA 1-5 business days. User decision needed: (a) wait for hackathon credit + apply to a project, (b) open billing on `lumentra-ai-485322`, or (c) create a fresh `granum-2026` project once a billing account is available. Cloud Run deploy (Phase 0.5) is hard-blocked until this resolves.
   - **Phoenix Cloud account not yet provisioned** — no `PHOENIX_API_KEY` anywhere in shell rc files, shared `.env`, or sibling hackathon projects. User must sign up at https://app.phoenix.arize.com, create project `granum`, generate API key, and drop it in `/home/oneknight/projects/hackathon/granum/.env` (gitignored).
 - NEXT: Once user clears the three blockers above, re-run both smoke scripts to capture evidence (Gemini "alive" + Phoenix trace visible in UI), then proceed to Phase 0.5 (Cloud Run hello-world).
+
+## [Terminal B] — 2026-05-27 17:21
+- DONE (staged, not yet pushed): All 4 new cells curated in `/home/oneknight/projects/hackathon/granum-staging-b/` plus both docs:
+  - `data/united_oncology/{denial_templates.json, valid_citations.json (49 entries), gold_appeals.jsonl (12), judge_rubric.md}`
+  - `data/anthem_mental_health/{denial_templates.json, valid_citations.json (45), gold_appeals.jsonl (12), judge_rubric.md}`
+  - `data/cigna_ortho/{denial_templates.json, valid_citations.json (35), gold_appeals.jsonl (12), judge_rubric.md}`
+  - `data/humana_endocrinology/{denial_templates.json, valid_citations.json (40), gold_appeals.jsonl (12), judge_rubric.md}`
+  - `docs/biology-mapping.md` (~6.5KB essay; cites Mesin/Ersching/Victora Immunity 2016, Tas et al. Science 2016, Mayer et al. Science 2017, Pankhurst Imm Cell Biol 2025)
+  - `docs/cell-curation-methodology.md` (judge-spot-check verification doc)
+  - All citations in each cell's `gold_appeals.jsonl` are members of that cell's `valid_citations.json` (negative-selection compliant by construction).
+  - Every CPT/HCPCS/ICD-10 code is real; every payer policy and clinical guideline cited resolves to a real URL.
+- IN PROGRESS: waiting on `data/aetna_cardiac/denial_templates.json` from Terminal A's Phase 1 Task 1.1 to lock the canonical JSON schema before pushing my files. My staging schema is `{"_meta": {...}, "patterns": [list of {cpt, icd10, reason, text_template, policy_reference, ...}]}` — if Terminal A's lock uses a different shape (e.g., flat list), I'll reshape mine 1:1 before commit.
+- BLOCKED: Aetna schema not yet locked (Terminal A is in Phase 0.4 blocked on user auth + billing).
+- NEXT: When `data/aetna_cardiac/denial_templates.json` appears on `main`, (1) compare schemas, (2) reshape staging if needed, (3) `cp -R` into `/home/oneknight/projects/hackathon/granum/data/` + `/home/oneknight/projects/hackathon/granum/docs/`, (4) commit as `[B] data: 4 cells + biology mapping + curation methodology` and push.
+- ASK TERMINAL A: when you write `data/aetna_cardiac/denial_templates.json`, please use a shape that supports either a flat pattern list OR a wrapped `{_meta, patterns}` object — both work for the `_AETNA_CARDIAC_PATTERNS` loader sketch in IMPLEMENTATION_PLAN Task 1.1 §Step 3. Or note your choice in this standup so I can match.
