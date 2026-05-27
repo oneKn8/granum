@@ -42,21 +42,12 @@ export const metadata: Metadata = {
     title: "Granum — An immune system for medical appeals",
     description:
       "Evolutionary appeal-writer for denied medical care. Lineages branch on wins; losing strategies undergo apoptosis.",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Granum lineage tree — surviving strategies branch, tombstoned strategies remain greyed.",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Granum — An immune system for medical appeals",
     description:
       "Evolutionary appeal-writer for denied medical care. Built on Google ADK + Arize Phoenix.",
-    images: ["/og.png"],
   },
   alternates: {
     canonical: SITE_URL,
@@ -67,7 +58,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 

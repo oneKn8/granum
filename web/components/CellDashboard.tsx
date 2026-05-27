@@ -5,6 +5,7 @@ import { LineageTree } from "./LineageTree";
 import { PromptDiff } from "./PromptDiff";
 import { FitnessCurve } from "./FitnessCurve";
 import { CoEvolutionDualTree } from "./CoEvolutionDualTree";
+import { cn } from "@/lib/cn";
 import type { BCellStrategy, CellPayload, CoEvolutionState } from "@/lib/types";
 
 interface CellDashboardProps {
@@ -15,7 +16,6 @@ interface CellDashboardProps {
 type ViewMode = "lineage" | "coevolution";
 
 export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
-  // Default selection = champion if present, else most recent alive strategy.
   const defaultSelected =
     payload.strategies.find((s) => s.status === "champion") ??
     payload.strategies.find((s) => s.status === "alive") ??
@@ -34,43 +34,36 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* View mode toggle */}
-      <div
-        role="tablist"
-        aria-label="Lineage view mode"
-        className="inline-flex w-fit border border-stroke-1"
-      >
+      {/* Plain toggle group — not a tab system. Two buttons, aria-pressed. */}
+      <div className="inline-flex w-fit border border-stroke-1" role="group" aria-label="Lineage view mode">
         <button
           type="button"
-          role="tab"
-          aria-selected={mode === "lineage"}
+          aria-pressed={mode === "lineage"}
           onClick={() => setMode("lineage")}
-          className={[
+          className={cn(
             "px-3 py-1.5 font-mono text-xs transition-colors duration-200",
             mode === "lineage"
               ? "bg-bg-3 text-fg-0"
-              : "bg-bg-1 text-fg-1 hover:bg-bg-2",
-          ].join(" ")}
+              : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
+          )}
         >
           appeal-writer lineage
         </button>
         <button
           type="button"
-          role="tab"
-          aria-selected={mode === "coevolution"}
+          aria-pressed={mode === "coevolution"}
           onClick={() => setMode("coevolution")}
-          className={[
+          className={cn(
             "border-l border-stroke-1 px-3 py-1.5 font-mono text-xs transition-colors duration-200",
             mode === "coevolution"
               ? "bg-bg-3 text-fg-0"
-              : "bg-bg-1 text-fg-1 hover:bg-bg-2",
-          ].join(" ")}
+              : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
+          )}
         >
           co-evolution (writer vs payer)
         </button>
       </div>
 
-      {/* Tree + diff */}
       <div
         className="grid grid-cols-1 gap-4 lg:grid-cols-5"
         aria-live="polite"
@@ -102,7 +95,6 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
         )}
       </div>
 
-      {/* Fitness curve full-width footer */}
       <FitnessCurve
         points={payload.fitness}
         baseline={payload.meta.baselineOverturn}

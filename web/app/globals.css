@@ -91,9 +91,12 @@ p, li, blockquote {
   hyphens: auto;
 }
 
-/* Mono for any element that wants it */
+/* Mono for any element that wants it.
+ * All mono spans are used for data (fitness, generation, counts, IDs), so
+ * tabular-nums is enforced globally to keep columns aligned. */
 .font-mono, code, pre, kbd, samp {
   font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Reduced motion — honored everywhere */

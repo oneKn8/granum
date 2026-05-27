@@ -139,6 +139,18 @@ These appear unprompted in AI-generated code. Each component PR must verify none
 
 ---
 
+## 8.5 Explicit baseline-ui exceptions
+
+The `baseline-ui` skill enforces an opinionated UI baseline. These three rules are intentionally overridden by Granum's design brief, and each override is permitted because the brief is the explicit request:
+
+1. **`tracking-widest` on small uppercase labels.** baseline-ui's `tracking-*` ban is overridden for `<10px` uppercase eyebrow labels (e.g. `"payer"`, `"generation"`, `"mechanism"`). Editorial-journal typography requires letter-spacing on small caps; this is core to the Germinal Lab aesthetic, not decoration. No other `tracking-*` usage is permitted.
+2. **SVG `linearGradient` area-fill in `FitnessCurve`.** baseline-ui's "NEVER use gradients" rule is overridden for one specific use: the Recharts `<Area>` mean-fitness shading uses a top-to-bottom alpha gradient on the survivor color (32% → 0%) — this is a chart-visualization idiom (the same shape every Recharts area chart uses), not decorative gradient styling. No other gradients exist in the codebase.
+3. **600ms `lineage-node[data-status="tombstoned"]` transition.** baseline-ui's 200ms-max interaction-feedback rule is overridden for the apoptosis transition. Apoptosis is the demo's emotional beat; a 200ms fade reads as "loading state" not "permanent death." 600ms is the duration confirmed in the brief.
+
+Every other baseline-ui rule applies.
+
+---
+
 ## 9. Differentiation summary
 
 What makes Granum's UI unforgettable:

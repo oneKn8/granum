@@ -29,10 +29,24 @@ export async function generateMetadata({ params }: CellPageProps): Promise<Metad
   if (!isCellId(cell)) return { title: "Cell not found" };
   const meta = getCell(cell).meta;
   const title = `${meta.payer} · ${meta.diagnosis}`;
+  const description = `Granum lineage for ${title}. Baseline overturn ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`;
+  const path = `/cell/${cell}`;
   return {
     title,
-    description: `Granum lineage for ${title}. Baseline overturn ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`,
-    alternates: { canonical: `/cell/${cell}` },
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      url: path,
+      title,
+      description,
+      siteName: "Granum",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
@@ -64,6 +78,9 @@ export default async function CellPage({ params }: CellPageProps) {
       </header>
 
       <main id="main" className="mx-auto max-w-screen-2xl px-6 py-8">
+        <h1 className="sr-only">
+          {meta.payer} · {meta.diagnosis} — lineage
+        </h1>
         {/* Cell meta strip */}
         <section
           className="mb-8 grid grid-cols-2 gap-x-6 gap-y-4 border border-stroke-1 bg-bg-1 p-6 lg:grid-cols-5"
