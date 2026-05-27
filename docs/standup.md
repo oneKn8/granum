@@ -242,3 +242,28 @@
 - BLOCKED: Phase 0.5 + Phase 1.10 still gated on user actions (`gcloud auth application-default login`, set-quota-project, Phoenix Cloud signup) — unchanged from earlier standups.
 - NEXT: ready for Phase 6 submission. Terminal C's `docs/submission.md` already drafted. When user clears the 3 auth blockers, Phase 0.5 (Cloud Run deploy) + Phase 1.10 (one live cycle for evidence) unlock, then video record + Devpost submission.
 - FILES TOUCHED: `src/granum/adversary/{__init__.py, payer_persona.py, payer_agent.py, adversarial_denials.py}`, `src/granum/center/{triangular_tournament.py, defensibility_judge.py, coevolution.py, driver.py}`, `src/granum/transfer/{__init__.py, embedding.py, trial.py}`, `src/granum/tools/phoenix_client.py`, `tests/test_*.py` (10 new test modules), `data/defensibility_rubric.md`, `docs/api-contract.md`. NO `web/**` touched; NO `data/<cell>/**` touched.
+
+## [Terminal C] — 2026-05-27 19:00 (Phase 6 audit + submission.md refresh)
+- DONE:
+  - **Localhost baseline web-quality audit** (`videos/audit/`, commit `ab3839a`):
+    - `/`                   A11y 96  Best 100  SEO 100  Agentic 100  LCP 283 ms  CLS 0.00
+    - `/cell/aetna_cardiac` A11y 96  Best 100  SEO  90  Agentic 100  LCP 417 ms  CLS 0.00
+    - Core Web Vitals 5–8× under the 2026 bar; CLS perfect.
+    - **3 findings** documented in `videos/audit/SUMMARY.md` for user triage:
+      - F1 `color-contrast` on `text-fg-2` + `text-fg-tomb` at xs/10px sizes — design-token call, needs Shifat sign-off before lightening palette
+      - F2 `label-content-name-mismatch` on SVG lineage-node buttons (WCAG 2.5.3) — ~1–2 line fix in `LineageTree.tsx`, zero risk, RECOMMENDED
+      - F3 missing `meta-description` on `/cell/[cell]` (drops SEO 100→90) — ~3 line fix in `generateMetadata`, zero risk, RECOMMENDED
+    - Did NOT auto-fix any: web/ is owned by C but Phase 5 marked complete; F2 + F3 are safe wins waiting for user OK.
+    - Tooling: chrome-devtools MCP `lighthouse_audit` + `performance_start_trace`; reports + summary committed; raw `*_trace.json` traces gitignored (multi-MB, regenerable).
+  - **`docs/submission.md` refresh** to reflect Terminal A's Phase 3 + 4 ship:
+    - Test count 67 → 157 (with Phase 3 modules enumerated: payer personas, triangular tournament, defensibility judge, co-evolution driver, cross-cell embedder, transfer trial harness).
+    - "Phase 3 in progress" → Phase 3 closed (5 personas, triangular `writer × payer × judge` tournament, anti-degeneracy regularization, `CoEvolutionDriver`, 5-round integration test).
+- IN PROGRESS: none.
+- BLOCKED:
+  - **ElevenLabs render** — user picked "skip render this session" via AskUserQuestion. Voice + key decision deferred to a later session; `scripts/render_voiceover.py` + `docs/voiceover.txt` stand ready.
+  - **Live web-quality audit** — same 3 user actions still gating Phase 0.5 deploy.
+- NEXT (when unblocked):
+  - User decision on F1/F2/F3 polish fixes (recommend F2 + F3 in a short follow-up session — both ≤5 line edits).
+  - When Cloud Run deploys: re-run the audit against the production-build URL; append second row to `videos/audit/SUMMARY.md` scoreboard; that becomes the submission-ready number.
+  - When user provides `ELEVENLABS_API_KEY` + locks voice: `uv run scripts/render_voiceover.py --render` → `videos/audio/granum_demo.mp3`.
+- FILES TOUCHED THIS SESSION (audit + refresh half): `videos/audit/*.{md,html,json}`, `.gitignore`, `docs/submission.md`, `docs/standup.md`. Cumulative across both Phase 6 halves: `docs/{submission.md, demo-script.md, voiceover.txt, standup.md}`, `scripts/{render_voiceover.py, audit_web_quality.sh}`, `videos/audit/*`, `.gitignore`. NO `src/**`, NO `web/**`, NO `data/**`, NO `pyproject.toml` / `LICENSE` / `infra/**`.
