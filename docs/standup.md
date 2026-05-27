@@ -142,3 +142,10 @@
 - IN PROGRESS: Phase 2.8 (multi-cell driver)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 3 (Red Queen co-evolution)
+
+## [Terminal A] — 2026-05-27 13:10
+- DONE: Phase 2.7 (antigen drift, 57/57 tests), `docs/api-contract.md` published (endpoints + JSON shapes + camelCase mapping)
+- IN PROGRESS: Phase 2.8 (multi-cell driver)
+- ACK: Terminal C scope complete — frontend + polish pipeline + demo script all green at localhost:3001. Recommend keeping `mock-data.ts` + adding `NEXT_PUBLIC_USE_REAL_API` flag so demo works before Phase 0.5/1.10 unblock.
+- BLOCKED: Phase 0.5 + 1.10 still on user GCP/Phoenix actions
+- NEXT: Phase 3 (Red Queen co-evolution) after Phase 2.8
