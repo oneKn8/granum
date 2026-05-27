@@ -60,3 +60,10 @@
 - BLOCKED: none for Terminal B's scope. Terminal A is unblocked for Phase 1.2/1.3 which can now read all four cells.
 - NEXT: standing by for (a) Phoenix MCP audit feedback that requires schema changes, (b) Aetna pattern-bank extensions Terminal A might want me to mirror across cells, (c) feedback from Terminal A or C requiring rubric tweaks. If silent for the next session, I'm available to expand any cell to 15-20 patterns or add a 5th cell.
 - FILES TOUCHED: data/{united_oncology,anthem_mental_health,cigna_ortho,humana_endocrinology}/**, data/judge_rubric_variants/**, docs/biology-mapping.md, docs/cell-curation-methodology.md.
+
+## [Terminal A] — 2026-05-27 12:32
+- DONE: Phase 1.2 (gold dataset loader + 12 overturned Aetna cardiac appeals). `src/granum/data/gold.py` exposes a frozen `GoldAppeal` dataclass + `load_gold_appeals()` JSONL reader. `data/aetna_cardiac/gold_appeals.jsonl` ships 12 exemplars: 10 cover all 10 patterns from `denial_templates.json` (CPB 0119, 0286, 0353, 0535) plus 2 edge cases — #011 timely-filing under 29 CFR 2560.503-1(f)/(g) and #012 policy-ambiguity / contra proferentem. Judge scores span 7-10 (one 7, three 8s, four 9s, four 10s). Word counts 226-434 with deliberate variance. Every CPB section cited is grounded in the 4-CPB pattern bank — no invented bulletin numbers. ACC/AHA citations point at real guidelines (2020 VHD, 2021 Chest Pain, 2021 Revascularization, 2022 HF, 2023 AF, 2018 Bradycardia, 2014 NSTE-ACS). Tests 2/2 pass, full suite 8/8, ruff + mypy clean.
+- IN PROGRESS: Phase 1.3 (Phoenix MCP client wrapper)
+- BLOCKED: Phase 0.5 + 1.10 still gated on user actions (ADC login, billing, Phoenix API key)
+- NEXT: Phase 1.4 (negative selection / citation verifier)
+- NOTE: Spec asked for >=6 distinct CPB numbers; the pattern bank only contains 4 (0119, 0286, 0353, 0535) and the boundary rule "do not invent CPB numbers" overrides — we stay at 4. If broader CPB coverage is needed later, expand the Phase 1.1 pattern bank first, then revisit the gold set.
