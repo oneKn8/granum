@@ -124,3 +124,9 @@
 - IN PROGRESS: none (waiting on user actions for Phase 0.4 to complete Phase 0.5 + 1.10)
 - BLOCKED: Phase 0.5 (Cloud Run deploy) + Phase 1.10 (live cycle) — both need user actions on GCP billing + ADC + Phoenix Cloud API key
 - NEXT: Once 0.4 unblocked, run Phase 0.5 + 1.10 in sequence
+
+## [Terminal A] — 2026-05-27 13:00
+- DONE: Phase 2.1 (cell registry — 5 declared cells, validated() filter for runtime safety)
+- IN PROGRESS: Phase 2.5 (immune memory primitive)
+- BLOCKED: Phase 0.5 + 1.10 (user actions)
+- NEXT: Phase 2.7 (antigen drift)
