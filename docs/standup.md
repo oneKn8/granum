@@ -97,3 +97,9 @@
 - IN PROGRESS: Phase 1.8 (germinal cycle orchestrator)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 1.9 (mutation strategies)
+
+## [Terminal A] — 2026-05-27 12:54
+- DONE: Phase 1.8 (germinal cycle orchestrator — full loop wired with OTel spans, 2 integration tests)
+- IN PROGRESS: Phase 1.9 (mutation strategies — deterministic proposer)
+- BLOCKED: Phase 0.5 + 1.10 (user actions)
+- NEXT: Phase 1.10 (live cycle, blocked until 0.4 done)
