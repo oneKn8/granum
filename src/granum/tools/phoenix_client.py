@@ -29,6 +29,7 @@ class PromptVersion:
     version_id: str
     tags: tuple[str, ...] = ()
     body: str = ""
+    name: str = ""
 
 
 class PhoenixClient:
@@ -65,6 +66,7 @@ class PhoenixClient:
             version_id=resp["versionId"],
             tags=tuple(resp.get("tags", [])),
             body=body,
+            name=name,
         )
 
     async def add_version_tag(
@@ -132,6 +134,7 @@ class PhoenixClient:
                     version_id=p["versionId"],
                     tags=tags,
                     body=p.get("body", ""),
+                    name=p.get("name", ""),
                 )
             )
         return result
