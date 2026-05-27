@@ -21,3 +21,12 @@
 - IN PROGRESS: Phase 0.4 (GCP + Vertex + Phoenix Cloud auth)
 - BLOCKED: none
 - NEXT: Phase 0.5 (Cloud Run hello-world)
+
+## [Terminal A] — 2026-05-27 12:19
+- DONE: Phase 0.4 partial — wrote `scripts/smoke_gemini.py` (Vertex Gemini 3 -> 2.5 fallback) and `scripts/smoke_phoenix.py` (Phoenix OTLP trace emitter); syntax + import-resolved; both run cleanly up to credential check. GCP project survey done: two existing projects under shifatsanto09@gmail.com — `lumentra-ai-485322` (billing CLOSED) and `call-agent-485305` (no billing account attached, aiplatform.googleapis.com pre-enabled). Active project set to `call-agent-485305`.
+- IN PROGRESS: Phase 0.4 verification (blocked on user actions, see below)
+- BLOCKED:
+  - **User must run `gcloud auth application-default login`** — no ADC file at `~/.config/gcloud/application_default_credentials.json`. Without it, Vertex smoke fails with "default credentials were not found" (confirmed by running smoke against `call-agent-485305`).
+  - **Billing is not active on either existing GCP project** — `gcloud services enable run/cloudbuild/artifactregistry/secretmanager/cloudscheduler` returns `UREQ_PROJECT_BILLING_NOT_OPEN` (lumentra) / `UREQ_PROJECT_BILLING_NOT_FOUND` (call-agent). Hackathon $100 GCP credit form (https://rapid-agent.devpost.com/resources) likely not yet submitted; SLA 1-5 business days. User decision needed: (a) wait for hackathon credit + apply to a project, (b) open billing on `lumentra-ai-485322`, or (c) create a fresh `granum-2026` project once a billing account is available. Cloud Run deploy (Phase 0.5) is hard-blocked until this resolves.
+  - **Phoenix Cloud account not yet provisioned** — no `PHOENIX_API_KEY` anywhere in shell rc files, shared `.env`, or sibling hackathon projects. User must sign up at https://app.phoenix.arize.com, create project `granum`, generate API key, and drop it in `/home/oneknight/projects/hackathon/granum/.env` (gitignored).
+- NEXT: Once user clears the three blockers above, re-run both smoke scripts to capture evidence (Gemini "alive" + Phoenix trace visible in UI), then proceed to Phase 0.5 (Cloud Run hello-world).
