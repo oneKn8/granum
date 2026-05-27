@@ -73,3 +73,9 @@
 - IN PROGRESS: Phase 1.4 (negative selection citation verifier)
 - BLOCKED: Phase 0.5 + 1.10 (user actions)
 - NEXT: Phase 1.5 (mutation operators)
+
+## [Terminal A] — 2026-05-27 12:42
+- DONE: Phase 1.4 (negative selection — citation verifier + 40-entry valid set)
+- IN PROGRESS: Phase 1.5 (mutation operators)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 1.6 (LLM-as-judge)
