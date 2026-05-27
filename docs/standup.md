@@ -79,3 +79,9 @@
 - IN PROGRESS: Phase 1.5 (mutation operators)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 1.6 (LLM-as-judge)
+
+## [Terminal A] — 2026-05-27 12:44
+- DONE: Phase 1.5 (mutation operators — 4 kinds, no rewrite, 6 tests)
+- IN PROGRESS: Phase 1.6 (LLM-as-judge)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 1.7 (tournament)
