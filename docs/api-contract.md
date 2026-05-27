@@ -150,7 +150,7 @@ Concrete sample payload:
     {
       "id": "bc_ae_writer_001",
       "cell": "aetna_cardiac",
-      "lineage_kind": "writer",
+      "lineageKind": "writer",
       "generation": 0,
       "parentId": null,
       "label": "L0 — baseline writer",
@@ -168,7 +168,7 @@ Concrete sample payload:
     {
       "id": "bc_ae_payer_strict_001",
       "cell": "aetna_cardiac",
-      "lineage_kind": "payer",
+      "lineageKind": "payer",
       "generation": 0,
       "parentId": null,
       "label": "L0 — strict adversary",
