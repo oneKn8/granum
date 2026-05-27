@@ -91,3 +91,9 @@
 - IN PROGRESS: Phase 1.7 (tournament engine)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 1.8 (germinal cycle orchestrator)
+
+## [Terminal A] — 2026-05-27 12:49
+- DONE: Phase 1.7 (tournament — gather-based concurrent scoring, tie-break by prompt_id)
+- IN PROGRESS: Phase 1.8 (germinal cycle orchestrator)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 1.9 (mutation strategies)
