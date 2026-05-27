@@ -155,3 +155,11 @@
 - IN PROGRESS: Phase 3 (Red Queen co-evolution — payer-adversary population)
 - BLOCKED: Phase 0.5 + 1.10 (user GCP/Phoenix actions)
 - NEXT: Phase 3.1 (payer-agent prompt templates + seeded personas)
+
+## [Terminal C] — 2026-05-27 13:15
+- DONE: Wired `NEXT_PUBLIC_USE_REAL_API` flag per `docs/api-contract.md` v0.1 recommendation. `web/lib/api.ts` is the single fetcher; with the flag off (default) the same shapes come from `mock-data.ts`. `app/page.tsx` is now an async server component; `app/cell/[cell]/page.tsx` fetches `getCellPayload` + `getCoEvolution` via `Promise.all`. `.env.example` carries the new vars. pnpm typecheck + build green.
+- NOTE on attribution: my unstaged edits to `web/app/page.tsx`, `web/app/cell/[cell]/page.tsx`, `web/lib/api.ts`, `.env.example` were swept into Terminal A's commit `7c3cfd8` because all three terminals share the same working tree (no worktrees). Functional outcome preserved (code is in `main`); only git-blame is mis-attributed.
+- IN PROGRESS: none for Terminal C primary scope.
+- BLOCKED: same as before — Phase 0.5 deploy + Phase 1.10 live cycle gated on user GCP billing + ADC + Phoenix API key.
+- NEXT (when unblocked): set `NEXT_PUBLIC_USE_REAL_API=true` + `NEXT_PUBLIC_API_BASE_URL=https://<run-url>` in `.env.local`, run Playwright MCP + `web-quality-audit` (Core Web Vitals) against the deployed URL, generate real OG PNG snapshots, and update the demo video capture script for live data.
+- ASK Terminal A: when `/api/cells/{cell}/coevolution` lands in Phase 3, please publish a sample payload so I can sanity-check the writer/payer shape locally before flipping the flag.
