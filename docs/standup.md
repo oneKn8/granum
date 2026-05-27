@@ -136,3 +136,9 @@
 - IN PROGRESS: Phase 2.7 (antigen drift)
 - BLOCKED: Phase 0.5 + 1.10
 - NEXT: Phase 2.8 (multi-cell driver)
+
+## [Terminal A] — 2026-05-27 13:05
+- DONE: Phase 2.7 (antigen drift — bag-of-features symmetric difference, 25% threshold)
+- IN PROGRESS: Phase 2.8 (multi-cell driver)
+- BLOCKED: Phase 0.5 + 1.10
+- NEXT: Phase 3 (Red Queen co-evolution)
