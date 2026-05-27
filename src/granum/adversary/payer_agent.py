@@ -55,6 +55,14 @@ class PayerAgent:
         self._payer = payer
         self._diagnosis = diagnosis
 
+    @property
+    def payer(self) -> str:
+        return self._payer
+
+    @property
+    def diagnosis(self) -> str:
+        return self._diagnosis
+
     async def deny(self, *, appeal: str, persona_id: str) -> Denial:
         """Produce a persona-conditioned denial response to a candidate appeal.
 
