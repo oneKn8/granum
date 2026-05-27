@@ -32,6 +32,16 @@ class PromptVersion:
     name: str = ""
 
 
+@dataclass(frozen=True)
+class TransferEdge:
+    source_cell: str
+    target_cell: str
+    source_prompt_id: str
+    target_prompt_id: str
+    mean_score: float
+    p_value: float
+
+
 class PhoenixClient:
     """Typed wrapper over arize-phoenix MCP + REST.
 
@@ -200,6 +210,67 @@ class PhoenixClient:
                 }
             ],
         )
+
+    async def add_transfer_edge(
+        self,
+        *,
+        source_cell: str,
+        target_cell: str,
+        source_prompt_id: str,
+        target_prompt_id: str,
+        mean_score: float,
+        p_value: float,
+    ) -> None:
+        """Write one accepted cross-cell transfer event to the shared transfer-edges dataset.
+
+        Dataset name: ``granum/transfer_edges``. Schema: one row per accepted
+        transfer (post-promotion-gate). UI consumes this to render lineage-tree
+        edges between cells.
+        """
+        await self.add_dataset_examples(
+            dataset_name="granum/transfer_edges",
+            examples=[
+                {
+                    "source_cell": source_cell,
+                    "target_cell": target_cell,
+                    "source_prompt_id": source_prompt_id,
+                    "target_prompt_id": target_prompt_id,
+                    "mean_score": mean_score,
+                    "p_value": p_value,
+                }
+            ],
+        )
+
+    async def list_transfer_edges(
+        self, *, cell: str | None = None
+    ) -> list[TransferEdge]:
+        """Read accepted transfer edges, optionally filtered by either endpoint cell.
+
+        If ``cell`` is None: returns all edges.
+        If ``cell`` is provided: returns edges where ``source_cell == cell`` OR
+        ``target_cell == cell``. Filtering happens client-side because the MCP
+        ``get-dataset-examples`` API doesn't support metadata filters
+        server-side (per Phoenix MCP audit).
+        """
+        resp = await self._mcp.call_tool(
+            "get-dataset-examples",
+            {"datasetName": "granum/transfer_edges"},
+        )
+        rows = resp.get("examples", [])
+        edges = [
+            TransferEdge(
+                source_cell=row["source_cell"],
+                target_cell=row["target_cell"],
+                source_prompt_id=row["source_prompt_id"],
+                target_prompt_id=row["target_prompt_id"],
+                mean_score=float(row["mean_score"]),
+                p_value=float(row["p_value"]),
+            )
+            for row in rows
+        ]
+        if cell is None:
+            return edges
+        return [e for e in edges if e.source_cell == cell or e.target_cell == cell]
 
     # === Spans / traces ===
 

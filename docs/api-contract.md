@@ -191,6 +191,35 @@ Concrete sample payload:
 
 ---
 
+### `GET /api/transfers`
+
+All accepted cross-cell transfer edges. UI consumes to render lineage-tree edges between cells.
+
+Optional query parameter `cell=<cell_id>` filters to edges where the cell is either endpoint.
+
+**Response shape:**
+
+```json
+{
+  "edges": [
+    {
+      "sourceCell": "aetna_cardiac",
+      "targetCell": "united_oncology",
+      "sourcePromptId": "bc_ae_writer_007",
+      "targetPromptId": "bc_uo_transferred_001",
+      "meanScore": 7.8,
+      "pValue": 0.012
+    }
+  ]
+}
+```
+
+**Source:** `granum.tools.phoenix_client.PhoenixClient.list_transfer_edges()`. Each accepted promotion via `granum.transfer.trial.promote_transfer` produces one row in the `granum/transfer_edges` Phoenix dataset.
+
+Status codes: 200 OK; 503 on Phoenix client error.
+
+---
+
 ### `GET /api/cells/{cell}/denials`
 
 Recent denials observed for this cell (used by the denial-stream visualization on the per-cell page).
@@ -289,6 +318,7 @@ Cloud Run service allows GET from `https://*.vercel.app` (Terminal C's deploymen
 - Removing or renaming fields: breaking — requires bump to `/api/v2/`.
 - v0.1 → v1.0 in scope: rename `bc_*` ids to UUID, add per-strategy `traceLink` (Phoenix trace URL).
 - **`lineageKind` is a new v0.1 field added 2026-05-27** for Phase 3 co-evolution rendering. Present on every entry in `CoEvolutionState.writers` and `CoEvolutionState.payers`. Always one of `"writer"` or `"payer"`. The single-population `/api/cells/{cell}.strategies` array does NOT carry this field (no ambiguity there — they are all writers).
+- transfer-edge endpoint `/api/transfers` is new in v0.1 (2026-05-27, Phase 4). camelCase per existing convention.
 
 ---
 

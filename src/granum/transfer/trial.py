@@ -164,11 +164,20 @@ async def promote_transfer(
         f"{trial.target_cell}/transferred_from_"
         f"{trial.source_cell}_{trial.prompt_id}"
     )
-    return await phoenix.upsert_prompt(
+    new_pv = await phoenix.upsert_prompt(
         name=name,
         body=trial.prompt_body,
         tags=("transferred", "experimental"),
     )
+    await phoenix.add_transfer_edge(
+        source_cell=trial.source_cell,
+        target_cell=trial.target_cell,
+        source_prompt_id=trial.prompt_id,
+        target_prompt_id=new_pv.prompt_id,
+        mean_score=trial.mean_score,
+        p_value=trial.p_value,
+    )
+    return new_pv
 
 
 def _t_survival(t: float, df: int) -> float:
