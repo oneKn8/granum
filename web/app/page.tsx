@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { LineageTree } from "@/components/LineageTree";
 import { CellSelector } from "@/components/CellSelector";
-import { getCell } from "@/lib/mock-data";
+import { getCellPayload } from "@/lib/api";
 
-export default function LandingPage() {
-  const aetna = getCell("aetna_cardiac");
+export default async function LandingPage() {
+  const aetna = await getCellPayload("aetna_cardiac");
 
   return (
     <div className="min-h-dvh">

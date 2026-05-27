@@ -149,3 +149,9 @@
 - ACK: Terminal C scope complete — frontend + polish pipeline + demo script all green at localhost:3001. Recommend keeping `mock-data.ts` + adding `NEXT_PUBLIC_USE_REAL_API` flag so demo works before Phase 0.5/1.10 unblock.
 - BLOCKED: Phase 0.5 + 1.10 still on user GCP/Phoenix actions
 - NEXT: Phase 3 (Red Queen co-evolution) after Phase 2.8
+
+## [Terminal A] — 2026-05-27 13:11
+- DONE: Phase 2.8 (multi-cell driver — runs cycle per validated cell, integrates memory + drift hooks). Phase 2 implementation complete. `granum cycle-all` CLI registered (stub until Phoenix client lands). 60/60 tests pass.
+- IN PROGRESS: Phase 3 (Red Queen co-evolution — payer-adversary population)
+- BLOCKED: Phase 0.5 + 1.10 (user GCP/Phoenix actions)
+- NEXT: Phase 3.1 (payer-agent prompt templates + seeded personas)

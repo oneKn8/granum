@@ -3,13 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CellDashboard } from "@/components/CellDashboard";
 import { CellSelector } from "@/components/CellSelector";
-import {
-  ALL_CELLS,
-  CELL_LABEL,
-  CELL_LIST,
-  getCell,
-  getCoEvolution,
-} from "@/lib/mock-data";
+import { getCellPayload, getCoEvolution } from "@/lib/api";
+import { ALL_CELLS, CELL_LABEL, CELL_LIST } from "@/lib/mock-data";
 import type { CellId } from "@/lib/types";
 
 interface CellPageProps {
@@ -27,7 +22,7 @@ function isCellId(id: string): id is CellId {
 export async function generateMetadata({ params }: CellPageProps): Promise<Metadata> {
   const { cell } = await params;
   if (!isCellId(cell)) return { title: "Cell not found" };
-  const meta = getCell(cell).meta;
+  const { meta } = await getCellPayload(cell);
   const title = `${meta.payer} · ${meta.diagnosis}`;
   const description = `Granum lineage for ${title}. Baseline overturn ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`;
   const path = `/cell/${cell}`;
@@ -54,8 +49,10 @@ export default async function CellPage({ params }: CellPageProps) {
   const { cell } = await params;
   if (!isCellId(cell)) notFound();
 
-  const payload = getCell(cell);
-  const coEvolution = getCoEvolution(cell);
+  const [payload, coEvolution] = await Promise.all([
+    getCellPayload(cell),
+    getCoEvolution(cell),
+  ]);
   const meta = payload.meta;
 
   const lift = meta.currentOverturn - meta.baselineOverturn;
