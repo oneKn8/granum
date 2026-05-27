@@ -1,0 +1,51 @@
+[
+  {"id": "Anthem Medical Policies & Clinical UM Guidelines (provider portal)", "kind": "policy", "url": "https://www.anthem.com/provider/policies/clinical-guidelines/"},
+  {"id": "Anthem Clinical UM Guideline CG-ADMIN-01: Pre-Payment Review Medical Necessity Determinations", "kind": "policy", "url": "https://www.anthem.com/medpolicies/abcbs/active/gl_pw_c191095.html"},
+  {"id": "Anthem Clinical UM Guideline CG-BEH-02: Adaptive Behavior Treatment", "kind": "policy", "url": "https://www.anthem.com/dam/medpolicies/abcbs/active/guidelines/gl_pw_c166121.html"},
+  {"id": "Anthem Clinical UM Guideline CG-BEH-14: Intensive In-home Behavioral Health Services", "kind": "policy", "url": "https://www.anthem.com/medpolicies/abcbs/active/gl_pw_c187094.html"},
+  {"id": "Anthem Clinical UM Guidelines (CA Medicaid compilation)", "kind": "policy", "url": "https://providers.anthem.com/docs/gpp/CA_CAID_Feb24CUMG.pdf"},
+  {"id": "Anthem Clinical UM Guidelines (OH Medicaid compilation)", "kind": "policy", "url": "https://providers.anthem.com/docs/gpp/OH_CAID_AUG24CUMG.pdf"},
+  {"id": "Anthem Provider News: Medical Policy and Clinical Guideline Updates", "kind": "policy", "url": "https://providernews.anthem.com/new-york/articles/medical-policy-and-clinical-guideline-updates-26747"},
+  {"id": "Anthem Express Medical Policy and Clinical UM Guideline Updates (January 2026)", "kind": "policy", "url": "https://files.providernews.anthem.com/7459/GA-BCBS-CM-000462-25-S325-EXPRESS-Med-Plcy-Updts_FINAL.pdf"},
+  {"id": "Anthem Behavioral Health Provider Resource Page", "kind": "policy", "url": "https://www.anthem.com/provider/individual-commercial/behavioral-health"},
+  {"id": "Anthem Behavioral Health Reference Guide (Indiana Medicaid)", "kind": "policy", "url": "https://providers.anthem.com/docs/gpp/IN_CAID_BehavioralHealthReferenceGuide.pdf"},
+  {"id": "Anthem Medical Policy: Transcranial Magnetic Stimulation", "kind": "policy", "url": "https://www.anthem.com/provider/policies/clinical-guidelines/"},
+  {"id": "Anthem Medical Policy: Electroconvulsive Therapy", "kind": "policy", "url": "https://www.anthem.com/provider/policies/clinical-guidelines/"},
+  {"id": "Anthem CG-BEH: Substance Use Disorder Level of Care", "kind": "policy", "url": "https://www.anthem.com/provider/policies/clinical-guidelines/"},
+  {"id": "Anthem CG-BEH: Level of Care for Behavioral Health Services", "kind": "policy", "url": "https://www.anthem.com/provider/policies/clinical-guidelines/"},
+  {"id": "Anthem Nevada Medicaid Rehabilitative Mental Health Services UM", "kind": "policy", "url": "https://providers.anthem.com/docs/gpp/NV_CAID_UMRehabilitativeServices.pdf"},
+  {"id": "Anthem Behavioral Health Reference Guide — Prior Authorization Requirements", "kind": "policy", "url": "https://www.anthem.com/provider/individual-commercial/behavioral-health"},
+  {"id": "Anthem Behavioral Health Reference Guide — Outpatient Concurrent Services", "kind": "policy", "url": "https://www.anthem.com/provider/individual-commercial/behavioral-health"},
+
+  {"id": "MCG Behavioral Health Care Guidelines (BHG): Inpatient Psychiatric Admission", "kind": "guideline", "url": "https://www.mcg.com/care-guidelines/behavioral-health/"},
+  {"id": "MCG Behavioral Health Care Guidelines (BHG): Partial Hospitalization Program", "kind": "guideline", "url": "https://www.mcg.com/care-guidelines/behavioral-health/"},
+  {"id": "MCG Behavioral Health Care Guidelines (BHG): Intensive Outpatient Program", "kind": "guideline", "url": "https://www.mcg.com/care-guidelines/behavioral-health/"},
+  {"id": "MCG Behavioral Health Care Guidelines (BHG): Residential Treatment", "kind": "guideline", "url": "https://www.mcg.com/care-guidelines/behavioral-health/"},
+
+  {"id": "LOCUS (Level of Care Utilization System) — American Association for Community Psychiatry", "kind": "guideline", "url": "https://www.communitypsychiatry.org/locus"},
+  {"id": "CALOCUS-CASII — Unified Child & Adolescent Level of Care/Service Intensity Tool (AACAP/AACP)", "kind": "guideline", "url": "https://www.thenationalcouncil.org/resources/service-intensity-assessment-and-planning/"},
+  {"id": "ECSII — Early Childhood Service Intensity Instrument (AACAP)", "kind": "guideline", "url": "https://www.aacap.org/"},
+
+  {"id": "ASAM Criteria, Fourth Edition (2023) — overview and access", "kind": "guideline", "url": "https://www.asam.org/asam-criteria/about-the-asam-criteria"},
+  {"id": "ASAM Criteria, Fourth Edition — 4th Edition Page", "kind": "guideline", "url": "https://www.asam.org/asam-criteria/asam-criteria-4th-edition"},
+  {"id": "ASAM Criteria Fourth Edition — Colorado HCPF Summary", "kind": "guideline", "url": "https://hcpf.colorado.gov/sites/hcpf/files/ASAM-Fourth-Ed-Disseminate-Summary.pdf"},
+  {"id": "ASAM Criteria Fourth Edition Assessment Guides", "kind": "guideline", "url": "https://www.asam.org/asam-criteria/implementation-tools/Criteria-assessment-guides"},
+
+  {"id": "APA Practice Guideline for the Treatment of Patients With Major Depressive Disorder", "kind": "guideline", "url": "https://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/mdd.pdf"},
+  {"id": "APA Practice Guideline for the Treatment of Patients With Bipolar Disorder", "kind": "guideline", "url": "https://psychiatryonline.org/guidelines"},
+  {"id": "APA Practice Guideline for the Treatment of Patients With Schizophrenia", "kind": "guideline", "url": "https://psychiatryonline.org/guidelines"},
+  {"id": "APA Practice Guideline for the Treatment of Patients With Acute Stress Disorder and Posttraumatic Stress Disorder", "kind": "guideline", "url": "https://psychiatryonline.org/guidelines"},
+  {"id": "APA Practice Guideline on the Use of Antipsychotics", "kind": "guideline", "url": "https://psychiatryonline.org/guidelines"},
+  {"id": "APA Practice Guideline for the Pharmacological Treatment of Patients With Alcohol Use Disorder", "kind": "guideline", "url": "https://psychiatryonline.org/guidelines"},
+
+  {"id": "AACAP Practice Parameters (American Academy of Child & Adolescent Psychiatry)", "kind": "guideline", "url": "https://www.aacap.org/AACAP/Resources_for_Primary_Care/Practice_Parameters_and_Resource_Centers/Practice_Parameters.aspx"},
+
+  {"id": "Mental Health Parity and Addiction Equity Act (MHPAEA) — CMS overview", "kind": "regulation", "url": "https://www.cms.gov/marketplace/private-health-insurance/mental-health-parity-addiction-equity"},
+  {"id": "Wit v. United Behavioral Health — Kennedy Forum Case Page", "kind": "case_law", "url": "https://www.thekennedyforum.org/wit/"},
+  {"id": "Mental Health Parity in the Wake of Wit v. UBH — Health Affairs Forefront", "kind": "case_law", "url": "https://www.healthaffairs.org/content/forefront/mental-health-parity-wake-wit-v-united-behavioral-health"},
+  {"id": "ARC Issue Brief: Key Parity Definitions and Medical Necessity Criteria (March 2025)", "kind": "regulation", "url": "https://end-overdose-epidemic.org/wp-content/uploads/2025/03/ARC-issue-brief-key-parity-defitions-March-2025.pdf"},
+  {"id": "Anthem Mental Health Parity Settlement (Behavioral Health Business, Jan 2026)", "kind": "case_law", "url": "https://bhbusiness.com/2026/01/12/anthem-agrees-to-pay-12-9m-to-settle-mental-health-parity-suit/"},
+
+  {"id": "SAMHSA TIP 63: Medications for Opioid Use Disorder", "kind": "guideline", "url": "https://store.samhsa.gov/product/Medications-for-Opioid-Use-Disorder-Full-Document/PEP21-02-01-002"},
+  {"id": "Adoption of LOCUS/CASII/ECSII for Level of Care Guidance — Optum/UBH Provider Express", "kind": "guideline", "url": "https://public.providerexpress.com/content/ope-provexpr/us/en/clinical-resources/guidelines-policies/Adoption-of-LOCUS-CASII-ECSII.html"}
+]

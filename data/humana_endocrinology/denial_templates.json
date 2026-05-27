@@ -1,0 +1,72 @@
+[
+  {
+    "cpb_number": "Humana-MCP-GLP1-T2D",
+    "cpt_code": "J3490",
+    "icd10_code": "E11.65",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for semaglutide (Ozempic) for a patient with type 2 diabetes mellitus with hyperglycemia (ICD-10 E11.65). Per Humana's Medical and Pharmacy Coverage Policy on GLP-1 receptor agonists for type 2 diabetes, prior authorization requires (1) confirmed diagnosis of T2DM, (2) most recent A1C \u22657.0% within the prior 90 days, (3) documented trial of metformin \u22653 months at maximally tolerated dose unless contraindicated, and (4) treatment goal documented. Submitted documentation reflects metformin 500 mg BID without titration history; the policy requires titration to 2000 mg daily or maximally tolerated dose. Resubmit with full metformin titration record or contraindication documentation."
+  },
+  {
+    "cpb_number": "Humana-MCP-AOGLP1",
+    "cpt_code": "J3490",
+    "icd10_code": "E66.01",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for semaglutide (Wegovy) 2.4 mg weekly for a patient with morbid obesity due to excess calories (ICD-10 E66.01). Per Humana's Medical and Pharmacy Coverage Policy on anti-obesity GLP-1 receptor agonists, coverage of Wegovy for chronic weight management requires (1) baseline BMI \u226530, or BMI \u226527 with at least one weight-related comorbidity, (2) participation in a structured lifestyle/behavioral weight-management program, (3) for Medicare Part D enrollees, coverage is generally NOT available for the obesity indication absent a covered cardiovascular indication. Submitted documentation indicates Medicare Part D enrollment without documented established CVD; Wegovy for the obesity indication alone is not a Part-D covered benefit under current regulatory framework."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "E0784",
+    "icd10_code": "E10.65",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for external insulin infusion pump (HCPCS E0784) for a patient with type 1 diabetes mellitus with hyperglycemia (ICD-10 E10.65). Per Humana's Medical and Pharmacy Coverage Policy on Insulin Pumps and CMS National Coverage Determination 280.14, insulin pump coverage requires (1) documented type 1 DM (or insulin-dependent T2DM meeting C-peptide criteria), (2) completed diabetes self-management education, (3) demonstrated capability to self-monitor blood glucose \u22654 times daily, (4) documented attempt at multiple daily injection therapy with inadequate glycemic control or recurrent severe hypoglycemia, and (5) documented A1C, CGM data, or fingerstick log. Submitted records lack the C-peptide assay or comprehensive blood-glucose monitoring data. Resubmit with C-peptide level (if T2DM) and \u226530-day glucose monitoring log."
+  },
+  {
+    "cpb_number": "Humana-DSP-2025",
+    "cpt_code": "A9276",
+    "icd10_code": "E10.9",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for continuous glucose monitor sensor, disposable (HCPCS A9276) for a patient with type 1 diabetes mellitus without complications (ICD-10 E10.9). Effective January 1, 2025, Humana requires members receiving an insulin pump through a DME provider to also receive their CGM through the same DME provider; conversely, members receiving a pump through in-network pharmacy must receive the CGM through the in-network pharmacy. Submitted claim shows pump dispensed via DME and CGM dispensed via pharmacy \u2014 the unified-channel requirement is not satisfied. Resubmit through the matching channel or document medical necessity for split sourcing."
+  },
+  {
+    "cpb_number": "Humana-CGM-2026",
+    "cpt_code": "A9277",
+    "icd10_code": "E11.9",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for continuous glucose monitor transmitter (HCPCS A9277) for a patient with type 2 diabetes mellitus without complications (ICD-10 E11.9). Per Humana's Group Medicare Advantage CGM Member Flyer (2026) and CMS National Coverage Determination 280.14, therapeutic CGM coverage for T2DM requires (1) documented insulin treatment with either three or more daily insulin injections OR insulin pump use, (2) demonstrated need for frequent therapy adjustments based on glucose readings, (3) completed in-person clinician visit within 6 months prior to CGM order, and (4) ongoing 6-month follow-up. Submitted records indicate basal-only insulin therapy without bolus dosing \u2014 the multi-daily-injection criterion is not satisfied. Resubmit with documentation of three or more daily injections OR pump use."
+  },
+  {
+    "cpb_number": "Humana-MCP-CDE",
+    "cpt_code": "J3490",
+    "icd10_code": "E66.811",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for compounded semaglutide injectable preparation for a patient with class 1 obesity (ICD-10 E66.811, BMI 33). Per Humana's Medical and Pharmacy Coverage Policies and FDA guidance on compounded GLP-1 medications, compounded versions of FDA-approved drugs are not covered when the FDA-approved finished product is available; following resolution of the prior FDA shortage status of GLP-1 receptor agonists, compounded versions are not eligible for reimbursement as they are not FDA-approved finished products. Resubmit a request for the FDA-approved branded product through the standard prior authorization pathway with appropriate clinical documentation."
+  },
+  {
+    "cpb_number": "Humana-MCP-GLP1-T2D",
+    "cpt_code": "J3490",
+    "icd10_code": "E11.65",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for tirzepatide (Mounjaro) for a patient with type 2 diabetes with hyperglycemia (ICD-10 E11.65). Claim history reflects active prescription for dulaglutide (Trulicity) within the prior 30 days. Per Humana's Medical and Pharmacy Coverage Policy on GLP-1 receptor agonists for type 2 diabetes, concurrent therapy with two GLP-1 receptor agonists is not medically necessary and is contraindicated by the FDA-approved labeling for both products. Resubmit with documentation of complete discontinuation of dulaglutide prior to tirzepatide initiation, including the discontinuation date and reason."
+  },
+  {
+    "cpb_number": "Humana-MCP-EIIP",
+    "cpt_code": "E0784",
+    "icd10_code": "E13.9",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for external insulin infusion pump (HCPCS E0784) for a patient with other specified diabetes mellitus without complications (ICD-10 E13.9). Per Humana's Medical and Pharmacy Coverage Policy on insulin pumps, conversion from multiple-daily-injection therapy to pump therapy requires documented inadequacy or intolerance of MDI: either A1C >7.0% on documented optimized MDI regimen, OR recurrent severe hypoglycemia (\u22652 episodes in 12 months requiring third-party assistance), OR recurrent diabetic ketoacidosis, OR marked dawn phenomenon. Submitted A1C is 6.8% on current MDI regimen with no documented hypoglycemia or DKA. Pump conversion is not medically necessary at this time."
+  },
+  {
+    "cpb_number": "Humana-MCP-PCSK9",
+    "cpt_code": "J3490",
+    "icd10_code": "E78.5",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for evolocumab (Repatha) for a patient with hyperlipidemia, unspecified (ICD-10 E78.5). Per Humana's Medical and Pharmacy Coverage Policy on PCSK9 inhibitors, coverage requires (1) clinical ASCVD or heterozygous familial hypercholesterolemia, (2) documented inability to achieve LDL-C goal on maximally tolerated statin therapy (high-intensity statin at maximum tolerated dose for \u22653 months), and (3) ezetimibe trial of \u226512 weeks unless contraindicated. Submitted documentation indicates atorvastatin 20 mg daily without titration history and no ezetimibe trial. Resubmit with titrated statin history and ezetimibe trial or documented contraindication."
+  },
+  {
+    "cpb_number": "Humana-MCP-Pumps",
+    "cpt_code": "E0784",
+    "icd10_code": "E10.10",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for hybrid closed-loop insulin pump system upgrade (HCPCS E0784 with associated control algorithm software) for a pediatric patient with type 1 diabetes mellitus with ketoacidosis without coma (ICD-10 E10.10). Per Humana's Medical and Pharmacy Coverage Policy and the ADA Standards of Care in Diabetes\u20142026, automated insulin delivery (AID) systems are recommended for individuals with type 1 diabetes; documentation of (1) confirmed type 1 diabetes by autoantibody or C-peptide testing, (2) completed CGM training, (3) ongoing diabetes self-management education with the integrated system, and (4) parent/guardian participation in system management for pediatric patients is required. Submitted documentation lacks the autoantibody/C-peptide confirmation and the parent/guardian training acknowledgment."
+  }
+]

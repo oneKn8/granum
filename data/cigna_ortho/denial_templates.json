@@ -1,0 +1,72 @@
+[
+  {
+    "cpb_number": "CMM-311",
+    "cpt_code": "27447",
+    "icd10_code": "M17.11",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for total knee arthroplasty (CPT 27447) for a patient with unilateral primary osteoarthritis of the right knee (ICD-10 M17.11). Per Cigna Medical Coverage Policy / EviCore CMM-311 Knee Replacement Arthroplasty (V2.0.2025, Eff. March 7, 2026), TKA is medically necessary when the patient has documented (1) radiographic moderate-to-severe osteoarthritis (Kellgren-Lawrence grade \u22653) confirmed by recent imaging, (2) failed conservative management of at least 3 months including supervised physical therapy AND pharmacologic management AND activity modification, (3) symptoms substantially limiting activities of daily living, and (4) BMI appropriately addressed. Submitted documentation does not establish 3 months of supervised PT or appropriate pharmacologic management. Resubmit with PT records, medication trial summary, and Kellgren-Lawrence grading."
+  },
+  {
+    "cpb_number": "CMM-312",
+    "cpt_code": "29881",
+    "icd10_code": "M23.205",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for arthroscopic medial OR lateral meniscectomy (CPT 29881) for a patient with derangement of unspecified meniscus due to old tear or injury, unspecified knee (ICD-10 M23.205). Per Cigna Medical Coverage Policy / EviCore CMM-312 Knee Surgery \u2014 Arthroscopic and Open Procedures, arthroscopic meniscectomy is medically necessary when documented (1) mechanical symptoms (locking, catching, true giving-way), (2) MRI-confirmed meniscal tear with tear pattern unlikely to heal, (3) failed conservative management \u22656 weeks, AND (4) symptoms not attributable to underlying osteoarthritis. Submitted MRI report describes degenerative meniscal fraying without discrete tear and concurrent Kellgren-Lawrence grade-3 medial-compartment osteoarthritis. Per the AAOS Clinical Practice Guideline for Management of Osteoarthritis of the Knee, arthroscopic debridement is not recommended in OA-predominant cases."
+  },
+  {
+    "cpb_number": "CMM-609",
+    "cpt_code": "22612",
+    "icd10_code": "M51.36",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for posterior lumbar arthrodesis, single interspace (CPT 22612), for a patient with other intervertebral disc degeneration, lumbar region (ICD-10 M51.36). Per Cigna Medical Coverage Policy / EviCore CMM-609 Lumbar Fusion (Arthrodesis) (V2.0.2025), single-level lumbar fusion for degenerative disc disease without instability is medically necessary only when (1) disabling pain \u22656 months despite optimized conservative care, (2) advanced imaging (MRI) corroborates symptom level, (3) documented failure of supervised PT and at least one structured non-surgical interventional treatment, and (4) absence of psychosocial contraindications per a validated screening tool (e.g., FABQ). Submitted records lack documentation of supervised PT or psychosocial screening."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "27130",
+    "icd10_code": "M16.11",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for total hip arthroplasty (CPT 27130) for a patient with unilateral primary osteoarthritis of the right hip (ICD-10 M16.11). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures and the AAOS Clinical Practice Guideline for the Management of Osteoarthritis of the Hip (2024), THA is medically necessary in adults with radiographic evidence of advanced osteoarthritis, persistent pain and functional impairment, and documented failure of conservative management. Submitted documentation lists only NSAID therapy and does not include physical therapy or activity modification. The AAOS CPG includes a strong recommendation for non-pharmacologic therapy prior to arthroplasty."
+  },
+  {
+    "cpb_number": "CMM-609",
+    "cpt_code": "63030",
+    "icd10_code": "M51.16",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for lumbar discectomy (CPT 63030) for a patient with intervertebral disc disorder with radiculopathy, lumbar region (ICD-10 M51.16). Per the Cigna Medical Coverage Policy / EviCore CMM-609 family musculoskeletal policies and the NASS Coverage Policy Recommendations for Lumbar Discectomy, lumbar discectomy is medically necessary when (1) MRI-confirmed disc herniation correlates with the patient's radicular symptoms and dermatomal distribution, (2) failed conservative management of 6 weeks (PT plus medication), and (3) symptoms include radicular leg pain, motor weakness, or sensory deficit. Submitted documentation describes isolated axial low-back pain without radicular distribution. Isolated axial pain is explicitly not an indication for discectomy per NASS."
+  },
+  {
+    "cpb_number": "Cigna-0515",
+    "cpt_code": "27412",
+    "icd10_code": "M23.41",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for autologous chondrocyte implantation, knee, including cell harvest and re-implantation (CPT 27412) for a patient with loose body in right knee (ICD-10 M23.41). Per Cigna Medical Coverage Policy 0515 Musculoskeletal Procedures, autologous chondrocyte implantation is medically necessary only when the patient has (1) symptomatic full-thickness cartilage defect \u22652 cm\u00b2 confirmed on MRI and at staged arthroscopy, (2) intact menisci or concurrent meniscal restoration, (3) appropriately aligned limb (or planned osteotomy), and (4) failed conservative management including PT. Submitted documentation does not include arthroscopic staging or measurement of the cartilage lesion. Resubmit with arthroscopic findings and lesion measurement."
+  },
+  {
+    "cpb_number": "CMM-312",
+    "cpt_code": "29870",
+    "icd10_code": "M17.10",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for diagnostic knee arthroscopy (CPT 29870) for a patient with unilateral primary osteoarthritis, unspecified knee (ICD-10 M17.10). Per Cigna Medical Coverage Policy / EviCore CMM-312 Knee Surgery \u2014 Arthroscopic and Open Procedures, diagnostic knee arthroscopy is medically necessary only when prior advanced imaging is non-diagnostic or non-conclusive in the setting of mechanical symptoms. Submitted MRI report 2026-03-08 describes Kellgren-Lawrence grade-4 osteoarthritis and corresponding findings; the diagnosis is already established on imaging. Diagnostic arthroscopy in this setting is considered duplicative of imaging. Resubmit with documentation of imaging non-conclusiveness or proceed to definitive arthroplasty pathway."
+  },
+  {
+    "cpb_number": "CMM-609",
+    "cpt_code": "27279",
+    "icd10_code": "M53.3",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for arthrodesis, sacroiliac joint, percutaneous, with image guidance (CPT 27279) for a patient with sacrococcygeal disorders, not elsewhere classified (ICD-10 M53.3). Per Cigna Medical Coverage Policy / EviCore CMM-609 family musculoskeletal policies, minimally invasive SI fusion is medically necessary only when documented (1) sacroiliac joint pain confirmed by at least 3 of 5 positive provocative physical exam tests (e.g., Patrick's, Gaenslen's, distraction, compression, thigh thrust), (2) \u226575% pain relief on a fluoroscopically-guided diagnostic SI injection performed twice on separate dates with concordant relief, (3) failure of \u22656 months of non-operative care, and (4) absence of other untreated lumbar pain generators. Submitted documentation includes one diagnostic SI injection (single block, not dual block) and no provocative exam testing."
+  },
+  {
+    "cpb_number": "Cigna-0303",
+    "cpt_code": "22633",
+    "icd10_code": "M43.16",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for combined posterior and posterolateral lumbar arthrodesis (CPT 22633) for a patient with spondylolisthesis, lumbar region (ICD-10 M43.16). Per Cigna Medical Coverage Policy 0303 Lumbar Fusion for Spinal Instability and Degenerative Disc Conditions, lumbar fusion for spondylolisthesis is medically necessary when (1) documented spondylolisthesis grade I or higher on flexion-extension radiographs, (2) corresponding radicular and/or claudication symptoms, (3) failure of \u22653 months of supervised non-operative care including PT, (4) imaging-confirmed neural compression, and (5) functional limitation documented by validated outcome measure (e.g., Oswestry Disability Index). Submitted documentation does not include flexion-extension radiographs or ODI."
+  },
+  {
+    "cpb_number": "CMM-311",
+    "cpt_code": "27487",
+    "icd10_code": "T84.53XA",
+    "denial_reason": "out_of_network",
+    "text_template": "Coverage denied for revision total knee arthroplasty, both components, with allograft (CPT 27487) for a patient with infection and inflammatory reaction due to internal right knee prosthesis, initial encounter (ICD-10 T84.53XA). Claim was submitted by an out-of-network facility without prior authorization for OON service. Per Cigna Medical Coverage Policy / EviCore CMM-311 Knee Replacement Arthroplasty and the related revision-procedure indication block, revision TKA for prosthetic joint infection is medically necessary; however, OON facility services require prior authorization with documentation of network inadequacy or emergent clinical necessity. Resubmit with OON-justification documentation or transfer to in-network revision-arthroplasty center."
+  }
+]

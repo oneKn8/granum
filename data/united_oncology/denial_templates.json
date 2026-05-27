@@ -1,0 +1,72 @@
+[
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C50.911",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of fam-trastuzumab deruxtecan-nxki (Enhertu) for a patient with malignant neoplasm of unspecified site of right female breast (ICD-10 C50.911). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, coverage for non-preferred oncology products requires both documented intolerance or contraindication to a preferred product and physician attestation that the same adverse event would not be expected with the requested agent. Submitted records do not document an adequate trial of, or contraindication to, a preferred HER2-directed regimen. Provide complete prior-therapy documentation including agent, dose, duration, and reason for discontinuation."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96365",
+    "icd10_code": "C34.91",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for IV infusion of pembrolizumab (Keytruda) (CPT 96365) for a patient with malignant neoplasm of unspecified part of right bronchus or lung (ICD-10 C34.91). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, first-line single-agent pembrolizumab for metastatic non-small cell lung cancer requires documented PD-L1 tumor proportion score (TPS) of \u226550%, no EGFR or ALK genomic alterations, and absence of other actionable driver mutations as supported by the NCCN Clinical Practice Guidelines in Oncology: Non-Small Cell Lung Cancer V.5.2026. The submitted biomarker report lists PD-L1 TPS 35% and does not document EGFR/ALK testing."
+  },
+  {
+    "cpb_number": "UHC-IMRT",
+    "cpt_code": "77386",
+    "icd10_code": "C61",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for intensity-modulated radiation therapy delivery, complex (CPT 77386) for a patient with malignant neoplasm of prostate (ICD-10 C61). Per the UnitedHealthcare Commercial Medical Drug Policy: Intensity-Modulated Radiation Therapy, IMRT for prostate cancer is proven and medically necessary only when 3D-conformal radiotherapy cannot achieve dose constraints to organs at risk (rectum, bladder, femoral heads) or when concurrent dose escalation requires improved conformality. Submitted treatment plan does not include comparative 3D-conformal dosimetry or documented dose-constraint violations."
+  },
+  {
+    "cpb_number": "UHC-SBRT",
+    "cpt_code": "77373",
+    "icd10_code": "C78.01",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for stereotactic body radiation therapy (CPT 77373) for a patient with secondary malignant neoplasm of right lung (ICD-10 C78.01). Per the UnitedHealthcare Commercial Medical Drug Policy: Stereotactic Body Radiation Therapy and Stereotactic Radiosurgery, SBRT for pulmonary oligometastases requires documented Karnofsky Performance Status (KPS) \u226570 or ECOG 0-2, fewer than five metastatic sites, controlled primary disease, and lesion size constraints. Submitted records lack KPS/ECOG documentation and provide imaging dated more than 90 days prior to treatment plan."
+  },
+  {
+    "cpb_number": "UHC-Oxford-PBT",
+    "cpt_code": "77520",
+    "icd10_code": "C71.9",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for proton beam treatment delivery, simple, without compensation (CPT 77520) for a patient with malignant neoplasm of brain, unspecified (ICD-10 C71.9). Per the UnitedHealthcare Oxford Clinical Policy: Proton Beam Radiation Therapy, proton beam therapy is proven and medically necessary only for specifically enumerated indications including ocular tumors, chordomas, chondrosarcomas of the skull base, and pediatric CNS tumors. For adult glioma, proton beam therapy is considered unproven and not medically necessary; intensity-modulated photon radiotherapy is the standard of care. Submitted documentation does not establish the patient meets a covered indication."
+  },
+  {
+    "cpb_number": "UHC-CAR-T",
+    "cpt_code": "0540T",
+    "icd10_code": "C83.30",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for chimeric antigen receptor T-cell therapy, autologous, harvesting through preparation (CPT 0540T) using axicabtagene ciloleucel (Yescarta) for a patient with diffuse large B-cell lymphoma, NOS, unspecified site (ICD-10 C83.30). Per the UnitedHealthcare Clinical Policy: Chimeric Antigen Receptor T-Cell (CAR T) Therapy, prior authorization is required and must be obtained before scheduled apheresis. The request was received the day of apheresis and does not satisfy the policy\u2019s pre-procedure notification requirement. Resubmit with documented two prior lines of systemic therapy, current performance status, and treatment-center FDA REMS attestation."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C18.9",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for chemotherapy administration (CPT 96413) of bevacizumab (Avastin) for a patient with malignant neoplasm of colon, unspecified (ICD-10 C18.9). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, bevacizumab biosimilars (bevacizumab-awwb, bevacizumab-bvzr, bevacizumab-maly) are preferred. Coverage of reference bevacizumab requires documented intolerance or treatment failure on at least one preferred biosimilar. Submitted records do not indicate a biosimilar trial."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96401",
+    "icd10_code": "C90.00",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for chemotherapy administration, SC/IM, non-hormonal anti-neoplastic (CPT 96401) of daratumumab and hyaluronidase-fihj (Darzalex Faspro) for a patient with multiple myeloma, not having achieved remission (ICD-10 C90.00). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, daratumumab is covered as part of a recognized NCCN compendium-listed regimen; however, the submitted claim history reflects concurrent active billing for a second anti-CD38 directed agent within the same regimen cycle. Duplicative therapy is not covered. Confirm intended regimen and resubmit."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96413",
+    "icd10_code": "C25.9",
+    "denial_reason": "experimental_treatment",
+    "text_template": "Coverage denied for chemotherapy administration with olaparib (Lynparza) maintenance therapy for a patient with malignant neoplasm of pancreas, unspecified (ICD-10 C25.9). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage, olaparib for first-line maintenance treatment of metastatic pancreatic adenocarcinoma is covered only when the patient has a deleterious or suspected deleterious germline BRCA1/BRCA2 mutation and has not progressed after \u22654 months of first-line platinum-based chemotherapy, consistent with NCCN compendium criteria. Submitted documentation does not include germline BRCA testing results."
+  },
+  {
+    "cpb_number": "UHC-OMCC",
+    "cpt_code": "96367",
+    "icd10_code": "C92.10",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for combination therapy administration including venetoclax (Venclexta) for a patient with chronic myeloid leukemia, BCR/ABL-positive, not having achieved remission (ICD-10 C92.10). Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage and the NCCN Drugs & Biologics Compendium, venetoclax is FDA-approved and compendium-supported for CLL/SLL and AML, not for chronic-phase CML, where tyrosine kinase inhibitors remain first-line. The submitted indication is not supported by Category 1 or Category 2A compendium evidence."
+  }
+]

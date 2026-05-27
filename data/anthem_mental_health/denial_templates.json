@@ -1,0 +1,72 @@
+[
+  {
+    "cpb_number": "MCG-BHG-IP",
+    "cpt_code": "99221",
+    "icd10_code": "F32.2",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for inpatient psychiatric admission, initial hospital care (CPT 99221), for a patient with major depressive disorder, single episode, severe without psychotic features (ICD-10 F32.2). Per Anthem's licensed MCG Behavioral Health Care Guidelines (BHG) for inpatient psychiatric admission, the medical necessity standard requires either acute risk of harm to self or others with inability to maintain safety at a less intensive level of care, OR severe symptoms preventing minimum self-care, OR acute medical complications of psychiatric illness. The submitted documentation indicates passive suicidal ideation without plan or intent and intact self-care. Recommend transition to partial hospitalization or intensive outpatient program with crisis safety planning."
+  },
+  {
+    "cpb_number": "Anthem-CG-BEH-LOC",
+    "cpt_code": "S9480",
+    "icd10_code": "F33.2",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for intensive outpatient psychiatric services (HCPCS S9480) for a patient with major depressive disorder, recurrent, severe without psychotic features (ICD-10 F33.2). Per Anthem's adopted LOCUS criteria for adults, IOP (Level 3) is medically necessary when the individual demonstrates moderate-to-severe symptom acuity AND has failed or cannot be maintained at a less intensive level of care (outpatient Level 1 or 2). Submitted documentation does not demonstrate a documented trial of weekly outpatient psychotherapy plus medication management of at least 6 weeks duration. Resubmit with documentation of prior outpatient services or clinical justification for direct step-up."
+  },
+  {
+    "cpb_number": "MCG-BHG-PHP",
+    "cpt_code": "H0035",
+    "icd10_code": "F31.13",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for mental health partial hospitalization, treatment, less than 24 hours (HCPCS H0035) for a patient with bipolar disorder, current episode manic severe without psychotic features (ICD-10 F31.13). Per Anthem's licensed MCG Behavioral Health Care Guidelines for partial hospitalization, the medical necessity standard requires (1) symptoms of sufficient severity to require structured daily treatment, (2) capacity to maintain safety overnight without 24-hour supervision, and (3) documented treatment plan with measurable goals. Submitted records lack the Young Mania Rating Scale (YMRS) or comparable severity instrument and do not document overnight safety planning. Resubmit with severity measurement and safety plan."
+  },
+  {
+    "cpb_number": "Anthem-MP-TMS",
+    "cpt_code": "90867",
+    "icd10_code": "F33.1",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for therapeutic repetitive transcranial magnetic stimulation (rTMS) treatment, initial (CPT 90867) for a patient with major depressive disorder, recurrent, moderate (ICD-10 F33.1). Per Anthem's Medical Policy on Transcranial Magnetic Stimulation, rTMS is medically necessary only after documented failure or intolerance of at least 4 adequate antidepressant medication trials from at least 2 different pharmacologic classes during the current depressive episode, AND documented failure of an adequate trial of evidence-based psychotherapy. Submitted records document only 2 antidepressant trials (sertraline and bupropion). Resubmit with complete medication history including dose, duration, and reason for discontinuation."
+  },
+  {
+    "cpb_number": "ASAM-4e-2023",
+    "cpt_code": "H2036",
+    "icd10_code": "F10.20",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for residential substance use treatment, alcohol use disorder (HCPCS H2036) for a patient with alcohol dependence, uncomplicated (ICD-10 F10.20). Per Anthem's adopted ASAM Criteria, Fourth Edition (2023), residential treatment (Level 3.5 or 3.7) requires demonstrated functional impairment across multiple ASAM dimensions and documented failure or inability to engage at a lower level of care. Submitted documentation reflects ASAM dimension scores supporting Level 2.1 (intensive outpatient). Patient is medically stable, in early-stage recovery readiness, and has not engaged in an IOP trial. Recommend ASAM Level 2.1 with weekly clinician review."
+  },
+  {
+    "cpb_number": "CG-BEH-02",
+    "cpt_code": "97155",
+    "icd10_code": "F84.0",
+    "denial_reason": "insufficient_clinical_documentation",
+    "text_template": "Coverage denied for adaptive behavior treatment (ABA), CPT 97155, for a 6-year-old patient with autism spectrum disorder (ICD-10 F84.0). Per Anthem Clinical UM Guideline CG-BEH-02 Adaptive Behavior Treatment, ABA coverage requires (1) DSM-5 or ICD-10 diagnosis of ASD by a qualified clinician, (2) a current comprehensive ABA assessment within 12 months, (3) an individualized treatment plan with measurable objectives, and (4) functional behavior analysis. Submitted records include the diagnostic evaluation but do not include the comprehensive ABA assessment or treatment plan. Resubmit with the full assessment package."
+  },
+  {
+    "cpb_number": "Anthem-BHRG-OCS",
+    "cpt_code": "90837",
+    "icd10_code": "F43.10",
+    "denial_reason": "duplicate_therapy",
+    "text_template": "Coverage denied for individual psychotherapy, 60 minutes (CPT 90837), for a patient with post-traumatic stress disorder, unspecified (ICD-10 F43.10). Claim history reflects concurrent active treatment with two enrolled providers within the same week for the same diagnosis. Per Anthem's outpatient behavioral health policy, coverage of concurrent psychotherapy with multiple providers requires documented clinical justification (e.g., trauma-focused therapy plus a separate medication-management visit; family therapy plus individual therapy). Resubmit with documented care-coordination plan describing the non-overlapping therapeutic objectives of each provider."
+  },
+  {
+    "cpb_number": "Anthem-BHRG-PA",
+    "cpt_code": "90791",
+    "icd10_code": "F20.9",
+    "denial_reason": "lacks_prior_auth",
+    "text_template": "Coverage denied for psychiatric diagnostic evaluation (CPT 90791) for a patient with schizophrenia, unspecified (ICD-10 F20.9). Per Anthem's Behavioral Health Reference Guide, in-network outpatient psychiatric diagnostic evaluations generally do not require prior authorization for adult commercial members; however, if performed at an out-of-network facility, prior authorization is required. Claim shows the rendering provider was out-of-network on the date of service and no prior authorization was on file. Resubmit with completed PA documentation or transfer of care to an in-network provider."
+  },
+  {
+    "cpb_number": "Anthem-MP-ECT",
+    "cpt_code": "90870",
+    "icd10_code": "F33.3",
+    "denial_reason": "not_medically_necessary",
+    "text_template": "Coverage denied for electroconvulsive therapy, ECT (CPT 90870), for a patient with major depressive disorder, recurrent, severe with psychotic features (ICD-10 F33.3). Per Anthem's Medical Policy on Electroconvulsive Therapy, ECT is medically necessary in the setting of severe psychiatric symptoms unresponsive to or intolerant of pharmacotherapy and psychotherapy, OR in the setting of acute suicide risk requiring rapid response, OR in pregnancy-related contraindication to pharmacotherapy. Submitted documentation does not include the required pre-anesthesia evaluation, baseline cognitive screen (e.g., MoCA), or documentation of pharmacotherapy failures with adequate dose and duration."
+  },
+  {
+    "cpb_number": "ASAM-4e-2023",
+    "cpt_code": "H0010",
+    "icd10_code": "F11.20",
+    "denial_reason": "step_therapy_required",
+    "text_template": "Coverage denied for alcohol/drug services, sub-acute detoxification (HCPCS H0010) for a patient with opioid dependence, uncomplicated (ICD-10 F11.20). Per Anthem's adopted ASAM Criteria, Fourth Edition (2023), Level 3.7-WM (medically monitored inpatient withdrawal management) is medically necessary only when the patient meets ASAM dimension 1 criteria for medical complications of withdrawal or has failed ASAM Level 2-WM ambulatory withdrawal management with extended on-site monitoring. Submitted COWS (Clinical Opiate Withdrawal Scale) score is 14 (moderate) and the patient has not had a prior trial of ambulatory medication-assisted withdrawal. Recommend ASAM Level 2-WM with buprenorphine induction."
+  }
+]
