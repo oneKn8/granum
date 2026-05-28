@@ -10,7 +10,36 @@ This file is the cold-resume document. Read it top-to-bottom and you have full c
 
 ---
 
-## ⚠️ STEP ZERO — Set up git worktrees BEFORE any other work
+## ⚠️ STEP ZERO #1 — PhoenixClient schema retrofit (Phase 1.10b) is the next code task
+
+**Status check (2026-05-28 ~13:50):**
+- GCP `granum-2026` project + billing OPEN + all 6 APIs enabled. ADC + quota project set. Vertex Gemini 3.1 Pro Preview + Gemini 3.5 Flash both verified live.
+- Phoenix Cloud space at `https://app.phoenix.arize.com/s/shifatislamsanto764` — API key in local `.env` (gitignored), `smoke_phoenix.py` emits traces successfully.
+- `phoenix_session.py` bootstrap spawns `@arizeai/phoenix-mcp` over stdio + REST httpx with Bearer auth. Live MCP smoke confirmed: `list_active_prompts(name_prefix="aetna_cardiac/")` returns 0 against the empty space.
+
+**But:** first live `upsert-prompt` call exposed that Phase 1.3's `PhoenixClient` was authored against a fictional MCP schema. The Phoenix MCP audit (2026-05-27) captured tool *names* + *descriptions* but not per-tool argument schemas or response shapes. Four mismatches:
+
+1. `upsert-prompt` requires `template` (not `body`).
+2. `upsert-prompt` has NO `tags` parameter (tags must be applied after via `add-prompt-version-tag`).
+3. Response keys are `id` / `name` / `description`, not `promptId` / `versionId`. The response is text-prefixed (`Successfully created prompt "X":` then a JSON blob).
+4. Prompt names get `/` stripped — `aetna_cardiac/bcell_1` becomes `aetna_cardiacbcell_1`.
+
+**Phase 1.10b work needed (~30–45 min agent time):**
+- Run `session.list_tools()` for the 10 prompt tools + 7 dataset tools + 8 tracing tools we'll actually call. For each, capture the full `inputSchema` and one real-invocation response. Write `research/phoenix-mcp-schemas.md`.
+- Retrofit `src/granum/tools/phoenix_client.py`:
+  - `upsert_prompt(name, template, tags=...)` (was `body`) — internally calls `upsert-prompt` then `add-prompt-version-tag` once per tag.
+  - Change response parsing to read `id` from the text-wrapped JSON, not `promptId`.
+  - Document the slash-stripping; either pick a new naming scheme (underscores: `aetna_cardiac__bcell_1`) or compute the namespace some other way.
+  - `list_active_prompts` to handle bare-array MCP responses.
+- Update the 7 PhoenixClient unit tests to use the real shape.
+- Re-run `scripts/seed_cell.py` against the live space; expect 3 B-cells in Phoenix UI.
+- Then `Phase 1.10c`: first live `granum cycle --cell aetna_cardiac --seed-value 42`.
+
+**See:** `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-audit-schemas-not-just-names.md` — the permanent lesson saved from this gap.
+
+---
+
+## ⚠️ STEP ZERO #2 — Set up git worktrees BEFORE any other work
 
 In the 2026-05-27 session, three scope leaks occurred where one terminal's commit swept in other terminals' WIP files. Root cause: all three Claude sessions ran in the SAME working directory at `/home/oneknight/projects/hackathon/granum/`, sharing one git index. The leaks weren't bugs — they were the predictable consequence of shared-index multi-terminal work.
 
@@ -59,6 +88,8 @@ When a worktree is no longer needed: `git worktree remove ../granum-A` (and `git
 7. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-git-commit-email.md` — **CRITICAL** git identity rule
 8. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-personal-cloud-identities.md` — safe email matrix for git/gcloud/gh
 9. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-git-commit-scope.md` — **CRITICAL** scope-leak rule + the worktree fix
+10. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-verify-model-names-and-apis.md` — verify current canonical model/API names before reporting "blocked"
+11. `~/.claude/projects/-home-oneknight-projects-hackathon/memory/feedback-audit-schemas-not-just-names.md` — **CRITICAL** when auditing an MCP/API, capture per-tool schemas + response shapes, not just operation names
 
 ---
 
@@ -71,19 +102,25 @@ When a worktree is no longer needed: `git worktree remove ../granum-A` (and `git
 5. **Phoenix prompt versions are immutable.** No `delete-prompt-version`. Apoptosis is Path B: REST removes `production` tag, MCP adds `tombstoned` tag. `PhoenixClient.tombstone(prompt_id, version_id)` does both.
 6. **`add-prompt-version-tag` is move-semantic** in Phoenix MCP — re-tagging strips from prior version. Atomic champion-swap primitive.
 7. **For novelty work,** read `~/.claude/projects/.../memory/feedback-explore-like-human-not-weights.md` BEFORE brainstorming. Don't generate ideas from Claude reflexes; spawn research into far fields.
-8. **GCP setup is DONE on the cloud side.** Project `granum-2026`, billing `01D7E1-9DABE7-254A06` OPEN, all 6 APIs enabled. Remaining for live cycle: user runs `gcloud auth application-default login` + signs up at app.phoenix.arize.com for Phoenix Cloud API key. See `.env.example` for the canonical env vars.
+8. **GCP setup is DONE.** Project `granum-2026`, billing `01D7E1-9DABE7-254A06` OPEN, all 6 APIs enabled. ADC + quota project set. `.env` populated locally with PHOENIX_API_KEY + Vertex env vars + the verified model IDs (`gemini-3.1-pro-preview` for reasoning, `gemini-3.5-flash` for fast). `.env` is gitignored — never commits.
+9. **Phoenix Cloud is DONE.** Space at `https://app.phoenix.arize.com/s/shifatislamsanto764`, System API Key created and stored in local `.env`, smoke trace verified in UI. Don't ask the user to re-do these steps.
+10. **PhoenixClient was authored against a fictional schema.** See Step Zero #1 above. The mocked unit tests still pass; real MCP rejects the calls. Do NOT trust the existing 7 PhoenixClient tests as integration evidence — they only verify the mock contract. Phase 1.10b lifts that into a verified-live contract.
+11. **`gemini-3-pro` was DISCONTINUED March 2026.** Use `gemini-3.1-pro-preview` (primary) + `gemini-3.5-flash` (fast). Pinned in `.env.example`. Don't probe for `gemini-3-pro` — it 404s in all regions for valid reasons.
 
 ---
 
 ## What's done (this session)
 
 ### Pre-flight + Phase 0 — Foundation
-- ✅ Phoenix MCP capability audit (`research/phoenix-mcp-audit.md`, 27 tools, Path B locked)
+- ✅ Phoenix MCP capability audit (`research/phoenix-mcp-audit.md`, 27 tools, Path B locked) — names captured, schemas NOT captured (the gap that bit us on 2026-05-28; see Step Zero #1)
 - ✅ Repo created at `oneKn8/granum`, Apache-2.0, public
 - ✅ Python toolchain (uv, Python 3.12), CLI skeleton (`granum doctor`, `granum version`, `granum cycle-all`)
 - ✅ GitHub Actions CI — green in 15s
-- 🟡 Phase 0.4 PARTIAL: `scripts/smoke_gemini.py` + `scripts/smoke_phoenix.py` written + committed but UNVERIFIED (blocked on user actions, see Blockers below)
-- 🔴 Phase 0.5 BLOCKED: Cloud Run deploy — needs GCP billing on a project
+- ✅ Phase 0.4 DONE (2026-05-28): GCP project + billing + APIs + ADC + Vertex Gemini 3.1 Pro Preview verified + Phoenix Cloud space + API key + `smoke_phoenix.py` trace in UI.
+- ✅ Phase 1.10a DONE (2026-05-28): `src/granum/tools/phoenix_session.py` — live MCP stdio + REST Bearer auth + `_MCPDictAdapter` for CallToolResult → dict.
+- 🟡 Phase 1.10b PENDING: PhoenixClient schema retrofit (see Step Zero #1).
+- 🟡 Phase 1.10c PENDING: First live germinal cycle against real Phoenix + Gemini (depends on 1.10b).
+- 🔴 Phase 0.5 PENDING: Cloud Run deploy. Now UNBLOCKED (billing is open); needs `infra/deploy.sh` to run and the hosted URL paste into `.env`'s `NEXT_PUBLIC_API_BASE_URL`.
 
 ### Phase 1 — Single-cell germinal loop (9/10 done)
 All pure-Python, all mockable, all tested:
