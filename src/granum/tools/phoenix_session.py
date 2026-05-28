@@ -27,9 +27,10 @@ Env vars optional:
 """
 from __future__ import annotations
 
+import json
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import Any, AsyncIterator
 
 import httpx
 from mcp import ClientSession, StdioServerParameters
@@ -45,6 +46,51 @@ def _require_env(name: str) -> str:
             f"{name} is not set. Source .env or export it before running."
         )
     return value
+
+
+class _MCPDictAdapter:
+    """Thin wrapper that exposes `call_tool(name, args) -> dict`.
+
+    The MCP Python SDK's `ClientSession.call_tool` returns a `CallToolResult`
+    Pydantic object whose payload lives in `.content` as a list of content
+    items (typically a single `TextContent` containing a JSON string).
+
+    PhoenixClient (Phase 1.3) was authored against a mocked session that
+    returned plain dicts. This adapter bridges the two so PhoenixClient's
+    code path is unchanged: tests mock it with dicts, live code uses this
+    adapter to unpack `CallToolResult.content[0].text` -> JSON -> dict.
+
+    Tools that return no content (None / empty) → returns {}.
+    """
+
+    def __init__(self, raw: ClientSession) -> None:
+        self._raw = raw
+
+    async def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        result = await self._raw.call_tool(name, arguments)
+        # CallToolResult.content is list[TextContent | ImageContent | EmbeddedResource]
+        content = getattr(result, "content", None) or []
+        if not content:
+            return {}
+        # We only handle the text-content case (Phoenix MCP always returns JSON text).
+        first = content[0]
+        text = getattr(first, "text", None)
+        if text is None:
+            return {}
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError:
+            # Some Phoenix MCP tools return naked strings ("success", etc.). Wrap.
+            return {"_raw_text": text}
+        # Phoenix tools return either a JSON object or a JSON array. Normalize
+        # array responses by wrapping in {"items": [...]} so callers can do
+        # `.get("items", [])`. (PhoenixClient currently expects dict-shaped
+        # responses keyed by `prompts`, `spans`, `tags`, etc.)
+        if isinstance(parsed, list):
+            return {"items": parsed}
+        if not isinstance(parsed, dict):
+            return {"_raw_value": parsed}
+        return parsed
 
 
 @asynccontextmanager
@@ -80,5 +126,7 @@ async def phoenix_client_from_env() -> AsyncIterator[PhoenixClient]:
                 timeout=30.0,
             ) as rest:
                 yield PhoenixClient(
-                    mcp_session=session, rest=rest, base_url=base_url
+                    mcp_session=_MCPDictAdapter(session),
+                    rest=rest,
+                    base_url=base_url,
                 )
