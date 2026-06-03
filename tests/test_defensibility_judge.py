@@ -168,3 +168,49 @@ async def test_score_handles_empty_reference_set_gracefully() -> None:
     assert "## Reference appeals" in prompt
     assert "## Payer denial response (adversary)" in prompt
     assert "## Candidate appeal (to be defended)" in prompt
+
+
+def _fenced_sample(
+    *,
+    cs: int = 7,
+    pcq: int = 7,
+    pc: int = 7,
+    arg: int = 7,
+    defn: int = 7,
+    feedback: str = "ok",
+) -> str:
+    """Same JSON as _sample but wrapped in ```json ... ``` fences."""
+    inner = (
+        '{"clinical_specificity": ' + str(cs) + ", "
+        '"policy_citation_quality": ' + str(pcq) + ", "
+        '"procedural_compliance": ' + str(pc) + ", "
+        '"argumentative_structure": ' + str(arg) + ", "
+        '"defensibility": ' + str(defn) + ", "
+        '"english_feedback": "' + feedback + '"}'
+    )
+    return "```json\n" + inner + "\n```"
+
+
+@pytest.mark.asyncio
+async def test_score_parses_fenced_json_responses() -> None:
+    """DefensibilityJudge.score() parses ```json fenced responses correctly."""
+    mock_client = AsyncMock()
+    mock_client.generate.side_effect = [
+        _fenced_sample(cs=7, pcq=8, pc=8, arg=7, defn=7, feedback="first"),
+        _fenced_sample(cs=8, pcq=8, pc=8, arg=8, defn=8, feedback="second"),
+        _fenced_sample(cs=6, pcq=7, pc=8, arg=7, defn=6, feedback="third"),
+    ]
+    judge = DefensibilityJudge(client=mock_client, model="gemini-3-pro")
+    score = await judge.score(
+        candidate_appeal="cand",
+        payer_denial_response="payer denied",
+        reference_set=[_gold()],
+    )
+    assert isinstance(score, DefensibilityScore)
+    # Medians of [7,8,6], [8,8,7], [8,8,8], [7,8,7], [7,8,6]
+    assert score.clinical_specificity == 7
+    assert score.policy_citation_quality == 8
+    assert score.procedural_compliance == 8
+    assert score.argumentative_structure == 7
+    assert score.defensibility == 7
+    assert score.english_feedback == "first"

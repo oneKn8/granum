@@ -11,7 +11,11 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from granum.adversary.payer_agent import PayerAgent
-from granum.center.coevolution import CoEvolutionDriver, CoEvolutionRoundResult
+from granum.center.coevolution import (
+    CoEvolutionDriver,
+    CoEvolutionRoundResult,
+    _extract_persona_id,
+)
 from granum.center.defensibility_judge import DefensibilityJudge, DefensibilityScore
 from granum.center.mutation import Mutation, MutationKind
 from granum.tools.phoenix_client import PhoenixClient, PromptVersion
@@ -432,3 +436,65 @@ async def test_round_result_exposes_per_population_scoreboards():
     assert p_ids[1] == "p1"
     assert outcome.payer_scoreboard[0][1] == pytest.approx(((10 - 6) + (10 - 2)) / 2)  # 6.0
     assert outcome.payer_scoreboard[1][1] == pytest.approx(((10 - 8) + (10 - 4)) / 2)  # 4.0
+
+
+# ---------------------------------------------------------------------------
+# Bug 1: _extract_persona_id handles Phoenix-normalized names (__ separator)
+# ---------------------------------------------------------------------------
+
+def test_extract_persona_id_slash_baseline() -> None:
+    """Original slash-style baseline name still parses."""
+    assert _extract_persona_id("aetna_cardiac_payer/baseline_evidence_focused") == "evidence_focused"
+
+
+def test_extract_persona_id_slash_mutant() -> None:
+    """Original slash-style mutant name still parses."""
+    assert _extract_persona_id("aetna_cardiac_payer/mut_strict_0") == "strict"
+
+
+def test_extract_persona_id_double_underscore_baseline() -> None:
+    """Phoenix-normalized baseline name (__ instead of /) parses correctly."""
+    assert _extract_persona_id("aetna_cardiac_payer__baseline_evidence_focused") == "evidence_focused"
+
+
+def test_extract_persona_id_double_underscore_mutant() -> None:
+    """Phoenix-normalized mutant name (__ instead of /) parses correctly."""
+    assert _extract_persona_id("aetna_cardiac_payer__mut_strict_0") == "strict"
+
+
+def test_extract_persona_id_double_underscore_cost_focused() -> None:
+    """Phoenix-normalized name with multi-word persona id parses correctly."""
+    assert _extract_persona_id("aetna_cardiac_payer__baseline_cost_focused") == "cost_focused"
+
+
+def test_extract_persona_id_raises_on_unparseable_name() -> None:
+    """A name with neither / nor __ separator raises ValueError."""
+    import pytest
+    with pytest.raises(ValueError, match="can't parse persona"):
+        _extract_persona_id("no_separator_at_all_baseline")
+
+
+# ---------------------------------------------------------------------------
+# Bug 2: dataset writeback is best-effort — failure must NOT abort the round
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_dataset_writeback_failure_does_not_abort_round() -> None:
+    """If add_dataset_examples raises, round() still returns CoEvolutionRoundResult."""
+    writers = [_writer("w1")]
+    payers = [_payer("p1", "strict")]
+    driver, mock_phoenix, _, _ = _make_driver(
+        writers=writers,
+        payers=payers,
+        score_side_effect=[_score(7)],
+    )
+    # Simulate the dataset not existing on first live run.
+    mock_phoenix.add_dataset_examples.side_effect = RuntimeError(
+        "dataset granum/aetna_cardiac/coevolution not found"
+    )
+
+    # Must NOT raise — best-effort writeback, round continues.
+    outcome = await driver.round()
+    assert isinstance(outcome, CoEvolutionRoundResult)
+    assert outcome.writer_winner_id == "w1"
+    assert outcome.payer_winner_id == "p1"

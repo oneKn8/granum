@@ -21,11 +21,11 @@ for adaptive co-evolution.
 from __future__ import annotations
 
 import hashlib
-import json
 from typing import Any, Protocol
 
 from granum.adversary.payer_persona import get_persona
 from granum.data.denials import Denial, DenialReason
+from granum.tools.json_parse import loads_lenient
 
 
 class _GenClient(Protocol):
@@ -77,7 +77,7 @@ class PayerAgent:
         raw = await self._client.generate(
             model=self._model, prompt=prompt, temperature=0.0
         )
-        parsed: dict[str, Any] = json.loads(raw)
+        parsed: dict[str, Any] = loads_lenient(raw)
         appeal_hash = hashlib.sha1(appeal.encode()).hexdigest()[:8]
         denial_id = (
             f"{self._payer}_{self._diagnosis}_adv_{persona_id}_{appeal_hash}"

@@ -68,13 +68,23 @@ class CoEvolutionRoundResult:
 def _extract_persona_id(prompt_name: str) -> str:
     """Parse persona_id from a payer-prompt name.
 
-    Convention:
+    Convention (slash-style, original):
         {cell}_payer/baseline_<persona_id>
         {cell}_payer/mut_<persona_id>_<index>
+
+    Phoenix normalizes '/' -> '__' on storage, so names arrive as:
+        {cell}_payer__baseline_<persona_id>
+        {cell}_payer__mut_<persona_id>_<index>
+
+    Both separators are handled by taking the suffix after the last
+    separator (/ preferred, __ as fallback).
     """
-    if "/" not in prompt_name:
+    if "/" in prompt_name:
+        suffix = prompt_name.rsplit("/", 1)[1]
+    elif "__" in prompt_name:
+        suffix = prompt_name.rsplit("__", 1)[1]
+    else:
         raise ValueError(f"can't parse persona from {prompt_name!r}")
-    suffix = prompt_name.rsplit("/", 1)[1]
     if suffix.startswith("baseline_"):
         return suffix[len("baseline_"):]
     if suffix.startswith("mut_"):
@@ -311,22 +321,32 @@ class CoEvolutionDriver:
                 )
             )
 
-            # 7. Dataset writeback
+            # 7. Dataset writeback (best-effort — dataset may not exist on a
+            # first live run; a missing dataset must NOT abort the round, which
+            # is already committed to Phoenix via prompt-version tags above).
             with _tracer.start_as_current_span(
                 "granum.coevolution.dataset_writeback"
-            ):
-                await self._phoenix.add_dataset_examples(
-                    dataset_name=f"granum/{self._cell}/coevolution",
-                    examples=[{
-                        "round_index": self._round_index,
-                        "writer_winner_id": writer_winner_id,
-                        "payer_winner_id": payer_winner_id,
-                        "defensibility_composite": composite,
-                        "english_feedback": english_feedback,
-                        "writer_loser_count": len(writer_loser_ids),
-                        "payer_loser_count": len(payer_loser_ids),
-                    }],
-                )
+            ) as ws:
+                try:
+                    await self._phoenix.add_dataset_examples(
+                        dataset_name=f"granum/{self._cell}/coevolution",
+                        examples=[{
+                            "round_index": self._round_index,
+                            "writer_winner_id": writer_winner_id,
+                            "payer_winner_id": payer_winner_id,
+                            "defensibility_composite": composite,
+                            "english_feedback": english_feedback,
+                            "writer_loser_count": len(writer_loser_ids),
+                            "payer_loser_count": len(payer_loser_ids),
+                        }],
+                    )
+                except Exception as exc:  # noqa: BLE001 — writeback is supplementary
+                    ws.set_attribute("granum.coevolution.dataset_writeback.ok", False)
+                    _log.warning(
+                        "co-evolution dataset writeback to granum/%s/coevolution "
+                        "failed (dataset may not exist yet): %s",
+                        self._cell, exc,
+                    )
 
             # 8. Adversary reset check — fires when (round_index + 1) is a
             # multiple of adversary_reset_every. Wipes the FULL current payer

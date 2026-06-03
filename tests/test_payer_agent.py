@@ -127,3 +127,37 @@ async def test_deny_raises_on_invalid_denial_reason_value():
 
     with pytest.raises(ValueError):
         await agent.deny(appeal="some appeal", persona_id="strict")
+
+
+_CANNED_DENIAL_JSON_FENCED = (
+    "```json\n"
+    + json.dumps(
+        {
+            "cpt_code": "93306",
+            "icd10_code": "I25.10",
+            "denial_reason": "not_medically_necessary",
+            "denial_text": (
+                "Coverage denied for echocardiogram (CPT 93306). "
+                "Aetna Clinical Policy Bulletin 0119 requires "
+                "documentation of new symptoms. Member may appeal within 30 days."
+            ),
+        }
+    )
+    + "\n```"
+)
+
+
+@pytest.mark.asyncio
+async def test_deny_parses_fenced_json_response() -> None:
+    """PayerAgent.deny() parses ```json fenced responses correctly."""
+    mock_client = AsyncMock()
+    mock_client.generate.return_value = _CANNED_DENIAL_JSON_FENCED
+    agent = _make_agent(mock_client)
+
+    denial = await agent.deny(appeal="my candidate appeal text", persona_id="strict")
+
+    assert isinstance(denial, Denial)
+    assert denial.cpt_code == "93306"
+    assert denial.icd10_code == "I25.10"
+    assert denial.denial_reason == DenialReason.NOT_MEDICALLY_NECESSARY
+    assert denial.denial_id.startswith("aetna_cardiac_adv_strict_")

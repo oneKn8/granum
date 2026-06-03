@@ -10,13 +10,13 @@ where downstream tournament rankings are stable across reruns.
 from __future__ import annotations
 
 import asyncio
-import json
 import statistics
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
 from granum.data.gold import GoldAppeal
+from granum.tools.json_parse import loads_lenient
 
 
 _DEFAULT_RUBRIC_PATH = Path("data/judge_rubric.md")
@@ -57,16 +57,7 @@ class _GenClient(Protocol):
 
 def _loads(raw: str) -> dict[str, Any]:
     """Parse model JSON, tolerating ```json fences / prose around the object."""
-    text = raw.strip()
-    if text.startswith("```"):
-        # ```json\n{...}\n```  → drop the fence lines
-        text = text.split("\n", 1)[-1]
-        if text.rstrip().endswith("```"):
-            text = text.rstrip()[:-3]
-    start, end = text.find("{"), text.rfind("}")
-    if start != -1 and end != -1 and end > start:
-        text = text[start : end + 1]
-    return json.loads(text)
+    return loads_lenient(raw)
 
 
 class LLMJudge:

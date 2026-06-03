@@ -10,13 +10,13 @@ from LLMJudge in:
 from __future__ import annotations
 
 import asyncio
-import json
 import statistics
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
 from granum.data.gold import GoldAppeal
+from granum.tools.json_parse import loads_lenient
 
 
 _DEFAULT_RUBRIC_PATH = Path("data/defensibility_rubric.md")
@@ -87,7 +87,7 @@ class DefensibilityJudge:
                 for _ in range(3)
             ]
         )
-        parsed: list[dict[str, Any]] = [json.loads(r) for r in responses]
+        parsed: list[dict[str, Any]] = [loads_lenient(r) for r in responses]
         return DefensibilityScore(
             clinical_specificity=int(
                 statistics.median(p["clinical_specificity"] for p in parsed)
