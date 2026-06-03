@@ -137,6 +137,10 @@ async def phoenix_client_from_env() -> AsyncIterator[PhoenixClient]:
                 base_url=base_url,
                 headers=rest_headers,
                 timeout=30.0,
+                # Retry transient connection failures (e.g. intermittent DNS
+                # "Name or service not known") so a long multi-round live run
+                # survives a blip mid-apoptosis instead of aborting.
+                transport=httpx.AsyncHTTPTransport(retries=3),
             ) as rest:
                 yield PhoenixClient(
                     mcp_session=_MCPDictAdapter(session),
