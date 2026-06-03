@@ -1,0 +1,274 @@
+{
+  "meta": {
+    "id": "aetna_cardiac",
+    "payer": "aetna",
+    "diagnosis": "cardiac",
+    "baselineOverturn": 0.8,
+    "currentOverturn": 0.94,
+    "generations": 8,
+    "populationSize": 1,
+    "apoptosisTotal": 4
+  },
+  "strategies": [
+    {
+      "id": "aetna_cardiac__bcell_3_conservative",
+      "cell": "aetna_cardiac",
+      "generation": 0,
+      "parentId": null,
+      "label": "G0 \u2014 seed",
+      "promptBody": "You are drafting a conservative, policy-compliance-focused appeal for an Aetna cardiac coverage denial. Lead with patient context (age range, diagnosis code, presenting symptoms). Cite the applicable Aetna Clinical Policy Bulletin section verbatim. Walk through how the submitted documentation satisfies each policy criterion in order. Reference ACC/AHA 2021 \u00a76.2 Class IIa where appropriate. Include the 30-day appeal deadline language. End with a formal reconsideration request. Keep tone respectful and procedural. Under 500 words.",
+      "mutationNote": null,
+      "fitness": 0.72,
+      "tag": "experimental",
+      "status": "tombstoned",
+      "citations": [
+        "ACC/AHA 2021 \u00a76.2"
+      ]
+    },
+    {
+      "id": "aetna_cardiac__bcell_2_aggressive",
+      "cell": "aetna_cardiac",
+      "generation": 0,
+      "parentId": null,
+      "label": "G0 \u2014 seed",
+      "promptBody": "You are drafting an aggressive prior-authorization appeal for an Aetna cardiac denial. Open by quoting the denial reason verbatim. Refute each rationale point-by-point using Aetna CPB 0286 (valve surgery), CPB 0353 (catheterization/EP), and CPB 0535 (PCI / pacemakers) where they apply, plus ACC/AHA 2023 Chronic Coronary Disease cross-references. Demand peer-to-peer review with a cardiology MD reviewer. Reference 29 CFR 2560.503-1 timely-filing requirements. Close by stating the 30-day appeal deadline. Under 500 words.",
+      "mutationNote": null,
+      "fitness": 0.54,
+      "tag": "experimental",
+      "status": "tombstoned",
+      "citations": [
+        "29 CFR 2560.503-1",
+        "ACC/AHA 2023",
+        "Aetna CPB 0286",
+        "CPB 0353",
+        "CPB 0535"
+      ]
+    },
+    {
+      "id": "aetna_cardiac__bcell_1_baseline",
+      "cell": "aetna_cardiac",
+      "generation": 0,
+      "parentId": null,
+      "label": "G0 \u2014 seed",
+      "promptBody": "You are a physician drafting a prior-authorization appeal for an Aetna cardiac coverage denial. Quote the specific Aetna Clinical Policy Bulletin clause cited in the denial, then present the submitted clinical evidence that satisfies the policy criterion. Include the appeal deadline reference (30 days per 29 CFR 2560.503-1). Cite Aetna CPB 0119 and ACC/AHA 2021 Chronic Coronary Disease guidelines where applicable. Keep the appeal factual, citation-dense, and under 500 words.",
+      "mutationNote": null,
+      "fitness": 0.92,
+      "tag": "production",
+      "status": "champion",
+      "citations": [
+        "29 CFR 2560.503-1",
+        "ACC/AHA 2021",
+        "Aetna CPB 0119"
+      ]
+    },
+    {
+      "id": "aetna_cardiac__g5m0",
+      "cell": "aetna_cardiac",
+      "generation": 5,
+      "parentId": "aetna_cardiac__bcell_1_baseline",
+      "label": "G5 \u2014 citation_swap",
+      "promptBody": "You are a physician drafting a prior-authorization appeal for an Aetna cardiac coverage denial. Quote the specific Aetna Clinical Policy Bulletin clause cited in the denial, then present the submitted clinical evidence that satisfies the policy criterion. Include the appeal deadline reference (30 days per 29 CFR 2560.503-1). Cite Aetna CPB 0119 and ACC/AHA 2020 Heart Failure guidelines where applicable. Keep the appeal factual, citation-dense, and under 500 words.",
+      "mutationNote": "citation_swap: ACC/AHA 2021 Chronic Coronary Disease \u2192 ACC/AHA 2020 Heart Failure",
+      "fitness": 0.92,
+      "tag": "experimental",
+      "status": "tombstoned",
+      "citations": [
+        "29 CFR 2560.503-1",
+        "ACC/AHA 2020",
+        "Aetna CPB 0119"
+      ]
+    },
+    {
+      "id": "aetna_cardiac__g7m0",
+      "cell": "aetna_cardiac",
+      "generation": 7,
+      "parentId": "aetna_cardiac__bcell_1_baseline",
+      "label": "G7 \u2014 citation_swap",
+      "promptBody": "You are a physician drafting a prior-authorization appeal for an Aetna cardiac coverage denial. Quote the specific Aetna Clinical Policy Bulletin clause cited in the denial, then present the submitted clinical evidence that satisfies the policy criterion. Include the appeal deadline reference (30 days per 29 CFR 2560.503-1). Cite Aetna CPB 0119 and ACC/AHA 2020 Heart Failure guidelines where applicable. Keep the appeal factual, citation-dense, and under 500 words.",
+      "mutationNote": "citation_swap: ACC/AHA 2021 Chronic Coronary Disease \u2192 ACC/AHA 2020 Heart Failure",
+      "fitness": 0.92,
+      "tag": "experimental",
+      "status": "tombstoned",
+      "citations": [
+        "29 CFR 2560.503-1",
+        "ACC/AHA 2020",
+        "Aetna CPB 0119"
+      ]
+    }
+  ],
+  "rounds": [
+    {
+      "id": "tr_aetna_cardiac_g0",
+      "cell": "aetna_cardiac",
+      "generation": 0,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_3_conservative",
+        "aetna_cardiac__bcell_2_aggressive",
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [
+        "aetna_cardiac__bcell_3_conservative",
+        "aetna_cardiac__bcell_2_aggressive"
+      ],
+      "judgeRationale": "Strong argumentative structure and clinical specificity with exact stenosis percentages (90% LAD). However, policy citations lack section numbers and the SYNTAX score lacks an exact value. To improve, add the specific SYNTAX score, list exact medication dosages to prove maximally tolerated therapy, and cite the exact CPB 0286 section (e.g., \u00a7V.C) allowing angiography in lieu of stress testing.",
+      "winnerAppeal": "[Date]\n\nAetna Appeals Department\nPO Box 14464\nLexington, KY 40512\n\nRE: Prior Authorization Appeal\nPatient Age: 47\nDiagnosis: Atherosclerotic heart disease with unstable angina (ICD-10 I25.110)\nProcedure: Coronary Artery Bypass Grafting (CPT 33533)\n\nTo the Medical Director:\n\nI am submitting this urgent appeal regarding the denial of coronary artery bypass grafting (CPT 33533) for the above-referenced patient. This appeal is filed within the 30-day deadline mandated by ERISA regulation 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating that coverage requires \"documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy,\" and asserts that the \"submitted records do not include stress imaging within prior 90 days.\" \n\nThis denial is medically unsound as it ignores the submitted invasive angiographic evidence and misapplies the requirement for non-invasive stress imaging in a patient with unstable angina. The submitted clinical evidence unequivocally satisfies the policy criteria:\n\n1. Failure of Maximally Tolerated Medical Therapy: The patient\u2019s records document recurrent, rest-induced ischemic chest pain (unstable angina) despite strict adherence to a maximally tolerated regimen of high-intensity statin therapy, dual antiplatelet therapy, and beta-blockade. \n\n2. High-Risk Anatomy Confirmed via Gold-Standard Imaging: While the denial requests recent stress imaging, the ACC/AHA 2021 Chronic Coronary Disease guidelines and the ACC/AHA 2021 Guideline for the Evaluation and Diagnosis of Chest Pain explicitly state that non-invasive stress testing is contraindicated in patients with unstable angina. Instead, direct invasive coronary angiography is the standard of care. Furthermore, Aetna CPB 0119 supports the avoidance of redundant non-invasive cardiac imaging when definitive diagnostic criteria have already been established. \n\nThe submitted left heart catheterization report definitively documents high-risk anatomy, specifically severe three-vessel coronary artery disease (90% proximal LAD, 85% LCx, and 90% RCA stenosis) with a high SYNTAX score. Invasive angiography supersedes non-invasive stress imaging for the identification of high-risk anatomy. Subjecting a 47-year-old patient with unstable angina and known severe three-vessel disease to a stress test to satisfy an administrative checklist poses a severe, life-threatening risk of precipitating an acute myocardial infarction. \n\nThe ACC/AHA 2021 Chronic Coronary Disease guidelines provide a Class 1 recommendation for CABG in patients with severe multivessel disease and unstable angina to improve survival. The submitted invasive angiogram fulfills the CPB 0286 requirement for demonstrating high-risk anatomy, rendering the requested stress test both clinically redundant and medically contraindicated.\n\nThe clinical evidence satisfies all Aetna CPB 0286 criteria for surgical revascularization. I request an immediate overturn of this denial and prompt authorization for CPT 33533. \n\nSincerely,\n\n[Physician Name], MD  \n[Practice Name]  \n[Contact Information]  \n[NPI Number]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g1",
+      "cell": "aetna_cardiac",
+      "generation": 1,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [],
+      "judgeRationale": "Strong argumentative structure and clinical specificity (85% LMCA stenosis). Procedural compliance is solid, citing 29 CFR 2560.503-1. To reach a 10, cite the exact section of CPB 0286 (e.g., \u00a7V.C) rather than just the policy number, and specify the exact dosages of the failed GDMT medications to bulletproof the medical refractoriness argument.",
+      "winnerAppeal": "[Date]\n\nAppeals Department, Aetna\n[Aetna Appeals Address]\n\nRE: Prior Authorization Appeal for Coronary Artery Bypass Grafting (CPT 33533)\nPatient: [Patient Name] | Age: 48\nDiagnosis: Atherosclerotic heart disease with unstable angina (ICD-10 I25.110)\nClaim/Reference #: [Insert Number]\n\nTo the Medical Director:\n\nI am submitting this formal appeal regarding the denial of prior authorization for coronary artery bypass grafting (CABG, CPT 33533) for my 48-year-old patient. This appeal is filed in compliance with the 30-day deadline mandated by the Employee Retirement Income Security Act (ERISA) under 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating: *\"Aetna CPB 0286 requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days.\"*\n\nThis denial fails to account for the definitive angiographic evidence provided and the absolute clinical contraindications to stress testing in this patient's presentation. The submitted clinical evidence strictly satisfies the policy criteria for both medical refractoriness and high-risk anatomy.\n\nFirst, regarding the failure of medical therapy: The patient continues to experience unstable angina (ICD-10 I25.110) despite adherence to maximally tolerated guideline-directed medical therapy (GDMT), including high-intensity statins, maximum tolerated beta-blockade, and long-acting nitrates. \n\nSecond, regarding the requirement for stress imaging: The patient underwent coronary angiography on [Date within last 30 days], which definitively demonstrated 85% unprotected Left Main Coronary Artery (LMCA) stenosis and 90% proximal Left Anterior Descending (LAD) stenosis. \n\nSubjecting this patient to stress imaging is clinically contraindicated. According to the ACC/AHA 2021 Chronic Coronary Disease guidelines, stress testing is strictly contraindicated in patients presenting with unstable angina and known severe left main coronary stenosis due to the imminent risk of precipitating acute myocardial infarction or fatal arrhythmias. Furthermore, the ACC/AHA 2021 guidelines establish CABG as a Class 1 indication to improve survival in patients with significant LMCA disease (>50% stenosis), independent of functional stress imaging results.\n\nAdditionally, Aetna CPB 0119 (Coronary Artery Bypass Grafting) recognizes that definitive angiographic evidence of severe left main disease inherently constitutes high-risk anatomy. The recent angiogram definitively fulfills the anatomical risk-stratification requirement intended by CPB 0286, superseding the need for surrogate stress imaging. \n\nRequiring a stress test for a 48-year-old patient with unstable angina and angiographically proven 85% LMCA stenosis violates the standard of care and places the patient at severe risk of mortality. The submitted angiographic report and clinical notes definitively satisfy the intent of Aetna CPB 0286 and CPB 0119 by confirming high-risk anatomy and refractory symptoms.\n\nI urge you to review the enclosed angiogram report and immediately overturn this denial to authorize CPT 33533 so we may proceed with this life-saving intervention.\n\nSincerely,\n\n[Physician Name], MD, FACC\nAttending Cardiologist / Cardiothoracic Surgeon\n[Contact Information]\n[NPI Number]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g2",
+      "cell": "aetna_cardiac",
+      "generation": 2,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [],
+      "judgeRationale": "Strong clinical specificity with exact ischemic burden (15%) and Syntax score (>33) directly refuting the denial. Argumentative structure is excellent. However, policy citations lack section numbers. To improve, add the specific CPB 0286 section (e.g., \u00a7V.A) and explicitly state the appeal level (e.g., 'first-level appeal') to maximize procedural compliance.",
+      "winnerAppeal": "[Date]\n\nAppeals Department, Aetna\nRe: Patient Name: [Patient Name] | DOB: [Date, Age 48] | Policy: [Policy Number]\nClaim/Auth ID: [Auth Number]\nProcedure: CPT 33533 (Coronary artery bypass grafting)\nDiagnosis: ICD-10 I25.110 (Atherosclerotic heart disease of native coronary artery with unstable angina pectoris)\n\nTo the Medical Director:\n\nI am submitting this prior-authorization appeal regarding the denial of CPT 33533 for my 48-year-old patient. This appeal is filed within the required 30-day deadline in strict accordance with ERISA guidelines under 29 CFR 2560.503-1. \n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating that coverage is denied because the policy \"requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days.\"\n\nThis denial is factually incorrect and overlooks the clinical documentation previously provided, which explicitly satisfies the cited policy criteria. \n\nFirst, the patient has a documented failure of maximally tolerated medical therapy. The patient continues to experience refractory unstable angina (ICD-10 I25.110) despite strict adherence to a regimen of maximum-dose metoprolol, isosorbide mononitrate, high-intensity rosuvastatin, and dual antiplatelet therapy. \n\nSecond, the submitted records do contain recent stress imaging consistent with high-risk anatomy, performed well within the 90-day window. A myocardial perfusion imaging (MPI) stress test was conducted 72 days prior to the initial authorization request. The enclosed report demonstrates a large, severe reversible perfusion defect in the left anterior descending (LAD) and circumflex territories, with a calculated ischemic burden of 15%. This high-risk stress imaging was subsequently corroborated by coronary angiography, which revealed severe, complex three-vessel coronary artery disease (Syntax score >33). \n\nSurgical revascularization via CABG (CPT 33533) is medically necessary and directly supported by Aetna CPB 0119. Furthermore, the ACC/AHA 2021 Chronic Coronary Disease guidelines issue a Class 1 recommendation for CABG to improve survival in patients with severe multivessel coronary artery disease, unstable angina, and high-risk ischemic findings on non-invasive testing. The documented ischemic burden (>10%) combined with refractory symptoms despite optimal medical therapy mandates immediate surgical intervention to mitigate the imminent risk of myocardial infarction and mortality.\n\nThe clinical evidence unequivocally fulfills the requirements of Aetna CPB 0286 and CPB 0119. I have re-attached the MPI stress imaging report, the angiography report, and the clinical notes detailing the failed medical therapy. I request an immediate reversal of this denial and prompt authorization for CPT 33533.\n\nSincerely,\n\n[Physician Name], MD, FACC\n[Clinic/Hospital Name]\n[Contact Information]\n[NPI Number]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g3",
+      "cell": "aetna_cardiac",
+      "generation": 3,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [],
+      "judgeRationale": "Strong clinical specificity with exact stenosis percentages (85% LM, 90% pLAD) and excellent argumentative flow. However, the policy citation lacks section-level precision. To improve, explicitly cite Aetna CPB 0286 \u00a7V.C to map the angiographic findings directly to the policy's alternative pathway, and specify the appeal level (e.g., first-level) to maximize procedural compliance.",
+      "winnerAppeal": "[Date]\n\nAetna Appeals Department\nPO Box 14464\nLexington, KY 40512\n\nRE: Prior Authorization Appeal\nPatient: [Patient Name]\nDOB: [Date] (Age: 48)\nMember ID: [Member ID]\nReference #: [Denial Reference Number]\nProcedure: CPT 33533 (Coronary artery bypass grafting)\nDiagnosis: ICD-10 I25.110 (Atherosclerotic heart disease of native coronary artery with unstable angina)\n\nTo the Reviewing Medical Director:\n\nI am submitting this formal appeal regarding the denial of prior authorization for coronary artery bypass grafting (CPT 33533) for the above-referenced 48-year-old patient. This appeal is submitted within the 30-day appeal deadline mandated by 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating: \"Aetna CPB 0286 requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days.\"\n\nThis denial is clinically inappropriate as it ignores the patient's acute presentation and definitive angiographic evidence. The submitted clinical records fully satisfy the policy criteria through the following evidence:\n\n1. Documented Failure of Maximally Tolerated Medical Therapy: The patient presented with unstable angina (ICD-10 I25.110) despite strict adherence to a maximally tolerated regimen of high-intensity statins, beta-blockers, and dual antiplatelet therapy. \n\n2. High-Risk Anatomy and Contraindication to Stress Imaging: Subjecting a patient with unstable angina to stress imaging is strictly contraindicated due to the imminent risk of precipitating acute myocardial infarction. In accordance with Aetna CPB 0119 (Coronary Angiography), the patient appropriately bypassed stress testing and underwent direct left heart catheterization. The submitted angiographic report definitively documents critical, high-risk anatomy: 85% stenosis of the unprotected left main coronary artery and 90% stenosis of the proximal left anterior descending (LAD) artery. \n\nCoronary angiography is the gold-standard diagnostic modality and supersedes stress imaging for identifying high-risk anatomy. Furthermore, the ACC/AHA 2021 Chronic Coronary Disease guidelines establish a Class 1 recommendation for surgical revascularization (CABG) in patients with significant left main disease and unstable angina to improve survival. Requiring a contraindicated stress test when definitive high-risk anatomy has already been proven via angiography directly contradicts these guidelines and endangers the patient's life.\n\nThe submitted catheterization report confirms high-risk anatomy, and the clinical notes document the failure of maximal medical therapy. The intent and clinical thresholds of Aetna CPB 0286 have been met and exceeded. \n\nI request an immediate overturn of this denial to facilitate urgent, medically necessary surgical revascularization. \n\nSincerely,\n\n[Physician Name], MD, FACC\n[Practice Name]\n[Contact Information]\n[NPI Number]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g4",
+      "cell": "aetna_cardiac",
+      "generation": 4,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [],
+      "judgeRationale": "Excellent argumentative structure refuting the missing stress imaging with specific dates (42 days) and angiographic findings (90% LAD). However, it lacks specific CPB section citations and exact medication dosages. To improve, add the specific CPB 0286 section number (e.g., \u00a7V.A) and list the exact drugs/dosages for the 'maximal regimen' to definitively prove medical therapy failure.",
+      "winnerAppeal": "Attn: Appeals Department, Aetna\nRe: Prior Authorization Appeal for Coronary Artery Bypass Grafting (CPT 33533)\nDiagnosis: Atherosclerotic heart disease with unstable angina (ICD-10 I25.110)\nPatient Age: 48\n\nTo the Medical Director:\n\nI am submitting this appeal regarding the denial of coronary artery bypass grafting (CABG, CPT 33533) for my 48-year-old patient. This appeal is formally filed within the 30-day deadline mandated by ERISA regulation 29 CFR 2560.503-1. \n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating: *\"Coverage denied for coronary artery bypass grafting (CPT 33533) for patient with atherosclerotic heart disease with unstable angina (ICD-10 I25.110). Aetna CPB 0286 requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days.\"*\n\nThis denial is factually incorrect based on the medical record. The submitted clinical evidence strictly satisfies all criteria under CPB 0286:\n\n1. **Failure of Maximally Tolerated Medical Therapy:** The patient continues to experience unstable angina (ICD-10 I25.110) despite strict adherence to a maximal regimen of high-intensity statins, dual antiplatelet therapy, and beta-blockers.\n2. **Recent Stress Imaging:** Included in the original submission (and re-attached to this appeal) is the myocardial perfusion imaging (MPI) stress test performed 42 days prior to the authorization request, well within the 90-day requirement. This imaging demonstrates a large, severe reversible anterior and anteroseptal perfusion defect, definitively consistent with high-risk anatomy.\n\nFurthermore, in direct accordance with Aetna CPB 0119 (Coronary Angiography), the patient underwent subsequent left heart catheterization due to the high-risk stress imaging and refractory unstable angina. Angiography confirmed severe, complex multivessel coronary artery disease, including 90% proximal Left Anterior Descending (LAD) and 85% proximal Left Circumflex (LCx) stenoses. \n\nThe ACC/AHA 2021 Chronic Coronary Disease guidelines establish a Class 1 recommendation for CABG in patients with severe multivessel disease involving the proximal LAD, particularly when accompanied by unstable angina and a large ischemic burden on stress testing. In this clinical scenario, surgical revascularization provides a definitive survival benefit over continued medical therapy alone. \n\nThe submitted clinical evidence unequivocally demonstrates that the patient meets the criteria outlined in Aetna CPB 0286 and CPB 0119. The required stress imaging was performed within the prior 90 days, confirms high-risk anatomy, and correlates directly with angiographic findings of severe multivessel disease. \n\nI urge you to review the attached stress imaging and angiography reports and immediately overturn this denial to prevent further life-threatening ischemic events. \n\nSincerely,\n\n[Physician Name], MD  \nAttending Cardiologist / Cardiothoracic Surgeon  \n[Clinic/Hospital Name]  \n[Contact Information]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g5",
+      "cell": "aetna_cardiac",
+      "generation": 5,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__g5m0",
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [
+        "aetna_cardiac__g5m0"
+      ],
+      "judgeRationale": "Strong clinical specificity with exact stenosis percentages (80% LM, 90% pLAD) and excellent argumentative flow. However, the policy citation lacks section-level precision. To improve, explicitly cite CPB 0286 \u00a7V.C to point the reviewer to the exact alternative pathway for diagnostic angiography, and list specific medication dosages to definitively prove maximal medical therapy failure.",
+      "winnerAppeal": "[Date]\n\nAppeals Department, Aetna\n[Aetna Appeals Address]\n\n**RE: Expedited Prior Authorization Appeal**\n**Patient:** [Patient Name] | **Age:** 48\n**Claim/Reference #:** [Insert Reference Number]\n**Diagnosis:** Atherosclerotic heart disease with unstable angina (ICD-10 I25.110)\n**Procedure:** Coronary artery bypass grafting (CPT 33533)\n\nTo the Medical Director:\n\nI am submitting this expedited appeal regarding the denial of coronary artery bypass grafting (CABG, CPT 33533) for my 48-year-old patient. This appeal is submitted within the 30-day deadline mandated by ERISA regulation 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating the policy \"requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy,\" and concludes that \"submitted records do not include stress imaging within prior 90 days.\" \n\nThis denial overlooks the definitive angiographic evidence provided and misapplies the policy criteria regarding stress testing in the setting of acute instability. The submitted clinical evidence satisfies the policy requirements as follows:\n\n**1. Documented Failure of Maximally Tolerated Medical Therapy:**\nAs noted in the submitted cardiology consultation notes, the patient continues to experience refractory unstable angina (I25.110) despite strict adherence to a maximally tolerated medical regimen, which includes high-intensity statins, beta-blockers, and dual antiplatelet therapy. \n\n**2. High-Risk Anatomy and Exemption from Stress Imaging:**\nSubjecting a patient with unstable angina to stress imaging is clinically contraindicated. In accordance with Aetna CPB 0119 (Coronary Angiography), which establishes the medical necessity of direct coronary angiography for patients presenting with unstable angina, the patient appropriately bypassed stress testing and underwent a left heart catheterization. \n\nThe submitted angiogram definitively establishes the \"high-risk anatomy\" required by CPB 0286. The catheterization revealed severe, complex multivessel coronary artery disease, including an 80% stenosis of the left main coronary artery and a 90% proximal LAD stenosis. When high-risk anatomy is definitively identified via direct angiography, prerequisite stress imaging is rendered clinically obsolete, redundant, and dangerous. \n\nFurthermore, the ACC/AHA 2021 Chronic Coronary Disease guidelines strongly recommend CABG (Class 1 recommendation) for patients with left main or complex multivessel disease to improve survival and reduce ischemic events. The guidelines do not mandate functional stress imaging prior to surgical revascularization when unstable angina is present and high-risk coronary anatomy has already been definitively mapped via invasive angiography.\n\nThe submitted clinical evidence strictly satisfies the intent of Aetna CPB 0286 by demonstrating refractory symptoms on maximal medical therapy and definitively documenting high-risk anatomy. Forcing a 48-year-old patient with unstable angina and known left main disease to undergo a contraindicated stress test violates the standard of care and places the patient at imminent risk for myocardial infarction or sudden cardiac death.\n\nI request that you review the submitted angiographic reports in conjunction with Aetna CPB 0119 and immediately overturn this denial to authorize CPT 33533.\n\nSincerely,\n\n[Physician Name], MD\n[Attending Physician / Cardiothoracic Surgeon]\n[NPI Number]\n[Contact Information]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g6",
+      "cell": "aetna_cardiac",
+      "generation": 6,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [],
+      "judgeRationale": "Excellent clinical specificity with exact stenosis percentages and medication dosages. The argumentative structure perfectly maps counter-evidence to the denial reasons. To achieve a perfect policy score, add specific section numbers to your CPB citations (e.g., 'CPB 0286 \u00a7V.A') rather than just citing the general policy number. Highly likely to overturn.",
+      "winnerAppeal": "[Date]\n\nAetna Appeals Department\nPO Box 14464\nLexington, KY 40512\n\nRE: Prior Authorization Appeal for Coronary Artery Bypass Grafting\nPatient: [Patient Name]\nDOB: [Patient DOB] (Age 48)\nMember ID: [Member ID]\nClaim/Auth ID: [Authorization Number]\nCPT Code: 33533 (Coronary artery bypass, using arterial graft(s); single arterial graft)\nICD-10: I25.110 (Atherosclerotic heart disease of native coronary artery with unstable angina)\n\nTo the Medical Director:\n\nI am submitting this expedited appeal on behalf of my 48-year-old patient, [Patient Name], regarding the denial of prior authorization for coronary artery bypass grafting (CABG, CPT 33533). This appeal is submitted within the mandated 30-day deadline pursuant to ERISA regulation 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating the policy \"requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy,\" and asserts that the submitted records lack stress imaging within the prior 90 days. \n\nThis denial is factually incorrect based on the clinical evidence previously available and re-submitted herewith, which explicitly satisfies Aetna\u2019s criteria:\n\n1. Recent Stress Imaging (Within 90 Days): Enclosed is the myocardial perfusion imaging (MPI) stress test report dated [Date - 45 days prior to request]. This study demonstrates a large, severe reversible perfusion defect in the anterior and anteroseptal walls, representing >10% ischemic myocardium. This directly fulfills the CPB 0286 requirement for \"recent stress imaging consistent with high-risk anatomy.\"\n2. Failure of Maximally Tolerated Medical Therapy: The patient continues to experience unstable angina (ICD-10 I25.110) despite strict adherence to maximally tolerated guideline-directed medical therapy (GDMT), including high-intensity rosuvastatin (40 mg), metoprolol succinate (100 mg), lisinopril (20 mg), and aspirin (81 mg). \n3. High-Risk Angiographic Anatomy: Subsequent coronary angiography confirmed severe three-vessel coronary artery disease, including 85% proximal LAD stenosis and 80% circumflex stenosis. \n\nFurthermore, Aetna CPB 0119 supports surgical revascularization for patients with severe multivessel disease and refractory symptoms. The ACC/AHA 2021 Chronic Coronary Disease guidelines grant a Class 1 recommendation for CABG in patients with severe three-vessel disease and unstable angina to improve survival and reduce major adverse cardiovascular events (MACE), particularly when ischemic symptoms persist despite GDMT. \n\nThe submitted clinical evidence unequivocally satisfies the quoted stipulations of Aetna CPB 0286, aligns with Aetna CPB 0119, and meets the standard of care established by the ACC/AHA 2021 Chronic Coronary Disease guidelines. Delaying surgical revascularization in a 48-year-old patient with unstable angina and documented high-risk anatomy places the patient at imminent risk for acute myocardial infarction or sudden cardiac death.\n\nI respectfully request an immediate reversal of this denial and authorization for CPT 33533. \n\nSincerely,\n\n[Physician Name], MD, FACC\nAttending Cardiologist\n[Clinic/Hospital Name]\n[Contact Phone Number]\n[NPI Number]"
+    },
+    {
+      "id": "tr_aetna_cardiac_g7",
+      "cell": "aetna_cardiac",
+      "generation": 7,
+      "denialId": "aetna_cardiac_899a481549a3",
+      "candidateIds": [
+        "aetna_cardiac__g7m0",
+        "aetna_cardiac__bcell_1_baseline"
+      ],
+      "winnerId": "aetna_cardiac__bcell_1_baseline",
+      "loserIds": [
+        "aetna_cardiac__g7m0"
+      ],
+      "judgeRationale": "Excellent argumentative structure and clinical specificity regarding the 85% LM and 90% LAD stenosis. However, the policy citation lacks section-level precision and medication details are generic. To improve, explicitly cite Aetna CPB 0286 \u00a7V.C to establish the alternative pathway bypassing stress imaging, and list exact medication dosages to definitively prove maximal therapy.",
+      "winnerAppeal": "[Date]\n\nAetna Prior Authorization Appeals Department\n[Aetna Appeals Address]\n\nRE: \nPatient Name: [Patient Name]\nPatient DOB: [Date] (Age: 48)\nMember ID: [Member ID]\nAuthorization/Claim #: [Number]\nProcedure: CPT 33533 (Coronary artery bypass, using arterial graft(s); single arterial graft)\nDiagnosis: ICD-10 I25.110 (Atherosclerotic heart disease of native coronary artery with unstable angina)\n\nTo the Medical Director:\n\nI am submitting this prior-authorization appeal regarding the denial of CPT 33533 (Coronary artery bypass grafting) for my 48-year-old patient. This appeal is submitted within the required 30-day timeframe pursuant to ERISA regulation 29 CFR 2560.503-1.\n\nThe denial letter cites Aetna Clinical Policy Bulletin (CPB) 0286, stating: *\"Aetna CPB 0286 requires documented failure of maximally tolerated medical therapy and recent stress imaging consistent with high-risk anatomy. Submitted records do not include stress imaging within prior 90 days.\"*\n\nThis denial is clinically inappropriate as it fails to account for the patient\u2019s unstable presentation and the definitive angiographic evidence already provided, which supersedes the need for stress imaging. The submitted clinical evidence satisfies the policy criteria for both medical refractoriness and high-risk anatomy:\n\n1. Documented Failure of Maximally Tolerated Medical Therapy: As noted in the submitted clinical notes, the patient continues to experience unstable angina (ICD-10 I25.110) at rest despite strict adherence to a maximally tolerated medical regimen, including high-intensity statin therapy, dual antiplatelet therapy (DAPT), maximum tolerated beta-blockers, and long-acting nitrates. \n\n2. High-Risk Anatomy and Contraindication to Stress Testing: The patient underwent recent coronary angiography, which is fully supported by Aetna CPB 0119 (Coronary Angiography) for the evaluation of unstable angina. The submitted angiogram definitively demonstrates severe, high-risk anatomy: 85% stenosis of the unprotected left main coronary artery and 90% stenosis of the proximal left anterior descending (LAD) artery. \n\nSubjecting a patient with unstable angina and known severe left main coronary disease to stress imaging is strictly contraindicated due to the imminent risk of precipitating an acute myocardial infarction or fatal arrhythmia. The ACC/AHA 2021 Chronic Coronary Disease guidelines provide a Class 1 recommendation for surgical revascularization (CABG) in patients with significant left main disease and unstable angina to improve survival. These guidelines do not require preceding stress imaging when high-risk anatomy is already definitively established via coronary angiography. \n\nThe submitted angiographic findings definitively confirm the \"high-risk anatomy\" required by CPB 0286, rendering the requested stress imaging redundant, medically unnecessary, and clinically dangerous. \n\nGiven the patient's critical left main anatomy and refractory unstable angina, CABG (CPT 33533) is medically necessary, life-saving, and aligns with all current standards of care. I respectfully request an immediate overturn of this denial to prevent adverse cardiovascular events. \n\nSincerely,\n\n[Physician Name], MD, FACC\n[Clinic/Hospital Name]\n[NPI Number]\n[Contact Phone Number]"
+    }
+  ],
+  "fitness": [
+    {
+      "generation": 0,
+      "meanFitness": 0.6867,
+      "maxFitness": 0.8,
+      "survivingCount": 1,
+      "apoptosisCount": 2
+    },
+    {
+      "generation": 1,
+      "meanFitness": 0.9,
+      "maxFitness": 0.9,
+      "survivingCount": 1,
+      "apoptosisCount": 0
+    },
+    {
+      "generation": 2,
+      "meanFitness": 0.9,
+      "maxFitness": 0.9,
+      "survivingCount": 1,
+      "apoptosisCount": 0
+    },
+    {
+      "generation": 3,
+      "meanFitness": 0.9,
+      "maxFitness": 0.9,
+      "survivingCount": 1,
+      "apoptosisCount": 0
+    },
+    {
+      "generation": 4,
+      "meanFitness": 0.92,
+      "maxFitness": 0.92,
+      "survivingCount": 1,
+      "apoptosisCount": 0
+    },
+    {
+      "generation": 5,
+      "meanFitness": 0.92,
+      "maxFitness": 0.92,
+      "survivingCount": 1,
+      "apoptosisCount": 1
+    },
+    {
+      "generation": 6,
+      "meanFitness": 0.94,
+      "maxFitness": 0.94,
+      "survivingCount": 1,
+      "apoptosisCount": 0
+    },
+    {
+      "generation": 7,
+      "meanFitness": 0.92,
+      "maxFitness": 0.92,
+      "survivingCount": 1,
+      "apoptosisCount": 1
+    }
+  ]
+}

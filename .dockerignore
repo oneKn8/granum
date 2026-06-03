@@ -1,0 +1,16 @@
+# Keep the API build context tiny + reproducible.
+.git
+.venv
+**/node_modules
+**/.next
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+runs
+videos
+research
+tests
+web
+docs
+*.log

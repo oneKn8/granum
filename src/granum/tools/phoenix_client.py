@@ -275,6 +275,27 @@ class PhoenixClient:
             )
         return result
 
+    async def list_all_prompts(self) -> list[dict[str, Any]]:
+        """Return the raw prompt list (name + prompt id), tags/versions NOT included.
+
+        Used by demo-setup/reset tooling that needs every prompt (incl. tombstoned),
+        not just the active population.
+        """
+        resp = await self._mcp.call_tool("list-prompts", {"limit": 100})
+        return resp.get("items") or resp.get("prompts") or []
+
+    async def delete_prompt(self, prompt_id: str) -> None:
+        """Hard-delete a prompt (and all its versions) via REST.
+
+        This is a DEMO-SETUP / reset primitive, NOT apoptosis — apoptosis is
+        tag-based and preserves audit history (:meth:`tombstone`). Hard delete is
+        only for wiping a cell to a clean seed state between evolution runs.
+        Tolerates 404 (already gone).
+        """
+        resp = await self._rest.delete(f"{self._base_url}/v1/prompts/{prompt_id}")
+        if resp.status_code not in (204, 404):
+            resp.raise_for_status()
+
     async def list_coevolution_state(
         self, *, cell: str
     ) -> tuple[list[PromptVersion], list[PromptVersion]]:

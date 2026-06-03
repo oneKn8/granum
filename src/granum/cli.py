@@ -174,5 +174,130 @@ def cycle(
     asyncio.run(_run())
 
 
+@app.command()
+def evolve(
+    cell: str = typer.Option("aetna_cardiac", "--cell", help="Cell id, e.g. aetna_cardiac"),
+    generations: int = typer.Option(8, "--generations", help="Number of generations"),
+    seed_value: int = typer.Option(42, "--seed-value", help="Deterministic antigen seed"),
+    mutation_count: int = typer.Option(2, "--mutation-count", help="Daughters per generation"),
+    reset: bool = typer.Option(
+        False, "--reset", help="Hard-wipe + reseed the cell before evolving (clean run)"
+    ),
+) -> None:
+    """Run a multi-generation evolution for a cell and persist a CellPayload artifact.
+
+    The population affinity-matures against a consistent antigen (the same
+    denial each generation). Writes runs/cell_payloads/{cell}.json (the camelCase
+    CellPayload the frontend consumes) + a full artifact with appeals.
+    """
+    import asyncio
+    import json
+    import os
+    from pathlib import Path
+
+    required = ("GOOGLE_CLOUD_PROJECT", "PHOENIX_API_KEY", "PHOENIX_COLLECTOR_ENDPOINT")
+    missing = [k for k in required if not os.getenv(k)]
+    if missing:
+        typer.echo(f"evolve requires env: {', '.join(missing)}. Source .env first.", err=True)
+        raise typer.Exit(code=1)
+
+    try:
+        payer, diagnosis = cell.split("_", 1)
+    except ValueError:
+        typer.echo(f"--cell must look like 'payer_diagnosis' (got {cell!r})", err=True)
+        raise typer.Exit(code=2)
+
+    model = os.getenv("GEMINI_MODEL", "gemini-3.1-pro-preview")
+
+    from granum.center.cycle import GerminalCycle
+    from granum.center.evolution import GenerationalEvolution
+    from granum.center.judge import LLMJudge
+    from granum.center.mutation_strategies import propose_mutations
+    from granum.data.denials import Denial, generate_denial
+    from granum.data.seeds import reset_cell, seed_cell
+    from granum.tools.gemini_client import GeminiClient
+    from granum.tools.phoenix_session import phoenix_client_from_env
+
+    gemini = GeminiClient()
+
+    async def gen_appeal(system_prompt: str, denial: Denial) -> str:
+        prompt = (
+            f"{system_prompt}\n\n## Denial to appeal\n{denial.denial_text}\n\n"
+            f"Payer: {denial.payer} | Diagnosis: {denial.diagnosis} | "
+            f"CPT {denial.cpt_code} | ICD-10 {denial.icd10_code} | "
+            f"Patient age {denial.patient_age_range} | "
+            f"Appeal deadline {denial.appeal_deadline_days} days.\n\n"
+            "Write the complete appeal letter now. Output only the letter."
+        )
+        return await gemini.generate(model=model, prompt=prompt, temperature=0.3)
+
+    async def _run() -> None:
+        try:
+            from phoenix.otel import register
+
+            endpoint = os.environ["PHOENIX_COLLECTOR_ENDPOINT"].rstrip("/")
+            api_key = os.environ["PHOENIX_API_KEY"]
+            register(
+                project_name=os.getenv("PHOENIX_PROJECT_NAME", "granum"),
+                endpoint=f"{endpoint}/v1/traces",
+                headers={"api_key": api_key, "authorization": f"Bearer {api_key}"},
+                batch=False,
+                set_global_tracer_provider=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            typer.echo(f"WARN: Phoenix tracer registration failed: {exc}", err=True)
+
+        judge = LLMJudge(client=gemini, model=model, rubric_path=Path("data/judge_rubric.md"))
+        denial = generate_denial(payer=payer, diagnosis=diagnosis, seed=seed_value)
+        typer.echo(
+            f"Antigen {denial.denial_id} ({denial.denial_reason}); "
+            f"evolving {generations} generations…"
+        )
+
+        async with phoenix_client_from_env() as phoenix:
+            if reset:
+                n = await reset_cell(phoenix, cell=cell)
+                typer.echo(f"reset: hard-deleted {n} prompt(s) under {cell}")
+            seeded = await seed_cell(phoenix, cell=cell)
+            typer.echo(f"seeded {len(seeded)} gen-0 B-cells" if seeded else "cell already seeded")
+
+            cyc = GerminalCycle(
+                phoenix=phoenix,
+                judge=judge,
+                cell=cell,
+                valid_citations_path=f"data/{cell}/valid_citations.json",
+                gold_path=f"data/{cell}/gold_appeals.jsonl",
+                mutation_proposer=propose_mutations,
+                mutation_count=mutation_count,
+                appeal_generator=gen_appeal,
+            )
+            evolution = GenerationalEvolution(
+                cycle=cyc, phoenix=phoenix, cell=cell, generations=generations
+            )
+            result = await evolution.run(denial=denial)
+
+        payload = result.to_payload()
+        out_dir = Path("runs/cell_payloads")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / f"{cell}.json").write_text(json.dumps(payload, indent=2))
+
+        typer.echo("")
+        typer.echo("=== EVOLUTION COMPLETE (live) ===")
+        for p in result.fitness_curve():
+            typer.echo(
+                f"  gen {p['generation']}: max={p['maxFitness']:.3f} "
+                f"mean={p['meanFitness']:.3f} apoptosis={p['apoptosisCount']}"
+            )
+        typer.echo(
+            f"  fitness: {payload['meta']['baselineOverturn']:.3f} -> "
+            f"{payload['meta']['currentOverturn']:.3f}  |  "
+            f"{payload['meta']['apoptosisTotal']} extinctions across "
+            f"{len(payload['strategies'])} strategies"
+        )
+        typer.echo(f"  artifact: {out_dir / f'{cell}.json'}")
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()
