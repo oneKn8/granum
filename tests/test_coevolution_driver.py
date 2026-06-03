@@ -59,6 +59,23 @@ def _score(defensibility: int, feedback: str = "ok") -> DefensibilityScore:
     )
 
 
+def _antigen():
+    """A minimal antigen Denial writers draft a real appeal against."""
+    from granum.data.denials import Denial, DenialReason
+
+    return Denial(
+        denial_id="antigen_x",
+        payer="aetna",
+        diagnosis="cardiac",
+        cpt_code="93306",
+        icd10_code="I25.10",
+        patient_age_range="adv",
+        denial_reason=DenialReason.NOT_MEDICALLY_NECESSARY,
+        denial_text="antigen denial text",
+        submission_date="adversarial",
+    )
+
+
 def _make_driver(
     *,
     writers: list[PromptVersion],
@@ -107,6 +124,14 @@ def _make_driver(
     if mutation_proposer is None:
         mutation_proposer = MagicMock(return_value=[])
 
+    # Generate-then-judge: each writer drafts a real appeal from its system
+    # prompt + the antigen before scoring. The mock generator echoes the writer
+    # body so tests can assert the GENERATED text (not the prompt) reaches the
+    # payer/judge. Exposed on driver._appeal_generator for direct inspection.
+    mock_appeal_generator = AsyncMock(
+        side_effect=lambda writer_body, antigen: f"GENERATED APPEAL for {writer_body}"
+    )
+
     driver = CoEvolutionDriver(
         phoenix=mock_phoenix,
         payer_agent=mock_payer,
@@ -115,8 +140,43 @@ def _make_driver(
         gold_path=_GOLD_PATH,
         mutation_proposer=mutation_proposer,
         mutation_count=mutation_count,
+        appeal_generator=mock_appeal_generator,
+        antigen=_antigen(),
     )
     return driver, mock_phoenix, mock_payer, mock_judge
+
+
+@pytest.mark.asyncio
+async def test_generated_appeal_flows_to_payer_and_judge_not_prompt_body():
+    """The fix: writers draft a real appeal from their system prompt + antigen;
+    that GENERATED letter (not the writer prompt body) is what the payer attacks
+    and the judge scores. One appeal per writer, reused across all payers."""
+    writers = [_writer("w1", "SYSTEM PROMPT w1"), _writer("w2", "SYSTEM PROMPT w2")]
+    payers = [_payer("p1", "strict"), _payer("p2", "lenient")]
+    driver, _, mock_payer, mock_judge = _make_driver(
+        writers=writers,
+        payers=payers,
+        score_side_effect=[_score(5), _score(5), _score(5), _score(5)],
+    )
+
+    await driver.round()
+
+    # ONE appeal per writer (2 generations), reused across 2 payers each.
+    assert driver._appeal_generator.await_count == 2
+
+    deny_appeals = {c.kwargs["appeal"] for c in mock_payer.deny.await_args_list}
+    assert deny_appeals == {
+        "GENERATED APPEAL for SYSTEM PROMPT w1",
+        "GENERATED APPEAL for SYSTEM PROMPT w2",
+    }
+    judged = {c.kwargs["candidate_appeal"] for c in mock_judge.score.await_args_list}
+    assert judged == {
+        "GENERATED APPEAL for SYSTEM PROMPT w1",
+        "GENERATED APPEAL for SYSTEM PROMPT w2",
+    }
+    # The raw writer system prompt never reaches deny()/score().
+    assert "SYSTEM PROMPT w1" not in deny_appeals
+    assert "SYSTEM PROMPT w2" not in judged
 
 
 @pytest.mark.asyncio

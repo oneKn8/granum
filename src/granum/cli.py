@@ -307,6 +307,7 @@ def evolve(
 def coevolve(
     cell: str = typer.Option("aetna_cardiac", "--cell", help="Cell id, e.g. aetna_cardiac"),
     rounds: int = typer.Option(8, "--rounds", help="Number of Red Queen rounds"),
+    seed_value: int = typer.Option(42, "--seed-value", help="Deterministic antigen seed"),
     mutation_count: int = typer.Option(2, "--mutation-count", help="Mutations per winner per round"),
     reset: bool = typer.Option(
         False, "--reset", help="Hard-wipe + reseed the cell before running (clean slate)"
@@ -353,11 +354,23 @@ def coevolve(
     from granum.center.coevolution_run import CoEvolutionRun
     from granum.center.defensibility_judge import DefensibilityJudge
     from granum.center.mutation_strategies import propose_mutations
+    from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell, seed_payers
     from granum.tools.gemini_client import GeminiClient
     from granum.tools.phoenix_session import phoenix_client_from_env
 
     gemini = GeminiClient()
+
+    async def gen_appeal(system_prompt: str, denial: Denial) -> str:
+        prompt = (
+            f"{system_prompt}\n\n## Denial to appeal\n{denial.denial_text}\n\n"
+            f"Payer: {denial.payer} | Diagnosis: {denial.diagnosis} | "
+            f"CPT {denial.cpt_code} | ICD-10 {denial.icd10_code} | "
+            f"Patient age {denial.patient_age_range} | "
+            f"Appeal deadline {denial.appeal_deadline_days} days.\n\n"
+            "Write the complete appeal letter now. Output only the letter."
+        )
+        return await gemini.generate(model=model, prompt=prompt, temperature=0.3)
 
     async def _run() -> None:
         try:
@@ -379,6 +392,12 @@ def coevolve(
             client=gemini, model=model, rubric_path=Path("data/defensibility_rubric.md")
         )
         payer_agent = PayerAgent(client=gemini, model=model, payer=payer, diagnosis=diagnosis)
+        # Shared antigen all writers draft a real appeal against this run.
+        antigen = generate_denial(payer=payer, diagnosis=diagnosis, seed=seed_value)
+        typer.echo(
+            f"Antigen {antigen.denial_id} ({antigen.denial_reason}); "
+            f"co-evolving {rounds} rounds…"
+        )
 
         async with phoenix_client_from_env() as phoenix:
             if reset:
@@ -405,6 +424,8 @@ def coevolve(
                 gold_path=f"data/{cell}/gold_appeals.jsonl",
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
+                appeal_generator=gen_appeal,
+                antigen=antigen,
             )
             run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell=cell, rounds=rounds)
             result = await run.run()

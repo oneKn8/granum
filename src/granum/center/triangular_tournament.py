@@ -1,9 +1,17 @@
 """TriangularTournament — co-evolution of writer × payer populations.
 
-For each (writer, payer) pair across the cross product, the payer agent
-produces a denial response specifically targeting the writer's candidate
-appeal, then the DefensibilityJudge scores how well the appeal withstood
-that denial.
+Before scoring, each writer drafts ONE real appeal letter from its system
+prompt against the shared antigen denial (via the injected appeal_generator).
+That single generated appeal is then reused across every payer the writer
+faces. For each (writer, payer) pair the payer agent produces a denial
+response specifically targeting the writer's GENERATED appeal, then the
+DefensibilityJudge scores how well the appeal withstood that denial.
+
+A writer's system prompt is *instructions for drafting an appeal*, not an
+appeal — judging the prompt body directly rates every writer uniformly low.
+Generate-then-judge fixes that: writers are scored on the letter they
+actually produce. When no appeal_generator/antigen is supplied the tournament
+falls back to judging the writer body directly (legacy unit-test path).
 
 Writers are ranked by mean defensibility across all payers they faced
 (higher is better — the appeal that defends best on average wins).
@@ -19,14 +27,19 @@ from __future__ import annotations
 import asyncio
 import statistics
 from dataclasses import dataclass
+from typing import Awaitable, Callable
 
 from granum.adversary.payer_agent import PayerAgent
 from granum.center.defensibility_judge import DefensibilityJudge, DefensibilityScore
+from granum.data.denials import Denial
 from granum.data.gold import GoldAppeal
 
 
 WriterRef = tuple[str, str, str]   # (prompt_id, version_id, body)
 PayerRef = tuple[str, str, str]    # (prompt_id, version_id, persona_id)
+
+# Drafts an appeal letter from a writer system prompt + the antigen denial.
+AppealGenerator = Callable[[str, Denial], Awaitable[str]]
 
 
 @dataclass(frozen=True)
@@ -74,10 +87,14 @@ class TriangularTournament:
         payer_agent: PayerAgent,
         judge: DefensibilityJudge,
         gold: list[GoldAppeal],
+        appeal_generator: AppealGenerator | None = None,
+        antigen: Denial | None = None,
     ) -> None:
         self._payer_agent = payer_agent
         self._judge = judge
         self._gold = gold
+        self._appeal_generator = appeal_generator
+        self._antigen = antigen
 
     async def run(
         self,
@@ -90,11 +107,17 @@ class TriangularTournament:
                 "triangular tournament requires at least one writer and one payer"
             )
 
+        # Generate ONE real appeal per writer (concurrently), keyed by prompt_id.
+        # Reused across every payer the writer faces — never regenerated per pair.
+        # Falls back to the writer body directly when no generator is wired
+        # (preserves the pure-unit path where scores are mocked anyway).
+        appeals = await self._generate_appeals(writer_candidates)
+
         pairs: list[tuple[WriterRef, PayerRef]] = [
             (w, p) for w in writer_candidates for p in payer_candidates
         ]
         pair_scores = await asyncio.gather(
-            *[self._score_pair(w, p) for w, p in pairs]
+            *[self._score_pair(w, p, appeals[w[0]]) for w, p in pairs]
         )
         pair_scores_tuple = tuple(pair_scores)
 
@@ -109,16 +132,32 @@ class TriangularTournament:
             all_pair_scores=pair_scores_tuple,
         )
 
+    async def _generate_appeals(
+        self, writer_candidates: list[WriterRef]
+    ) -> dict[str, str]:
+        """Draft one appeal per writer from its system prompt + the antigen.
+
+        Returns a dict keyed by writer prompt_id. When no appeal_generator /
+        antigen is wired, the writer body is used as-is (legacy fallback).
+        """
+        if self._appeal_generator is None or self._antigen is None:
+            return {w[0]: w[2] for w in writer_candidates}
+        generator = self._appeal_generator
+        antigen = self._antigen
+        drafted = await asyncio.gather(
+            *[generator(w[2], antigen) for w in writer_candidates]
+        )
+        return {w[0]: appeal for w, appeal in zip(writer_candidates, drafted)}
+
     async def _score_pair(
-        self, writer: WriterRef, payer: PayerRef
+        self, writer: WriterRef, payer: PayerRef, appeal: str
     ) -> PairScore:
-        _, _, writer_body = writer
         _, _, persona_id = payer
         denial = await self._payer_agent.deny(
-            appeal=writer_body, persona_id=persona_id
+            appeal=appeal, persona_id=persona_id
         )
         score = await self._judge.score(
-            candidate_appeal=writer_body,
+            candidate_appeal=appeal,
             payer_denial_response=denial.denial_text,
             reference_set=self._gold,
         )

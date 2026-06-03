@@ -42,7 +42,7 @@ def _make_tournament(
     *,
     deny_side_effect=None,
     score_side_effect=None,
-) -> tuple[TriangularTournament, AsyncMock, AsyncMock]:
+) -> tuple[TriangularTournament, AsyncMock, AsyncMock, AsyncMock]:
     mock_payer = AsyncMock(spec=PayerAgent)
     mock_judge = AsyncMock(spec=DefensibilityJudge)
     if deny_side_effect is None:
@@ -51,17 +51,31 @@ def _make_tournament(
         mock_payer.deny.side_effect = deny_side_effect
     if score_side_effect is not None:
         mock_judge.score.side_effect = score_side_effect
-    tournament = TriangularTournament(
-        payer_agent=mock_payer, judge=mock_judge, gold=[]
+
+    # The tournament drafts ONE appeal per writer from its system prompt + the
+    # antigen, then judges THAT letter (not the writer prompt body). The mock
+    # generator echoes the writer body so we can assert the generated text
+    # (not the raw prompt) flows into deny()/score().
+    mock_appeal_generator = AsyncMock(
+        side_effect=lambda writer_body, antigen: f"GENERATED APPEAL for {writer_body}"
     )
-    return tournament, mock_payer, mock_judge
+    antigen = _denial("antigen")
+
+    tournament = TriangularTournament(
+        payer_agent=mock_payer,
+        judge=mock_judge,
+        gold=[],
+        appeal_generator=mock_appeal_generator,
+        antigen=antigen,
+    )
+    return tournament, mock_payer, mock_judge, mock_appeal_generator
 
 
 @pytest.mark.asyncio
 async def test_run_executes_full_cross_product_of_writers_and_payers():
     # 2 writers × 3 payers = 6 pairs.
     scores = [_score(5) for _ in range(6)]
-    tournament, mock_payer, mock_judge = _make_tournament(
+    tournament, mock_payer, mock_judge, _ = _make_tournament(
         score_side_effect=scores,
     )
     writers = [
@@ -79,11 +93,52 @@ async def test_run_executes_full_cross_product_of_writers_and_payers():
 
 
 @pytest.mark.asyncio
+async def test_generate_then_judge_drafts_one_appeal_per_writer_and_scores_it():
+    """The fix: each writer drafts ONE real appeal (reused across all payers),
+    and the GENERATED letter — not the writer prompt body — is what the payer
+    attacks and the judge scores."""
+    scores = [_score(5) for _ in range(4)]  # 2 writers × 2 payers
+    tournament, mock_payer, mock_judge, mock_gen = _make_tournament(
+        score_side_effect=scores,
+    )
+    writers = [
+        ("w1", "v1", "SYSTEM PROMPT w1"),
+        ("w2", "v1", "SYSTEM PROMPT w2"),
+    ]
+    payers = [
+        ("py1", "v1", "strict"),
+        ("py2", "v1", "lenient"),
+    ]
+    await tournament.run(writer_candidates=writers, payer_candidates=payers)
+
+    # ONE appeal generated per writer (2 total), NOT one per pair (would be 4).
+    assert mock_gen.await_count == 2
+    gen_inputs = {call.args[0] for call in mock_gen.await_args_list}
+    assert gen_inputs == {"SYSTEM PROMPT w1", "SYSTEM PROMPT w2"}
+
+    # The payer attacks the GENERATED appeal, never the raw system prompt.
+    deny_appeals = {c.kwargs["appeal"] for c in mock_payer.deny.await_args_list}
+    assert deny_appeals == {
+        "GENERATED APPEAL for SYSTEM PROMPT w1",
+        "GENERATED APPEAL for SYSTEM PROMPT w2",
+    }
+    # The judge scores the GENERATED appeal, never the raw system prompt.
+    judged = {c.kwargs["candidate_appeal"] for c in mock_judge.score.await_args_list}
+    assert judged == {
+        "GENERATED APPEAL for SYSTEM PROMPT w1",
+        "GENERATED APPEAL for SYSTEM PROMPT w2",
+    }
+    # Sanity: the raw prompt body never leaks into deny()/score().
+    assert "SYSTEM PROMPT w1" not in deny_appeals
+    assert "SYSTEM PROMPT w1" not in judged
+
+
+@pytest.mark.asyncio
 async def test_writer_winner_ranks_by_mean_defensibility_across_all_payers():
     # Order: (wA,py1), (wA,py2), (wB,py1), (wB,py2)
     # wA: 9, 7 → mean 8.0 ; wB: 6, 4 → mean 5.0
     scores = [_score(9), _score(7), _score(6), _score(4)]
-    tournament, _, _ = _make_tournament(score_side_effect=scores)
+    tournament, _, _, _ = _make_tournament(score_side_effect=scores)
     writers = [
         ("wA", "v1", "appeal A"),
         ("wB", "v1", "appeal B"),
@@ -106,7 +161,7 @@ async def test_payer_winner_ranks_by_mean_inverse_defensibility():
     # py1 inverse mean: (10-9 + 10-6)/2 = 2.5
     # py2 inverse mean: (10-7 + 10-4)/2 = 4.5 ← winner
     scores = [_score(9), _score(7), _score(6), _score(4)]
-    tournament, _, _ = _make_tournament(score_side_effect=scores)
+    tournament, _, _, _ = _make_tournament(score_side_effect=scores)
     writers = [
         ("wA", "v1", "appeal A"),
         ("wB", "v1", "appeal B"),
@@ -127,7 +182,7 @@ async def test_payer_winner_ranks_by_mean_inverse_defensibility():
 async def test_tie_break_by_prompt_id_ascending():
     # All scores equal → tie. Lexicographically smallest prompt_id wins.
     scores = [_score(7), _score(7), _score(7), _score(7)]
-    tournament, _, _ = _make_tournament(score_side_effect=scores)
+    tournament, _, _, _ = _make_tournament(score_side_effect=scores)
     writers = [
         ("wB", "v1", "appeal B"),
         ("wA", "v1", "appeal A"),
@@ -146,7 +201,7 @@ async def test_tie_break_by_prompt_id_ascending():
 
 @pytest.mark.asyncio
 async def test_run_raises_on_empty_writer_candidates():
-    tournament, _, _ = _make_tournament()
+    tournament, _, _, _ = _make_tournament()
     with pytest.raises(
         ValueError, match="at least one writer and one payer"
     ):
@@ -158,7 +213,7 @@ async def test_run_raises_on_empty_writer_candidates():
 
 @pytest.mark.asyncio
 async def test_run_raises_on_empty_payer_candidates():
-    tournament, _, _ = _make_tournament()
+    tournament, _, _, _ = _make_tournament()
     with pytest.raises(
         ValueError, match="at least one writer and one payer"
     ):
@@ -171,7 +226,7 @@ async def test_run_raises_on_empty_payer_candidates():
 @pytest.mark.asyncio
 async def test_pair_scores_record_all_writer_payer_combinations():
     scores = [_score(5), _score(5), _score(5), _score(5)]
-    tournament, _, _ = _make_tournament(score_side_effect=scores)
+    tournament, _, _, _ = _make_tournament(score_side_effect=scores)
     writers = [
         ("wA", "v1", "appeal A"),
         ("wB", "v1", "appeal B"),
@@ -199,7 +254,7 @@ async def test_pair_scores_record_all_writer_payer_combinations():
 async def test_writer_winner_mean_defensibility_property_correct():
     # Same fixture as test_writer_winner_ranks_*: winner wA mean = 8.0.
     scores = [_score(9), _score(7), _score(6), _score(4)]
-    tournament, _, _ = _make_tournament(score_side_effect=scores)
+    tournament, _, _, _ = _make_tournament(score_side_effect=scores)
     writers = [
         ("wA", "v1", "appeal A"),
         ("wB", "v1", "appeal B"),

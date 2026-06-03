@@ -27,10 +27,12 @@ from granum.adversary.payer_persona import SEEDED_PERSONAS
 from granum.center.defensibility_judge import DefensibilityJudge
 from granum.center.mutation import Mutation, apply_mutation
 from granum.center.triangular_tournament import (
+    AppealGenerator,
     PayerRef,
     TriangularTournament,
     WriterRef,
 )
+from granum.data.denials import Denial
 from granum.data.gold import load_gold_appeals
 from granum.tools.phoenix_client import PhoenixClient, PromptVersion
 
@@ -109,6 +111,8 @@ class CoEvolutionDriver:
         mutation_count: int = 2,
         mutation_rate_cap: float = 0.15,
         adversary_reset_every: int = 5,
+        appeal_generator: AppealGenerator | None = None,
+        antigen: Denial | None = None,
     ) -> None:
         if not (0.0 <= mutation_rate_cap <= 1.0):
             raise ValueError(
@@ -127,6 +131,10 @@ class CoEvolutionDriver:
         self._mutation_count = mutation_count
         self._mutation_rate_cap = mutation_rate_cap
         self._adversary_reset_every = adversary_reset_every
+        # Generate-then-judge: when wired, each writer drafts a real appeal from
+        # its system prompt against this antigen before the tournament scores it.
+        self._appeal_generator = appeal_generator
+        self._antigen = antigen
         self._round_index = 0
 
     def _effective_mutation_count(self, population_size: int) -> int:
@@ -176,6 +184,8 @@ class CoEvolutionDriver:
                     payer_agent=self._payer_agent,
                     judge=self._judge,
                     gold=self._gold,
+                    appeal_generator=self._appeal_generator,
+                    antigen=self._antigen,
                 )
                 result = await tournament.run(
                     writer_candidates=writer_refs,
