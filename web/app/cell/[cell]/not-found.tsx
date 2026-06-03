@@ -8,8 +8,8 @@ export default function NotFound() {
         That cell hasn&rsquo;t been seeded yet.
       </h1>
       <p className="mt-4 font-serif text-base text-fg-1">
-        Granum holds five (payer × diagnosis) cells. Pick one from the list and explore
-        its lineage.
+        Pick a (payer × diagnosis) cell from the list on the home page and explore its
+        lineage.
       </p>
       <Link
         href="/"

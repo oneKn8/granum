@@ -39,18 +39,19 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
 }
 
 export function FitnessCurve({ points, baseline, height = 220 }: FitnessCurveProps) {
+  // Peak of the plotted max-fitness line — honest (it is literally the highest
+  // point on the curve) and consistent with the page's headline appeal-fitness.
+  const peak = points.length > 0 ? Math.max(...points.map((p) => p.maxFitness)) : null;
   return (
     <figure
       className="flex flex-col gap-2 border border-stroke-1 bg-bg-1 p-4"
-      aria-label="Fitness curve over generations"
+      aria-label="Appeal fitness over generations"
     >
       <figcaption className="flex items-baseline justify-between font-sans text-sm text-fg-1">
-        <span>Fitness over generations</span>
+        <span>Appeal fitness over generations</span>
         <span className="font-mono text-xs text-fg-2">
-          baseline {baseline?.toFixed(2) ?? "—"} → champion{" "}
-          {points.length > 0
-            ? points[points.length - 1].maxFitness.toFixed(2)
-            : "—"}
+          baseline {baseline?.toFixed(2) ?? "—"} → peak{" "}
+          {peak !== null ? peak.toFixed(2) : "—"}
         </span>
       </figcaption>
       <div style={{ height }}>

@@ -5,12 +5,29 @@ import { CELL_LABEL, CELL_LIST } from "@/lib/mock-data";
 import { cn } from "@/lib/cn";
 import type { CellId } from "@/lib/types";
 
+export interface CellNavItem {
+  id: CellId;
+  label: string;
+}
+
 interface CellSelectorProps {
   current?: CellId;
   className?: string;
+  /**
+   * Cells to offer. When omitted, falls back to the full static list (mock
+   * mode). Server components pass the live API's served cells here so the nav
+   * never links to a cell the deployed API can't render.
+   */
+  items?: CellNavItem[];
 }
 
-export function CellSelector({ current, className }: CellSelectorProps) {
+const FALLBACK_ITEMS: CellNavItem[] = CELL_LIST.map((id) => ({
+  id,
+  label: CELL_LABEL[id],
+}));
+
+export function CellSelector({ current, className, items }: CellSelectorProps) {
+  const cells = items && items.length > 0 ? items : FALLBACK_ITEMS;
   return (
     <nav
       aria-label="Select a (payer × diagnosis) cell"
@@ -19,7 +36,7 @@ export function CellSelector({ current, className }: CellSelectorProps) {
         className,
       )}
     >
-      {CELL_LIST.map((id) => {
+      {cells.map(({ id, label }) => {
         const isCurrent = id === current;
         return (
           <Link
@@ -33,7 +50,7 @@ export function CellSelector({ current, className }: CellSelectorProps) {
                 : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
             )}
           >
-            {CELL_LABEL[id]}
+            {label}
           </Link>
         );
       })}

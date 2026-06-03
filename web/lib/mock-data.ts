@@ -400,6 +400,22 @@ export function getCell(id: CellId): CellPayload {
   return ALL_CELLS[id];
 }
 
+const titleCase = (s: string): string =>
+  s.replace(/\b\w/g, (c) => c.toUpperCase());
+
+/**
+ * Display label for a cell. Prefers the curated CELL_LABEL; falls back to a
+ * title-cased "Payer · Diagnosis" for any cell the live API serves that the
+ * static map doesn't know about. Keeps the nav honest to what the API returns.
+ */
+export function cellLabelFromMeta(meta: {
+  id: CellId;
+  payer: string;
+  diagnosis: string;
+}): string {
+  return CELL_LABEL[meta.id] ?? `${titleCase(meta.payer)} · ${titleCase(meta.diagnosis)}`;
+}
+
 // ---------- Co-evolution mock (dual tree) ----------
 
 export function getCoEvolution(cell: CellId): CoEvolutionState {

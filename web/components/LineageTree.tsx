@@ -24,6 +24,20 @@ interface TreeDatum {
   children: TreeDatum[];
 }
 
+/** Horizontal pixels per generation (one x-column per generation of evolution). */
+const GEN_SPACING = 104;
+
+/**
+ * Compact form for an inline tree label. Strips the redundant "G8 —" / "L3 —"
+ * generation prefix (generation is shown on the axis and the f=… sub-line) and
+ * truncates long real-world labels. The full label lives in the PromptDiff
+ * panel and the node's aria-label, so nothing is lost — the tree stays legible.
+ */
+function shortLabel(label: string): string {
+  const stripped = label.replace(/^[GL][\d.]*\s*[—–-]\s*/i, "").trim() || label;
+  return stripped.length > 30 ? `${stripped.slice(0, 29).trimEnd()}…` : stripped;
+}
+
 function buildHierarchy(strategies: BCellStrategy[]): TreeDatum | null {
   const byId = new Map<string, TreeDatum>();
   for (const s of strategies) byId.set(s.id, { strategy: s, children: [] });
@@ -40,17 +54,18 @@ function buildHierarchy(strategies: BCellStrategy[]): TreeDatum | null {
   return root;
 }
 
-const STATUS_FILL: Record<BCellStrategy["status"], string> = {
-  alive: "var(--color-survivor)",
-  tombstoned: "var(--color-fg-tomb)",
-  champion: "var(--color-champion)",
-};
-
-const STATUS_STROKE: Record<BCellStrategy["status"], string> = {
-  alive: "var(--color-survivor)",
-  tombstoned: "var(--color-fg-tomb)",
-  champion: "var(--color-champion)",
-};
+// Node color is semantic, per DESIGN.md §4 (single-accent + biology-stain rule):
+//   champion           → hematoxylin amber (promoted to production)
+//   tombstoned         → desaturated grey  (apoptosed; the permanent record)
+//   alive + experimental → methyl-violet magenta (the live "mutant" tag)
+//   alive + production   → eosin blue       (surviving lineage, the primary accent)
+// This is the only place the magenta stain is keyed to data state.
+function nodeColor(s: BCellStrategy): string {
+  if (s.status === "champion") return "var(--color-champion)";
+  if (s.status === "tombstoned") return "var(--color-fg-tomb)";
+  if (s.tag === "experimental") return "var(--color-mutant)";
+  return "var(--color-survivor)";
+}
 
 export function LineageTree({
   strategies,
@@ -68,9 +83,32 @@ export function LineageTree({
     const rootDatum = buildHierarchy(strategies);
     if (!rootDatum) return null;
     const root = hierarchy<TreeDatum>(rootDatum);
-    const layoutFn = tree<TreeDatum>().nodeSize([40, 130]);
-    return layoutFn(root);
+    // [vertical sibling gap, horizontal gap]. d3's depth layout is used only
+    // for vertical sibling separation; horizontal is overridden below.
+    const layoutFn = tree<TreeDatum>().nodeSize([44, GEN_SPACING]);
+    const laid = layoutFn(root);
+    // Position horizontally by GENERATION (time), not lineage depth: the x-axis
+    // then reads as generations, and a strategy that survives several
+    // generations before mutating shows as a longer edge rather than collapsing
+    // adjacent. (Child generation is always > parent's, so edges stay rightward.)
+    for (const d of laid.descendants()) {
+      d.y = d.data.strategy.generation * GEN_SPACING;
+    }
+    return laid;
   }, [strategies]);
+
+  // One column per generation present, at its time-position. Drives the faint
+  // depth axis so the left→right progression reads explicitly as generations.
+  const genColumns = useMemo(() => {
+    if (!layout) return [];
+    const byGen = new Map<number, number>();
+    for (const n of layout.descendants()) {
+      byGen.set(n.data.strategy.generation, n.y);
+    }
+    return Array.from(byGen.entries())
+      .map(([generation, y]) => ({ generation, y }))
+      .sort((a, b) => a.y - b.y);
+  }, [layout]);
 
   // Bounding box of laid-out nodes — used to fit the tree to the viewport.
   const bbox = useMemo(() => {
@@ -93,8 +131,11 @@ export function LineageTree({
     const gEl = gRef.current;
     if (!svgEl || !gEl || !bbox) return;
     const width = svgEl.clientWidth || 800;
-    const padding = 120;
-    const treeW = bbox.yMax - bbox.yMin + padding * 2;
+    const padding = 56;
+    // Survivor labels render to the right of their node; reserve room so the
+    // rightmost (latest-generation) labels are not clipped by the viewport.
+    const labelPad = 185;
+    const treeW = bbox.yMax - bbox.yMin + padding * 2 + labelPad;
     const treeH = bbox.xMax - bbox.xMin + padding * 2;
     const scale = Math.min(width / treeW, height / treeH, 1);
     const tx = padding * scale - bbox.yMin * scale;
@@ -149,6 +190,33 @@ export function LineageTree({
           className="block"
         >
           <g ref={gRef}>
+            {/* Generation-depth axis — faint columns behind the lineage so the
+                left→right progression reads explicitly as generations. */}
+            {bbox &&
+              genColumns.map((c) => (
+                <g key={`gen-${c.generation}`} className="pointer-events-none">
+                  <line
+                    x1={c.y}
+                    x2={c.y}
+                    y1={bbox.xMin - 20}
+                    y2={bbox.xMax + 18}
+                    stroke="var(--color-stroke-1)"
+                    strokeWidth={1}
+                    strokeDasharray="2 5"
+                    opacity={0.4}
+                  />
+                  <text
+                    x={c.y}
+                    y={bbox.xMin - 28}
+                    textAnchor="middle"
+                    fontFamily="var(--font-mono)"
+                    fontSize={9}
+                    fill="var(--color-fg-2)"
+                  >
+                    g{c.generation}
+                  </text>
+                </g>
+              ))}
             {/* Edges */}
             {links.map((link) => {
               const childStatus = link.target.data.strategy.status;
@@ -169,6 +237,15 @@ export function LineageTree({
               const isSelected = selectedId === s.id;
               const isChampion = s.status === "champion";
               const isTomb = s.status === "tombstoned";
+              // A freshly-spawned mutant carries fitness 0 until the judge scores
+              // it next cycle. Render that honestly as "awaiting judge" rather
+              // than "f=0.00", which would read as a failed strategy.
+              const unscored = s.status === "alive" && s.fitness === 0;
+              const color = nodeColor(s);
+              // Living lineage (champion + alive) is always labelled; the dead
+              // are a quiet field of struck grey dots — their labels surface on
+              // hover/focus/selection. Declutters 23 labels down to the survivors.
+              const showLabel = !isTomb || isHover || isSelected;
               return (
                 <g
                   key={s.id}
@@ -177,7 +254,7 @@ export function LineageTree({
                   data-status={s.status}
                   tabIndex={0}
                   role="button"
-                  aria-label={`${s.label}, generation ${s.generation}, fitness ${s.fitness.toFixed(2)}, ${s.status}`}
+                  aria-label={`${s.label}, generation ${s.generation}, ${unscored ? "awaiting judge" : `fitness ${s.fitness.toFixed(2)}`}, ${s.status}`}
                   aria-pressed={isSelected}
                   onMouseEnter={() => setHoverId(s.id)}
                   onMouseLeave={() => setHoverId(null)}
@@ -206,7 +283,7 @@ export function LineageTree({
                     <circle
                       r={12}
                       fill="none"
-                      stroke={STATUS_STROKE[s.status]}
+                      stroke={color}
                       strokeWidth={1}
                       opacity={0.5}
                     />
@@ -214,30 +291,51 @@ export function LineageTree({
                   {/* Body */}
                   <circle
                     r={isHover ? 6.5 : 5.5}
-                    fill={STATUS_FILL[s.status]}
-                    stroke={STATUS_STROKE[s.status]}
+                    fill={color}
+                    stroke={color}
                     strokeWidth={1}
                   />
-                  {/* Label */}
-                  <text
-                    x={10}
-                    y={4}
-                    fontFamily="var(--font-mono)"
-                    fontSize={10}
-                    fill={isTomb ? "var(--color-fg-tomb)" : "var(--color-fg-1)"}
-                    style={isTomb ? { textDecoration: "line-through" } : undefined}
-                  >
-                    {s.label}
-                  </text>
-                  <text
-                    x={10}
-                    y={16}
-                    fontFamily="var(--font-mono)"
-                    fontSize={9}
-                    fill="var(--color-fg-2)"
-                  >
-                    f={s.fitness.toFixed(2)} · g{s.generation}
-                  </text>
+                  {/* Label — survivors always; the dead reveal on hover/focus.
+                      aria-hidden: the node's name comes from its aria-label (the
+                      full, untruncated label); the visual text is decorative and
+                      truncated, so it must not compete as the accessible name. */}
+                  {showLabel && (
+                    <g aria-hidden="true">
+                      {/* Halo behind a revealed dead label so it reads above
+                          neighbouring dots without reordering the DOM. */}
+                      {isTomb && (
+                        <rect
+                          x={9}
+                          y={-7}
+                          width={shortLabel(s.label).length * 6.2 + 10}
+                          height={26}
+                          fill="var(--color-bg-0)"
+                          opacity={0.82}
+                        />
+                      )}
+                      <text
+                        x={11}
+                        y={4}
+                        fontFamily="var(--font-mono)"
+                        fontSize={11}
+                        fill={isTomb ? "var(--color-fg-tomb)" : "var(--color-fg-0)"}
+                        style={isTomb ? { textDecoration: "line-through" } : undefined}
+                      >
+                        {shortLabel(s.label)}
+                      </text>
+                      <text
+                        x={11}
+                        y={16.5}
+                        fontFamily="var(--font-mono)"
+                        fontSize={9.5}
+                        fill={isChampion ? "var(--color-champion)" : "var(--color-fg-2)"}
+                      >
+                        {unscored
+                          ? `awaiting judge · g${s.generation}`
+                          : `f=${s.fitness.toFixed(2)} · g${s.generation}`}
+                      </text>
+                    </g>
+                  )}
                 </g>
               );
             })}

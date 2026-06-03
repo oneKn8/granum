@@ -23,7 +23,10 @@ const jetbrains = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://granum.app";
+// Canonical / Open Graph base URL. Override at deploy time with the real domain
+// (NEXT_PUBLIC_SITE_URL); falls back to the production domain for local builds so
+// canonical + og:url always agree with metadataBase.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://granum.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -3,16 +3,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CellDashboard } from "@/components/CellDashboard";
 import { CellSelector } from "@/components/CellSelector";
-import { getCellPayload, getCoEvolution } from "@/lib/api";
-import { ALL_CELLS, CELL_LABEL, CELL_LIST } from "@/lib/mock-data";
-import type { CellId } from "@/lib/types";
+import { ApiError, getCellPayload, getCoEvolution, listCellMetas } from "@/lib/api";
+import { ALL_CELLS, CELL_LABEL, cellLabelFromMeta } from "@/lib/mock-data";
+import type { CellId, CellMeta, CellPayload, CoEvolutionState } from "@/lib/types";
 
 interface CellPageProps {
   params: Promise<{ cell: string }>;
 }
 
-export function generateStaticParams() {
-  return CELL_LIST.map((id) => ({ cell: id }));
+export async function generateStaticParams() {
+  // Data-driven: only pre-render cells the live API actually serves, so a
+  // real-API build doesn't try (and fail) to render unseeded cells.
+  const metas = await listCellMetas();
+  return metas.map((m) => ({ cell: m.id }));
 }
 
 function isCellId(id: string): id is CellId {
@@ -22,7 +25,14 @@ function isCellId(id: string): id is CellId {
 export async function generateMetadata({ params }: CellPageProps): Promise<Metadata> {
   const { cell } = await params;
   if (!isCellId(cell)) return { title: "Cell not found" };
-  const { meta } = await getCellPayload(cell);
+  let meta: CellMeta;
+  try {
+    ({ meta } = await getCellPayload(cell));
+  } catch (err) {
+    // Unseeded cell on the live API → minimal metadata; the page itself 404s.
+    if (err instanceof ApiError && err.status === 404) return { title: "Cell not found" };
+    throw err;
+  }
   const title = `${meta.payer} · ${meta.diagnosis}`;
   const description = `Granum lineage for ${title}. Baseline appeal fitness ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`;
   const path = `/cell/${cell}`;
@@ -49,11 +59,22 @@ export default async function CellPage({ params }: CellPageProps) {
   const { cell } = await params;
   if (!isCellId(cell)) notFound();
 
-  const [payload, coEvolution] = await Promise.all([
-    getCellPayload(cell),
-    getCoEvolution(cell),
-  ]);
+  let payload: CellPayload;
+  let coEvolution: CoEvolutionState;
+  let cellMetas: CellMeta[];
+  try {
+    [payload, coEvolution, cellMetas] = await Promise.all([
+      getCellPayload(cell),
+      getCoEvolution(cell),
+      listCellMetas(),
+    ]);
+  } catch (err) {
+    // A known cell id the live API hasn't seeded (404) → 404 page, not a 500.
+    if (err instanceof ApiError && err.status === 404) notFound();
+    throw err;
+  }
   const meta = payload.meta;
+  const navItems = cellMetas.map((m) => ({ id: m.id, label: cellLabelFromMeta(m) }));
 
   const lift = meta.currentOverturn - meta.baselineOverturn;
 
@@ -70,7 +91,7 @@ export default async function CellPage({ params }: CellPageProps) {
               {CELL_LABEL[cell]}
             </span>
           </Link>
-          <CellSelector current={cell} />
+          <CellSelector current={cell} items={navItems} />
         </div>
       </header>
 
@@ -108,7 +129,7 @@ export default async function CellPage({ params }: CellPageProps) {
             <p className="mt-1 font-mono text-base text-fg-0">
               <span className="text-survivor">{meta.populationSize}</span>
               <span className="text-fg-2"> · </span>
-              <span className="text-fg-tomb">{meta.apoptosisTotal}</span>
+              <span className="text-fg-2">{meta.apoptosisTotal}</span>
             </p>
           </div>
           <div>
@@ -116,7 +137,7 @@ export default async function CellPage({ params }: CellPageProps) {
               appeal fitness
             </p>
             <p className="mt-1 font-mono text-base text-fg-0">
-              <span className="text-fg-tomb">
+              <span className="text-fg-2">
                 {(meta.baselineOverturn * 100).toFixed(0)}%
               </span>{" "}
               →{" "}

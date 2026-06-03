@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { LineageTree } from "@/components/LineageTree";
 import { CellSelector } from "@/components/CellSelector";
-import { getCellPayload } from "@/lib/api";
+import { getCellPayload, listCellMetas } from "@/lib/api";
+import { cellLabelFromMeta } from "@/lib/mock-data";
 
 export default async function LandingPage() {
-  const aetna = await getCellPayload("aetna_cardiac");
+  const [aetna, cellMetas] = await Promise.all([
+    getCellPayload("aetna_cardiac"),
+    listCellMetas(),
+  ]);
+  const navItems = cellMetas.map((m) => ({ id: m.id, label: cellLabelFromMeta(m) }));
+  const { baselineOverturn, currentOverturn, generations, apoptosisTotal } = aetna.meta;
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
 
   return (
     <div className="min-h-dvh">
@@ -69,7 +76,7 @@ export default async function LandingPage() {
             <div className="col-span-12 mt-10 lg:col-span-6 lg:mt-0 lg:-ml-12">
               <LineageTree
                 strategies={aetna.strategies}
-                caption="Aetna · Cardiac — 8 generations, 6 apoptosed"
+                caption={`${cellLabelFromMeta(aetna.meta)} — ${generations} generations, ${apoptosisTotal} apoptosed`}
                 height={520}
               />
             </div>
@@ -101,21 +108,25 @@ export default async function LandingPage() {
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
                     aetna · cardiac · baseline
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-fg-tomb">40%</dd>
+                  <dd className="mt-2 font-serif text-2xl text-fg-tomb">
+                    {pct(baselineOverturn)}
+                  </dd>
                   <dd className="font-mono text-xs text-fg-2">appeal fitness, naive gen 0</dd>
                 </div>
                 <div>
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-                    after 10 generations
+                    after {generations} generations
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-champion">98%</dd>
+                  <dd className="mt-2 font-serif text-2xl text-champion">
+                    {pct(currentOverturn)}
+                  </dd>
                   <dd className="font-mono text-xs text-fg-2">appeal fitness, champion</dd>
                 </div>
                 <div>
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
                     strategies apoptosed
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-apoptosis">20</dd>
+                  <dd className="mt-2 font-serif text-2xl text-apoptosis">{apoptosisTotal}</dd>
                   <dd className="font-mono text-xs text-fg-2">
                     permanent removal from registry
                   </dd>
@@ -130,9 +141,12 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-screen-2xl px-6 py-16">
             <div className="mb-6 flex items-baseline justify-between">
               <h2 className="font-serif text-xl text-fg-0">Explore the cells.</h2>
-              <p className="font-mono text-xs text-fg-2">5 (payer × diagnosis) cells</p>
+              <p className="font-mono text-xs text-fg-2">
+                {navItems.length} (payer × diagnosis){" "}
+                {navItems.length === 1 ? "cell" : "cells"}
+              </p>
             </div>
-            <CellSelector />
+            <CellSelector items={navItems} />
           </div>
         </section>
       </main>

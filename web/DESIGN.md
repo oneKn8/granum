@@ -60,17 +60,17 @@ Single accent color rule: **eosin blue** is THE primary. Champion-amber, mutant-
   --bg-2:  oklch(0.26 0.030 285);   /* card / hover state */
   --bg-3:  oklch(0.32 0.035 285);   /* selected / active */
 
-  /* Foregrounds */
+  /* Foregrounds — fg-2/fg-tomb tuned for WCAG AA contrast on bg-0/bg-1 */
   --fg-0:  oklch(0.96 0.005 285);   /* primary text */
   --fg-1:  oklch(0.74 0.020 285);   /* secondary text */
-  --fg-2:  oklch(0.58 0.015 285);   /* tertiary / metadata */
-  --fg-tomb: oklch(0.42 0.010 285); /* tombstoned (apoptosed) lineage */
+  --fg-2:  oklch(0.66 0.018 285);   /* tertiary / metadata (AA on bg-0/bg-1) */
+  --fg-tomb: oklch(0.54 0.012 285); /* tombstoned (apoptosed) — faded but legible */
 
   /* Semantic accents — biology stain palette */
   --accent-survivor:   oklch(0.74 0.16 230);  /* eosin blue — living lineage (PRIMARY) */
   --accent-champion:   oklch(0.80 0.18 65);   /* hematoxylin amber — promoted to production */
   --accent-mutant:     oklch(0.68 0.22 320);  /* methyl-violet magenta — experimental tag */
-  --accent-apoptosis:  oklch(0.60 0.22 25);   /* apoptosis red — hover-only on tombstones */
+  --accent-apoptosis:  oklch(0.70 0.20 25);   /* apoptosis red — AA-legible at small sizes (diff deletions) */
 
   /* Borders / strokes */
   --stroke-1: oklch(0.30 0.030 285 / 0.6);
@@ -146,8 +146,9 @@ The `baseline-ui` skill enforces an opinionated UI baseline. These three rules a
 1. **`tracking-widest` on small uppercase labels.** baseline-ui's `tracking-*` ban is overridden for `<10px` uppercase eyebrow labels (e.g. `"payer"`, `"generation"`, `"mechanism"`). Editorial-journal typography requires letter-spacing on small caps; this is core to the Germinal Lab aesthetic, not decoration. No other `tracking-*` usage is permitted.
 2. **SVG `linearGradient` area-fill in `FitnessCurve`.** baseline-ui's "NEVER use gradients" rule is overridden for one specific use: the Recharts `<Area>` mean-fitness shading uses a top-to-bottom alpha gradient on the survivor color (32% → 0%) — this is a chart-visualization idiom (the same shape every Recharts area chart uses), not decorative gradient styling. No other gradients exist in the codebase.
 3. **600ms `lineage-node[data-status="tombstoned"]` transition.** baseline-ui's 200ms-max interaction-feedback rule is overridden for the apoptosis transition. Apoptosis is the demo's emotional beat; a 200ms fade reads as "loading state" not "permanent death." 600ms is the duration confirmed in the brief.
+4. **`--fg-tomb` contrast.** The tombstoned/apoptosed tone (`oklch(0.54)`) clears WCAG AA-large but not AA-normal (4.5:1) at small sizes. This is intentional: apoptosed content is dead, de-emphasized history (analogous to disabled/placeholder text). It is never the only signal — strikethrough, desaturation, and 0.35 opacity all co-encode "dead." Raising it to AA-normal would erase the living-vs-dead hierarchy that is the product's whole point.
 
-Every other baseline-ui rule applies.
+Every other baseline-ui rule applies. Lighthouse a11y target: ≥96 (Best Practices / SEO / Agentic Browsing: 100).
 
 ---
 
