@@ -289,3 +289,23 @@
 - CLEANUP: removed 3 schema-probe prompts from the Phoenix space via REST (204) — space is demo-clean.
 - KNOWN (Phase B): mutant naming double-nests (`bcell_mut_{cell}__{winner}_{i}`) — fine for 1 generation, needs a generation-counter scheme for an 8–12 gen run. Dataset writeback is best-effort (no MCP `create-dataset`; the outcomes dataset must be pre-created for real writeback).
 - NEXT (Phase B): multi-generation evolution (8–12 gens on 2–3 cells) → real lineage tree + fitness climb + Gen1-vs-GenN diff persisted as API-served artifacts; Cloud Run deploy; flip `NEXT_PUBLIC_USE_REAL_API=true`.
+
+## [Solo] — 2026-06-03 (Phase B — live multi-gen evolution + real-data API + frontend E2E) [MERGED to main: PR #1, PR #2]
+
+Continued autonomously overnight (user AFK, authorized commit+push). Phase A merged via **PR #1** (`b936b01`); Phase B via **PR #2** (`4a1fedd`). Both CI-green.
+
+**Phase B1 — multi-generation evolution (`328873e`):**
+- `src/granum/center/evolution.py` `GenerationalEvolution`: chains `GerminalCycle` across G generations vs a consistent antigen; accumulates lineage (parent→child), per-gen tournament rounds, fitness curve; sweeps Phoenix for final bodies/status so the artifact is self-contained. `to_payload()` → camelCase `CellPayload` matching `web/lib/types.ts`.
+- Cycle: daughters now tagged `production` (germinal-correct — they compete next gen), generation-scoped names, per-generation mutation seed for lineage diversity. `CycleOutcome` gains `mutant_notes`, `generation`, `winner_appeal`, `scoreboard`. Backward-compatible.
+- `PhoenixClient.list_all_prompts` + `delete_prompt` (demo reset). Shared `granum.data.seeds` (seed bank + `seed_cell`/`reset_cell`); `seed_cell.py` delegates.
+- `granum evolve --reset --generations N`. **Live 8-gen run VERIFIED:** overturn lift 80%→94%, champion fitness 0.92, 4 extinctions.
+
+**Phase B2 — FastAPI (`1ecd72c`):** `granum.web.api` serves `/api/cells`, `/api/cells/{cell}`, `/api/cells/{cell}/coevolution` from the evolution artifacts. No live Phoenix dep at request time (deploys clean). CORS + `GRANUM_DATA_DIR`-configurable.
+
+**Phase B3 — deploy assets + E2E (`0e62d66`, `e9793e0`):**
+- Lean API `Dockerfile` + `infra/deploy.sh` (Cloud Run). **docker build + run + curl verified.** NOT deployed (left for a supervised run; frontend → Vercel).
+- **Local E2E VERIFIED via Playwright:** ran FastAPI + Next.js with `NEXT_PUBLIC_USE_REAL_API=true` → the frontend rendered the REAL evolution data (cell summary 80%→94% +14pp, lineage tree with champion G0 + tombstoned G5/G7 mutants, the real `bcell_1_baseline` prompt body, the 8-gen fitness curve). Screenshot captured.
+- **Bug found + fixed by the E2E:** the cell page fetches `/coevolution` unconditionally and treats non-200 as fatal — a 404 crashed the page. Fixed the API to return an empty-but-valid `CoEvolutionState`. Also fixed a stale `baselineFitness` key that crashed the `evolve` summary print after a successful run.
+
+- TESTS: 159 → **181 passed**; ruff clean throughout. Every slice committed + pushed.
+- KNOWN for Phase C: (1) frontend labels fitness as "overturn lift" — relabel to "appeal fitness" (it's judge-composite/10, NOT a real overturn rate) BEFORE the demo video; (2) lineage tree is thin (strong baseline won every gen) — `granum evolve --mutation-count 3 --generations 12` yields a richer tree; (3) Cloud Run deploy (assets ready, build-verified) + flip `NEXT_PUBLIC_USE_REAL_API=true` — left for a supervised run.
