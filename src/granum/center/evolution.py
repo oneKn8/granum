@@ -24,7 +24,11 @@ from statistics import mean
 
 from granum.center.cycle import CycleOutcome, GerminalCycle
 from granum.data.denials import Denial
-from granum.tools.phoenix_client import PhoenixClient, PhoenixToolError
+from granum.tools.phoenix_client import (
+    PhoenixClient,
+    PhoenixToolError,
+    _extract_template_text,
+)
 
 _log = logging.getLogger(__name__)
 
@@ -169,6 +173,30 @@ def _label(s: _StrategyAccum) -> str:
     return f"G{s.generation} — mutant"
 
 
+async def sweep_bodies_and_status(
+    nodes: dict[str, _StrategyAccum], phoenix: PhoenixClient
+) -> None:
+    """Fill body + final status for every strategy from Phoenix.
+
+    production tag resolves → status=production, body from version.
+    tombstoned tag resolves → status=tombstoned, body from version.
+    else → leave as-is (experimental/unknown).
+    """
+    for node in nodes.values():
+        for tag, status in (("production", "production"), ("tombstoned", "tombstoned")):
+            try:
+                ver = await phoenix._mcp.call_tool(
+                    "get-prompt-version-by-tag",
+                    {"prompt_identifier": node.id, "tag_name": tag},
+                )
+            except PhoenixToolError:
+                continue
+            node.body = _extract_template_text(ver.get("template"))
+            node.status = status
+            node.tag = tag
+            break
+
+
 class GenerationalEvolution:
     def __init__(
         self, *, cycle: GerminalCycle, phoenix: PhoenixClient, cell: str, generations: int
@@ -224,27 +252,7 @@ class GenerationalEvolution:
         )
 
     async def _sweep_bodies_and_status(self, nodes: dict[str, _StrategyAccum]) -> None:
-        """Fill body + final status for every strategy from Phoenix.
-
-        production tag resolves → champion (status=production, body from version).
-        else tombstoned tag resolves → status=tombstoned, body from that version.
-        else → leave as-is (experimental/unknown).
-        """
-        for node in nodes.values():
-            for tag, status in (("production", "production"), ("tombstoned", "tombstoned")):
-                try:
-                    ver = await self._phoenix._mcp.call_tool(
-                        "get-prompt-version-by-tag",
-                        {"prompt_identifier": node.id, "tag_name": tag},
-                    )
-                except PhoenixToolError:
-                    continue
-                from granum.tools.phoenix_client import _extract_template_text
-
-                node.body = _extract_template_text(ver.get("template"))
-                node.status = status
-                node.tag = tag
-                break
+        await sweep_bodies_and_status(nodes, self._phoenix)
 
 
 def _record(outcome: CycleOutcome, denial_id: str) -> GenerationRecord:

@@ -11,8 +11,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from granum.center.evolution import _citations, _StrategyAccum
-from granum.tools.phoenix_client import PhoenixClient, PhoenixToolError
+from granum.center.coevolution import CoEvolutionDriver
+from granum.center.evolution import _citations, _label, _StrategyAccum, sweep_bodies_and_status
+from granum.tools.phoenix_client import PhoenixClient
 
 _log = logging.getLogger(__name__)
 
@@ -67,7 +68,14 @@ class CoEvolutionRunResult:
 
 
 class CoEvolutionRun:
-    def __init__(self, driver, phoenix: PhoenixClient, cell: str, rounds: int) -> None:
+    def __init__(
+        self,
+        *,
+        driver: CoEvolutionDriver,
+        phoenix: PhoenixClient,
+        cell: str,
+        rounds: int,
+    ) -> None:
         self._driver = driver
         self._phoenix = phoenix
         self._cell = cell
@@ -156,28 +164,7 @@ class CoEvolutionRun:
         )
 
     async def _sweep_bodies_and_status(self, nodes: dict[str, _CoEvNode]) -> None:
-        """Fill body + final status for every node from Phoenix.
-
-        Mirrors GenerationalEvolution._sweep_bodies_and_status exactly:
-        - production tag resolves → status=production, body from version.
-        - tombstoned tag resolves → status=tombstoned, body from version.
-        - neither resolves → leave node as-is.
-        """
-        for node in nodes.values():
-            for tag, status in (("production", "production"), ("tombstoned", "tombstoned")):
-                try:
-                    ver = await self._phoenix._mcp.call_tool(
-                        "get-prompt-version-by-tag",
-                        {"prompt_identifier": node.id, "tag_name": tag},
-                    )
-                except PhoenixToolError:
-                    continue
-                from granum.tools.phoenix_client import _extract_template_text
-
-                node.body = _extract_template_text(ver.get("template"))
-                node.status = status
-                node.tag = tag
-                break
+        await sweep_bodies_and_status(nodes, self._phoenix)
 
 
 # ---------------------------------------------------------------------------
@@ -215,10 +202,3 @@ def _serialize_nodes(nodes: tuple[_CoEvNode, ...], cell: str) -> list[dict]:
     return result
 
 
-def _label(node: _CoEvNode) -> str:
-    """Human label mirroring evolution._label for consistency."""
-    if node.parent_id is None:
-        return f"G{node.generation} — seed"
-    if node.mutation_note:
-        return f"G{node.generation} — {node.mutation_note.split(':', 1)[0]}"
-    return f"G{node.generation} — mutant"

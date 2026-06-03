@@ -89,7 +89,7 @@ async def test_run_accumulates_both_lineages_and_serializes_payload():
     # w2 and p2 are tombstoned (losers); rest survive
     phoenix = _phoenix_with_sweep(dead_ids={"w2", "p2"})
 
-    run = CoEvolutionRun(driver, phoenix, "aetna_cardiac", rounds=2)
+    run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell="aetna_cardiac", rounds=2)
     result = await run.run()
     payload = result.to_payload()
 
