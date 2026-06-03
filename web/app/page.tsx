@@ -101,21 +101,21 @@ export default async function LandingPage() {
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
                     aetna · cardiac · baseline
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-fg-tomb">41%</dd>
-                  <dd className="font-mono text-xs text-fg-2">overturn rate, gen 0</dd>
+                  <dd className="mt-2 font-serif text-2xl text-fg-tomb">40%</dd>
+                  <dd className="font-mono text-xs text-fg-2">appeal fitness, naive gen 0</dd>
                 </div>
                 <div>
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-                    after 8 generations
+                    after 10 generations
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-champion">79%</dd>
-                  <dd className="font-mono text-xs text-fg-2">overturn rate, champion</dd>
+                  <dd className="mt-2 font-serif text-2xl text-champion">98%</dd>
+                  <dd className="font-mono text-xs text-fg-2">appeal fitness, champion</dd>
                 </div>
                 <div>
                   <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
                     strategies apoptosed
                   </dt>
-                  <dd className="mt-2 font-serif text-2xl text-apoptosis">6</dd>
+                  <dd className="mt-2 font-serif text-2xl text-apoptosis">20</dd>
                   <dd className="font-mono text-xs text-fg-2">
                     permanent removal from registry
                   </dd>

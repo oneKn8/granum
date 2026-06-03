@@ -8,42 +8,34 @@ from __future__ import annotations
 
 # (name, body). Names use the logical `/` separator; PhoenixClient normalizes
 # it to `__` (Phoenix strips `/`).
+# Generation-0 seeds are deliberately NAIVE: each passes negative selection
+# (it names a valid Aetna CPB + the 30-day deadline) but gives the writer no
+# guidance on the things the judge rewards — quantified clinical values,
+# section-level (§) citations, 29 CFR procedural framing, or argument structure.
+# So gen-0 appeals score LOW, and feedback-directed evolution has to DISCOVER the
+# expert strategy generation by generation. That is the real climb.
 SEED_BANK: dict[str, list[tuple[str, str]]] = {
     "aetna_cardiac": [
         (
-            "aetna_cardiac/bcell_1_baseline",
-            "You are a physician drafting a prior-authorization appeal for an "
-            "Aetna cardiac coverage denial. Quote the specific Aetna Clinical "
-            "Policy Bulletin clause cited in the denial, then present the "
-            "submitted clinical evidence that satisfies the policy criterion. "
-            "Include the appeal deadline reference (30 days per 29 CFR "
-            "2560.503-1). Cite Aetna CPB 0119 and ACC/AHA 2021 Chronic "
-            "Coronary Disease guidelines where applicable. Keep the appeal "
-            "factual, citation-dense, and under 500 words.",
+            "aetna_cardiac/bcell_1_generic",
+            "You are writing a prior-authorization appeal letter for an Aetna "
+            "cardiac coverage denial. Mention Aetna CPB 0119 and note the 30-day "
+            "appeal deadline. Argue that the denial should be overturned because "
+            "the care is medically necessary. Keep it under 500 words.",
         ),
         (
-            "aetna_cardiac/bcell_2_aggressive",
-            "You are drafting an aggressive prior-authorization appeal for an "
-            "Aetna cardiac denial. Open by quoting the denial reason verbatim. "
-            "Refute each rationale point-by-point using Aetna CPB 0286 (valve "
-            "surgery), CPB 0353 (catheterization/EP), and CPB 0535 (PCI / "
-            "pacemakers) where they apply, plus ACC/AHA 2023 Chronic Coronary "
-            "Disease cross-references. Demand peer-to-peer review with a "
-            "cardiology MD reviewer. Reference 29 CFR 2560.503-1 timely-filing "
-            "requirements. Close by stating the 30-day appeal deadline. Under "
-            "500 words.",
+            "aetna_cardiac/bcell_2_persuasive",
+            "Write a persuasive letter to Aetna appealing a denied cardiac "
+            "procedure. Reference Aetna CPB 0119 and remind them of the 30-day "
+            "deadline to file. Emphasize that the patient needs this treatment "
+            "and that denying it is unreasonable.",
         ),
         (
-            "aetna_cardiac/bcell_3_conservative",
-            "You are drafting a conservative, policy-compliance-focused appeal "
-            "for an Aetna cardiac coverage denial. Lead with patient context "
-            "(age range, diagnosis code, presenting symptoms). Cite the "
-            "applicable Aetna Clinical Policy Bulletin section verbatim. "
-            "Walk through how the submitted documentation satisfies each "
-            "policy criterion in order. Reference ACC/AHA 2021 §6.2 Class IIa "
-            "where appropriate. Include the 30-day appeal deadline language. "
-            "End with a formal reconsideration request. Keep tone respectful "
-            "and procedural. Under 500 words.",
+            "aetna_cardiac/bcell_3_plain",
+            "Draft a short appeal for an Aetna cardiac coverage denial. Cite "
+            "Aetna CPB 0119 and state that the appeal must be filed within 30 "
+            "days. Explain in plain language why the treatment is needed and ask "
+            "Aetna to reconsider.",
         ),
     ],
 }

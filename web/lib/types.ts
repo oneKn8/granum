@@ -77,9 +77,10 @@ export interface CellMeta {
   id: CellId;
   payer: string;
   diagnosis: string;
-  /** Vanilla baseline overturn rate before any evolution. */
+  /** Gen-0 baseline APPEAL FITNESS (judge composite / 10, [0,1]) — NOT a real
+   * overturn rate. Field name is legacy; the value is judge-rated appeal quality. */
   baselineOverturn: number;
-  /** Current best overturn rate (champion of latest generation). */
+  /** Champion's appeal fitness at the latest generation (judge composite / 10). */
   currentOverturn: number;
   /** Number of generations completed. */
   generations: number;

@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: CellPageProps): Promise<Metad
   if (!isCellId(cell)) return { title: "Cell not found" };
   const { meta } = await getCellPayload(cell);
   const title = `${meta.payer} · ${meta.diagnosis}`;
-  const description = `Granum lineage for ${title}. Baseline overturn ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`;
+  const description = `Granum lineage for ${title}. Baseline appeal fitness ${(meta.baselineOverturn * 100).toFixed(0)}% → champion ${(meta.currentOverturn * 100).toFixed(0)}% across ${meta.generations} generations.`;
   const path = `/cell/${cell}`;
   return {
     title,
@@ -113,7 +113,7 @@ export default async function CellPage({ params }: CellPageProps) {
           </div>
           <div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-              overturn lift
+              appeal fitness
             </p>
             <p className="mt-1 font-mono text-base text-fg-0">
               <span className="text-fg-tomb">
