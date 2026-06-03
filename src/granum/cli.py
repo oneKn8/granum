@@ -303,5 +303,146 @@ def evolve(
     asyncio.run(_run())
 
 
+@app.command()
+def coevolve(
+    cell: str = typer.Option("aetna_cardiac", "--cell", help="Cell id, e.g. aetna_cardiac"),
+    rounds: int = typer.Option(8, "--rounds", help="Number of Red Queen rounds"),
+    mutation_count: int = typer.Option(2, "--mutation-count", help="Mutations per winner per round"),
+    reset: bool = typer.Option(
+        False, "--reset", help="Hard-wipe + reseed the cell before running (clean slate)"
+    ),
+) -> None:
+    """Run a live Red Queen co-evolution session for a cell.
+
+    In each round the writer population (appeal drafters) faces the payer
+    population (adversarial denial agents) in a triangular tournament scored
+    by DefensibilityJudge. Losers are tombstoned in Phoenix, winners are
+    promoted, and K clonal mutations are spawned in both populations so each
+    side evolves against the other's improving counter-strategy.
+
+    Writes runs/cell_payloads/{cell}_coevolution.json (the CoEvolutionState
+    payload consumed by the frontend).
+
+    Requires live Phoenix + Vertex Gemini auth (GOOGLE_CLOUD_PROJECT,
+    PHOENIX_API_KEY, PHOENIX_COLLECTOR_ENDPOINT).
+    """
+    import asyncio
+    import json
+    import os
+    from pathlib import Path
+
+    required = ("GOOGLE_CLOUD_PROJECT", "PHOENIX_API_KEY", "PHOENIX_COLLECTOR_ENDPOINT")
+    missing = [k for k in required if not os.getenv(k)]
+    if missing:
+        typer.echo(
+            f"coevolve requires env: {', '.join(missing)}. Source .env first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        payer, diagnosis = cell.split("_", 1)
+    except ValueError:
+        typer.echo(f"--cell must look like 'payer_diagnosis' (got {cell!r})", err=True)
+        raise typer.Exit(code=2)
+
+    model = os.getenv("GEMINI_MODEL", "gemini-3.1-pro-preview")
+
+    from granum.adversary.payer_agent import PayerAgent
+    from granum.center.coevolution import CoEvolutionDriver
+    from granum.center.coevolution_run import CoEvolutionRun
+    from granum.center.defensibility_judge import DefensibilityJudge
+    from granum.center.mutation_strategies import propose_mutations
+    from granum.data.seeds import reset_cell, seed_cell, seed_payers
+    from granum.tools.gemini_client import GeminiClient
+    from granum.tools.phoenix_session import phoenix_client_from_env
+
+    gemini = GeminiClient()
+
+    async def _run() -> None:
+        try:
+            from phoenix.otel import register
+
+            endpoint = os.environ["PHOENIX_COLLECTOR_ENDPOINT"].rstrip("/")
+            api_key = os.environ["PHOENIX_API_KEY"]
+            register(
+                project_name=os.getenv("PHOENIX_PROJECT_NAME", "granum"),
+                endpoint=f"{endpoint}/v1/traces",
+                headers={"api_key": api_key, "authorization": f"Bearer {api_key}"},
+                batch=False,
+                set_global_tracer_provider=True,
+            )
+        except Exception as exc:  # noqa: BLE001 — tracing is supplementary
+            typer.echo(f"WARN: Phoenix tracer registration failed: {exc}", err=True)
+
+        judge = DefensibilityJudge(
+            client=gemini, model=model, rubric_path=Path("data/defensibility_rubric.md")
+        )
+        payer_agent = PayerAgent(client=gemini, model=model, payer=payer, diagnosis=diagnosis)
+
+        async with phoenix_client_from_env() as phoenix:
+            if reset:
+                n = await reset_cell(phoenix, cell=cell)
+                typer.echo(f"reset: hard-deleted {n} prompt(s) under {cell}")
+            seeded_writers = await seed_cell(phoenix, cell=cell)
+            typer.echo(
+                f"seeded {len(seeded_writers)} gen-0 writers"
+                if seeded_writers
+                else "writers already seeded"
+            )
+            seeded_payers = await seed_payers(phoenix, cell=cell)
+            typer.echo(
+                f"seeded {len(seeded_payers)} gen-0 payers"
+                if seeded_payers
+                else "payers already seeded"
+            )
+
+            driver = CoEvolutionDriver(
+                phoenix=phoenix,
+                payer_agent=payer_agent,
+                judge=judge,
+                cell=cell,
+                gold_path=f"data/{cell}/gold_appeals.jsonl",
+                mutation_proposer=propose_mutations,
+                mutation_count=mutation_count,
+            )
+            run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell=cell, rounds=rounds)
+            result = await run.run()
+
+        payload = result.to_payload()
+        out_dir = Path("runs/cell_payloads")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        artifact = out_dir / f"{cell}_coevolution.json"
+        artifact.write_text(json.dumps(payload, indent=2))
+
+        writers = payload.get("writers", [])
+        payers = payload.get("payers", [])
+        writer_champion = next(
+            (w for w in writers if w.get("status") == "champion"), None
+        )
+        payer_champion = next(
+            (p for p in payers if p.get("status") == "champion"), None
+        )
+
+        typer.echo("")
+        typer.echo("=== CO-EVOLUTION COMPLETE (live) ===")
+        typer.echo(
+            f"  writers: {len(writers)} total  |  payers: {len(payers)} total"
+        )
+        if writer_champion:
+            typer.echo(
+                f"  writer champion: {writer_champion['id']} "
+                f"(fitness {writer_champion['fitness']:.4f})"
+            )
+        if payer_champion:
+            typer.echo(
+                f"  payer champion:  {payer_champion['id']} "
+                f"(fitness {payer_champion['fitness']:.4f})"
+            )
+        typer.echo(f"  artifact: {artifact}")
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()
