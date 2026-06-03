@@ -309,3 +309,16 @@ Continued autonomously overnight (user AFK, authorized commit+push). Phase A mer
 
 - TESTS: 159 → **181 passed**; ruff clean throughout. Every slice committed + pushed.
 - KNOWN for Phase C: (1) frontend labels fitness as "overturn lift" — relabel to "appeal fitness" (it's judge-composite/10, NOT a real overturn rate) BEFORE the demo video; (2) lineage tree is thin (strong baseline won every gen) — `granum evolve --mutation-count 3 --generations 12` yields a richer tree; (3) Cloud Run deploy (assets ready, build-verified) + flip `NEXT_PUBLIC_USE_REAL_API=true` — left for a supervised run.
+
+## [Solo] — 2026-06-03 (Phase C start — GENUINE self-improvement via feedback-directed mutation)
+
+User reviewed Phase B and correctly flagged that the evolution wasn't real: mechanical citation-swaps made a strong baseline worse, so the gen-0 seed won all 8 gens and the "fitness climb" was judge noise on a static champion.
+
+**Fix (`564f537`, branch `phase-c-genuine-evolution`):** `src/granum/center/prompt_mutation.py` `make_llm_mutator` — reads the judge's English critique of the winning appeal and rewrites the B-cell STRATEGY to fix the named weaknesses (directed optimization; daughters can beat the parent). Wired as an optional `prompt_mutator` on `GerminalCycle` (mechanical proposer stays as the fallback → existing tests untouched). This is Arize's prompt-learning-from-feedback thesis as the actual mechanism. Guardrail: mutator told never to fabricate citations; negative selection still tombstones hallucinated ones.
+
+**Verified live (10-gen run, seed 42):** the champion GENUINELY evolves —
+`bcell_1_baseline (0.90) → g1m1 (0.96, "mapped sections to clinical metrics") → g5m0 (1.0, "header placeholders + first-level appeal")` — TWO real displacement events. Population mean fitness 0.66 → 0.97; 23 strategies, 20 extinctions (2/gen, rich tree). E2E re-verified via Playwright: frontend renders the deep evolving lineage + a gen-0-vs-evolved prompt diff + the fitness curve (screenshot `../granum-evolved-lineage.png`). Curated into `api_data/aetna_cardiac.json`.
+
+- TESTS: **182 passed** (4 prompt-mutation + 1 cycle mutator-branch added); ruff clean.
+- HONEST CAVEAT: the judge's MAX score saturates at 1.0 by gen 2 (appeals hit the rubric ceiling fast), so headline max only moves 0.94→1.0. The truthful headline numbers are the mean climb (0.66→0.97) + the champion-lineage story. Bigger max-arc would need a harsher/more-discriminating judge or a weaker seed — optional.
+- NEXT: honesty relabel (overturn→fitness) in the frontend; then deploy + video + Devpost.
