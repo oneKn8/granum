@@ -26,7 +26,6 @@ Usage (once Phase 1.10b ships):
 from __future__ import annotations
 
 import asyncio
-import sys
 from dataclasses import dataclass
 
 import typer
