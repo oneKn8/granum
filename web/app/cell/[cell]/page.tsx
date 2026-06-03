@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CellDashboard } from "@/components/CellDashboard";
 import { CellSelector } from "@/components/CellSelector";
+import { LivePoll } from "@/components/LivePoll";
 import { ApiError, getCellPayload, getCoEvolution, listCellMetas } from "@/lib/api";
 import { ALL_CELLS, CELL_LABEL, cellLabelFromMeta } from "@/lib/mock-data";
 import type { CellId, CellMeta, CellPayload, CoEvolutionState } from "@/lib/types";
@@ -149,6 +150,7 @@ export default async function CellPage({ params }: CellPageProps) {
           </div>
         </section>
 
+        <LivePoll />
         <CellDashboard payload={payload} coEvolution={coEvolution} />
       </main>
 

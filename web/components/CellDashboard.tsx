@@ -42,9 +42,7 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
           onClick={() => setMode("lineage")}
           className={cn(
             "px-3 py-1.5 font-mono text-xs transition-colors duration-200",
-            mode === "lineage"
-              ? "bg-bg-3 text-fg-0"
-              : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
+            mode === "lineage" ? "bg-bg-3 text-fg-0" : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
           )}
         >
           appeal-writer lineage
@@ -55,19 +53,14 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
           onClick={() => setMode("coevolution")}
           className={cn(
             "border-l border-stroke-1 px-3 py-1.5 font-mono text-xs transition-colors duration-200",
-            mode === "coevolution"
-              ? "bg-bg-3 text-fg-0"
-              : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
+            mode === "coevolution" ? "bg-bg-3 text-fg-0" : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
           )}
         >
           co-evolution (writer vs payer)
         </button>
       </div>
 
-      <div
-        className="grid grid-cols-1 gap-4 lg:grid-cols-5"
-        aria-live="polite"
-      >
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5" aria-live="polite">
         {mode === "lineage" ? (
           <>
             <div className="lg:col-span-3">
@@ -95,10 +88,7 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
         )}
       </div>
 
-      <FitnessCurve
-        points={payload.fitness}
-        baseline={payload.meta.baselineOverturn}
-      />
+      <FitnessCurve points={payload.fitness} baseline={payload.meta.baselineOverturn} />
     </div>
   );
 }

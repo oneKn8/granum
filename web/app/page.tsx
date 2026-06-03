@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LineageTree } from "@/components/LineageTree";
 import { CellSelector } from "@/components/CellSelector";
+import { LivePoll } from "@/components/LivePoll";
 import { getCellPayload, listCellMetas } from "@/lib/api";
 import { cellLabelFromMeta } from "@/lib/mock-data";
 
@@ -33,6 +34,7 @@ export default async function LandingPage() {
       </header>
 
       <main id="main">
+        <LivePoll />
         {/* Hero — asymmetric, serif headline left, tree right */}
         <section className="border-b border-stroke-1">
           <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 px-6 py-16 lg:py-24">
