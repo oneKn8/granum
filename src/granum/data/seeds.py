@@ -6,6 +6,8 @@ selects a meaningful winner. Shared by `scripts/seed_cell.py` and `granum evolve
 """
 from __future__ import annotations
 
+from granum.adversary.payer_persona import SEEDED_PERSONAS
+
 # (name, body). Names use the logical `/` separator; PhoenixClient normalizes
 # it to `__` (Phoenix strips `/`).
 # Generation-0 seeds are deliberately NAIVE: each passes negative selection
@@ -56,6 +58,27 @@ async def seed_cell(phoenix, *, cell: str) -> list[str]:
     ids: list[str] = []
     for name, body in seeds:
         pv = await phoenix.upsert_prompt(name=name, body=body, tags=("production",))
+        ids.append(pv.prompt_id)
+    return ids
+
+
+async def seed_payers(phoenix, *, cell: str) -> list[str]:
+    """Seed a cell's adversary population with gen-0 payer personas (tagged production).
+
+    No-op if the cell already has active payer prompts.
+
+    Returns the list of seeded prompt ids (empty if payer prompts already existed).
+    """
+    existing = await phoenix.list_active_prompts(name_prefix=f"{cell}_payer/")
+    if existing:
+        return []
+    ids: list[str] = []
+    for persona in SEEDED_PERSONAS:
+        pv = await phoenix.upsert_prompt(
+            name=f"{cell}_payer/baseline_{persona.persona_id}",
+            body=persona.system_prompt,
+            tags=("production",),
+        )
         ids.append(pv.prompt_id)
     return ids
 
