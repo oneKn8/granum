@@ -74,9 +74,13 @@ def get_cell(cell: str) -> dict:
 
 @app.get("/api/cells/{cell}/coevolution")
 def get_coevolution(cell: str) -> dict:
+    """Co-evolution (Red Queen) state for a cell.
+
+    Returns an EMPTY-but-valid CoEvolutionState when no live co-evolution run
+    exists yet (the common case) rather than a 404 — the frontend's cell page
+    fetches this unconditionally and treats a non-200 as a fatal error.
+    """
     f = _data_dir() / f"{cell}_coevolution.json"
     if not f.exists():
-        raise HTTPException(
-            status_code=404, detail=f"no co-evolution data for cell {cell!r} yet"
-        )
+        return {"cell": cell, "writers": [], "payers": []}
     return json.loads(f.read_text())

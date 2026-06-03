@@ -170,8 +170,11 @@ class GerminalCycle:
             with _tracer.start_as_current_span("granum.cycle.clonal_expansion"):
                 mutant_ids: list[str] = []
                 mutant_notes: list[tuple[str, str]] = []
+                # Seed by generation: deterministic + reproducible, yet a different
+                # mutation draw each generation so the lineage diversifies instead
+                # of re-proposing the same edits on a repeat champion.
                 mutations = self._propose_mutations(
-                    parent=winner_body, n=self._mutation_count
+                    parent=winner_body, n=self._mutation_count, seed=generation
                 )
                 for i, mutation in enumerate(mutations):
                     try:

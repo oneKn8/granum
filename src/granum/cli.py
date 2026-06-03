@@ -289,8 +289,8 @@ def evolve(
                 f"mean={p['meanFitness']:.3f} apoptosis={p['apoptosisCount']}"
             )
         typer.echo(
-            f"  fitness: {payload['meta']['baselineFitness']:.3f} -> "
-            f"{payload['meta']['currentFitness']:.3f}  |  "
+            f"  fitness: {payload['meta']['baselineOverturn']:.3f} -> "
+            f"{payload['meta']['currentOverturn']:.3f}  |  "
             f"{payload['meta']['apoptosisTotal']} extinctions across "
             f"{len(payload['strategies'])} strategies"
         )

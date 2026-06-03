@@ -71,5 +71,13 @@ def test_get_unknown_cell_404(client):
     assert client.get("/api/cells/nope_nope").status_code == 404
 
 
-def test_coevolution_404_without_data(client):
-    assert client.get("/api/cells/aetna_cardiac/coevolution").status_code == 404
+def test_coevolution_empty_when_no_data(client):
+    """Missing co-evolution data returns an empty-but-valid state, not 404.
+
+    The frontend cell page fetches this unconditionally and treats non-200 as
+    fatal, so an empty population must come back 200.
+    """
+    r = client.get("/api/cells/aetna_cardiac/coevolution")
+    assert r.status_code == 200
+    body = r.json()
+    assert body == {"cell": "aetna_cardiac", "writers": [], "payers": []}
