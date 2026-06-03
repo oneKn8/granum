@@ -356,7 +356,7 @@ def coevolve(
     from granum.center.mutation_strategies import propose_mutations
     from granum.center.prompt_mutation import make_llm_mutator
     from granum.data.denials import Denial, generate_denial
-    from granum.data.seeds import reset_cell, seed_cell, seed_payers
+    from granum.data.seeds import reset_cell, seed_cell, seed_payers, wait_for_active_population
     from granum.tools.gemini_client import GeminiClient
     from granum.tools.phoenix_session import phoenix_client_from_env
 
@@ -416,6 +416,10 @@ def coevolve(
                 if seeded_payers
                 else "payers already seeded"
             )
+
+            await wait_for_active_population(phoenix, name_prefix=f"{cell}/", min_count=1)
+            await wait_for_active_population(phoenix, name_prefix=f"{cell}_payer/", min_count=1)
+            typer.echo("populations ready")
 
             driver = CoEvolutionDriver(
                 phoenix=phoenix,

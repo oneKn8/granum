@@ -84,3 +84,49 @@ async def test_seed_payers_is_noop_when_already_seeded():
     ids = await seed_payers(phoenix, cell="aetna_cardiac")
     assert ids == []
     phoenix.upsert_prompt.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_wait_for_active_population_retries_until_visible(monkeypatch):
+    """Phoenix eventual-consistency guard: retries until min_count prompts appear."""
+    from unittest.mock import AsyncMock as _AsyncMock
+
+    from granum.data.seeds import wait_for_active_population
+
+    obj1 = PromptVersion(prompt_id="p1", version_id="v1", body="b", name="n1")
+    obj2 = PromptVersion(prompt_id="p2", version_id="v2", body="b", name="n2")
+    obj3 = PromptVersion(prompt_id="p3", version_id="v3", body="b", name="n3")
+
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.side_effect = [[], [], [obj1, obj2, obj3]]
+
+    sleep_mock = _AsyncMock()
+    monkeypatch.setattr("granum.data.seeds.asyncio.sleep", sleep_mock)
+
+    result = await wait_for_active_population(
+        phoenix, name_prefix="aetna_cardiac_payer/", min_count=1
+    )
+
+    assert result == [obj1, obj2, obj3]
+    assert phoenix.list_active_prompts.await_count == 3
+    # slept between the two empty attempts (not after the success)
+    assert sleep_mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_wait_for_active_population_raises_when_never_visible(monkeypatch):
+    """Raises RuntimeError when the population never reaches min_count after all attempts."""
+    from unittest.mock import AsyncMock as _AsyncMock
+
+    from granum.data.seeds import wait_for_active_population
+
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.return_value = []
+
+    sleep_mock = _AsyncMock()
+    monkeypatch.setattr("granum.data.seeds.asyncio.sleep", sleep_mock)
+
+    with pytest.raises(RuntimeError, match="did not reach 1 active prompt"):
+        await wait_for_active_population(
+            phoenix, name_prefix="aetna_cardiac_payer/", min_count=1, attempts=3
+        )

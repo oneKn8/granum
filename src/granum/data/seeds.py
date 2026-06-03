@@ -6,6 +6,8 @@ selects a meaningful winner. Shared by `scripts/seed_cell.py` and `granum evolve
 """
 from __future__ import annotations
 
+import asyncio
+
 from granum.adversary.payer_persona import SEEDED_PERSONAS
 
 # (name, body). Names use the logical `/` separator; PhoenixClient normalizes
@@ -96,3 +98,34 @@ async def reset_cell(phoenix, *, cell: str) -> int:
             await phoenix.delete_prompt(p["id"])
             deleted += 1
     return deleted
+
+
+async def wait_for_active_population(
+    phoenix,
+    *,
+    name_prefix: str,
+    min_count: int = 1,
+    attempts: int = 12,
+    delay: float = 2.5,
+) -> list:
+    """Poll Phoenix until at least ``min_count`` active prompts are visible under ``name_prefix``.
+
+    Guards against Phoenix Cloud eventual-consistency lag after seeding: a prompt
+    upserted with the ``production`` tag may not be returned by
+    ``list_active_prompts`` immediately.  Retries up to ``attempts`` times with
+    ``delay`` seconds between polls.
+
+    Returns the list of active prompts once the threshold is met.
+
+    Raises ``RuntimeError`` if ``min_count`` prompts are not visible after all
+    attempts are exhausted.
+    """
+    for attempt in range(attempts):
+        prompts = await phoenix.list_active_prompts(name_prefix=name_prefix)
+        if len(prompts) >= min_count:
+            return prompts
+        await asyncio.sleep(delay)
+    raise RuntimeError(
+        f"population under {name_prefix!r} did not reach {min_count} active prompt(s) "
+        f"after {attempts} attempts"
+    )
