@@ -60,6 +60,8 @@ class CycleOutcome:
     winner_appeal: str = ""
     english_feedback: str = ""
     scoreboard: tuple[tuple[str, float], ...] = ()
+    mutant_notes: tuple[tuple[str, str], ...] = ()
+    generation: int = 0
 
 
 class GerminalCycle:
@@ -84,10 +86,11 @@ class GerminalCycle:
         self._mutation_count = mutation_count
         self._generate_appeal = appeal_generator
 
-    async def run(self, *, denial: Denial) -> CycleOutcome:
+    async def run(self, *, denial: Denial, generation: int = 0) -> CycleOutcome:
         with _tracer.start_as_current_span(f"granum.cycle.{self._cell}") as span:
             span.set_attribute("granum.cell", self._cell)
             span.set_attribute("granum.denial_id", denial.denial_id)
+            span.set_attribute("granum.generation", generation)
 
             # 1. Load active population
             with _tracer.start_as_current_span("granum.cycle.load_active"):
@@ -159,9 +162,14 @@ class GerminalCycle:
                     winner_id, winner_version, "production"
                 )
 
-            # 6. Clonal expansion
+            # 6. Clonal expansion — winning lineage proliferates into mutated
+            # daughters. Mutants are tagged `production` (NOT experimental): in a
+            # germinal center the daughters are active members that compete in the
+            # NEXT round of selection, not benched. Generation-scoped names keep
+            # them unique + traceable across a multi-generation run.
             with _tracer.start_as_current_span("granum.cycle.clonal_expansion"):
                 mutant_ids: list[str] = []
+                mutant_notes: list[tuple[str, str]] = []
                 mutations = self._propose_mutations(
                     parent=winner_body, n=self._mutation_count
                 )
@@ -177,11 +185,13 @@ class GerminalCycle:
                     if mutant_body == winner_body:
                         # No-op mutation; skip
                         continue
-                    name = f"{self._cell}/bcell_mut_{winner_id}_{i}"
+                    name = f"{self._cell}/g{generation + 1}m{i}"
                     pv = await self._phoenix.upsert_prompt(
-                        name=name, body=mutant_body, tags=("experimental",)
+                        name=name, body=mutant_body, tags=("production",)
                     )
                     mutant_ids.append(pv.prompt_id)
+                    note = f"{mutation.kind.value}: {mutation.target} → {mutation.replacement}"
+                    mutant_notes.append((pv.prompt_id, note))
 
             # 7. Dataset writeback (best-effort — Phoenix MCP has no create-dataset,
             # so the outcomes dataset may not exist on a first live run. A missing
@@ -229,4 +239,6 @@ class GerminalCycle:
                     (s.prompt_id, s.score.composite)
                     for s in tournament_result.all_scores
                 ),
+                mutant_notes=tuple(mutant_notes),
+                generation=generation,
             )

@@ -226,6 +226,27 @@ async def test_add_dataset_examples_wraps_flat_rows():
     assert ex["output"]["denial_id"] == "d1"
 
 
+@pytest.mark.asyncio
+async def test_list_all_prompts_returns_raw_items():
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {"items": [{"name": "a", "id": "P1"}, {"name": "b", "id": "P2"}]}
+    client = _client(mock_mcp)
+    items = await client.list_all_prompts()
+    assert [i["name"] for i in items] == ["a", "b"]
+
+
+@pytest.mark.asyncio
+async def test_delete_prompt_uses_rest():
+    mock_mcp = AsyncMock()
+    mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    mock_rest.delete.return_value = httpx.Response(204)
+    client = _client(mock_mcp, mock_rest)
+    await client.delete_prompt("P1")
+    mock_rest.delete.assert_called_once()
+    assert "/v1/prompts/P1" in mock_rest.delete.call_args[0][0]
+    mock_mcp.call_tool.assert_not_called()
+
+
 # === Co-evolution: dual-lineage state + writeback ===
 
 
