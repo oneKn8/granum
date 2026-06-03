@@ -322,3 +322,17 @@ User reviewed Phase B and correctly flagged that the evolution wasn't real: mech
 - TESTS: **182 passed** (4 prompt-mutation + 1 cycle mutator-branch added); ruff clean.
 - HONEST CAVEAT: the judge's MAX score saturates at 1.0 by gen 2 (appeals hit the rubric ceiling fast), so headline max only moves 0.94→1.0. The truthful headline numbers are the mean climb (0.66→0.97) + the champion-lineage story. Bigger max-arc would need a harsher/more-discriminating judge or a weaker seed — optional.
 - NEXT: honesty relabel (overturn→fitness) in the frontend; then deploy + video + Devpost.
+
+## [Solo] — 2026-06-03 (Phase C cont. — BIGGER honest arc + honesty relabel) [MERGED: PR #3, #4]
+
+User reviewed the genuine-improvement run and wanted a bigger arc (the champion-max saturated at ~1.0 by gen 2). Two honest levers, no number-gaming:
+- **Discriminating judge** (`data/judge_rubric.md`): harsh anchored calibration — naive appeals 3-5, expert 8-10; each axis caps ≤4 when a required element is absent. Kills saturation.
+- **Naive gen-0 seeds** (`granum.data.seeds`): pass negative selection (valid CPB + 30-day deadline) but give no guidance on quantified evidence / §-citations / 29 CFR / structure → low baseline. Mutator preserves citation+deadline so daughters survive negative selection.
+
+**Live 10-gen run (`6d50a0d`):** champion lineage `bcell_1_generic → g1m1 → g4m1 → g6m0 → g7m0 → g8m1` (FIVE displacements, 6-deep); appeal fitness **0.40 → 0.98** (+58pp), mean 0.40 → 0.94, 23 strategies / 20 extinctions. Genuine naive→expert learning from judge feedback.
+
+**Honesty relabel (PR #4):** UI said "overturn rate/lift" — it's judge-rated appeal fitness (composite/10), NOT a real overturn rate. Relabeled all DISPLAY strings → "appeal fitness"; replaced home/OG hardcoded fakes (41→79) with the real run (40→98, 20 apoptosed). Field names kept (no API churn). Verified: zero "overturn" labels remain (the word only appears as legit content — appeals seek to overturn denials).
+
+- E2E re-verified via Playwright (screenshots `../granum-evolved-lineage.png`, `../granum-bigger-arc.png`): frontend renders the deep lineage + 40→98 curve + naive→expert prompt diff.
+- 182 tests, ruff, mypy all green. CI confirmed: keep `ci.yml` (only mypy gate + clean-env check + quality signal); no CD.
+- NEXT: supervised deploy (Cloud Run API + Vercel frontend) → demo video → Devpost.
