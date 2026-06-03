@@ -45,6 +45,13 @@ class _MutationProposer(Protocol):
 # when absent, it judges the prompt bodies directly (preserves legacy behavior).
 _AppealGenerator = Callable[[str, Denial], Awaitable[str]]
 
+# Feedback-directed mutation: given the winning STRATEGY body + the judge's English
+# critique of its appeal, return N improved (body, note) variants. This is directed
+# optimization (mutants can actually beat the parent), unlike the mechanical
+# citation-swap proposer. When absent, the cycle uses the mechanical proposer.
+# Returns: list of (improved_strategy_body, short_change_note).
+_PromptMutator = Callable[[str, str, int], Awaitable[list[tuple[str, str]]]]
+
 
 @dataclass(frozen=True)
 class CycleOutcome:
@@ -76,6 +83,7 @@ class GerminalCycle:
         mutation_proposer: _MutationProposer,
         mutation_count: int = 2,
         appeal_generator: _AppealGenerator | None = None,
+        prompt_mutator: _PromptMutator | None = None,
     ) -> None:
         self._phoenix = phoenix
         self._judge = judge
@@ -85,6 +93,7 @@ class GerminalCycle:
         self._propose_mutations = mutation_proposer
         self._mutation_count = mutation_count
         self._generate_appeal = appeal_generator
+        self._mutate_prompt = prompt_mutator
 
     async def run(self, *, denial: Denial, generation: int = 0) -> CycleOutcome:
         with _tracer.start_as_current_span(f"granum.cycle.{self._cell}") as span:
@@ -148,6 +157,7 @@ class GerminalCycle:
             winner_id, winner_version, winner_appeal = tournament_result.winner
             # Mutation operates on the winning PROMPT, never the generated appeal.
             winner_body = prompt_body_by_id[winner_id]
+            winner_feedback = tournament_result.winner_score.english_feedback
 
             # 4. Apoptosis losers
             with _tracer.start_as_current_span("granum.cycle.apoptosis"):
@@ -170,30 +180,40 @@ class GerminalCycle:
             with _tracer.start_as_current_span("granum.cycle.clonal_expansion"):
                 mutant_ids: list[str] = []
                 mutant_notes: list[tuple[str, str]] = []
-                # Seed by generation: deterministic + reproducible, yet a different
-                # mutation draw each generation so the lineage diversifies instead
-                # of re-proposing the same edits on a repeat champion.
-                mutations = self._propose_mutations(
-                    parent=winner_body, n=self._mutation_count, seed=generation
-                )
-                for i, mutation in enumerate(mutations):
-                    try:
-                        mutant_body = apply_mutation(winner_body, mutation)
-                    except ValueError as e:
-                        _log.warning(
-                            "mutation %d on winner %s failed: %s — skipping",
-                            i, winner_id, e,
+                # Each (improved_body, note) candidate daughter.
+                proposals: list[tuple[str, str]] = []
+                if self._mutate_prompt is not None:
+                    # Feedback-directed: rewrite the winning strategy to address the
+                    # judge's critique. Directed optimization — daughters can beat
+                    # the parent, so the champion genuinely evolves.
+                    proposals = await self._mutate_prompt(
+                        winner_body, winner_feedback, self._mutation_count
+                    )
+                else:
+                    # Mechanical fallback (citation swaps / reframes). Seeded by
+                    # generation for reproducibility; no-ops are skipped below.
+                    for mutation in self._propose_mutations(
+                        parent=winner_body, n=self._mutation_count, seed=generation
+                    ):
+                        try:
+                            body = apply_mutation(winner_body, mutation)
+                        except ValueError as e:
+                            _log.warning("mutation on winner %s failed: %s", winner_id, e)
+                            continue
+                        note = (
+                            f"{mutation.kind.value}: "
+                            f"{mutation.target} → {mutation.replacement}"
                         )
-                        continue
-                    if mutant_body == winner_body:
-                        # No-op mutation; skip
-                        continue
+                        proposals.append((body, note))
+
+                for i, (mutant_body, note) in enumerate(proposals):
+                    if not mutant_body or mutant_body == winner_body:
+                        continue  # empty or no-op daughter
                     name = f"{self._cell}/g{generation + 1}m{i}"
                     pv = await self._phoenix.upsert_prompt(
                         name=name, body=mutant_body, tags=("production",)
                     )
                     mutant_ids.append(pv.prompt_id)
-                    note = f"{mutation.kind.value}: {mutation.target} → {mutation.replacement}"
                     mutant_notes.append((pv.prompt_id, note))
 
             # 7. Dataset writeback (best-effort — Phoenix MCP has no create-dataset,
