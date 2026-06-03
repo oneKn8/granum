@@ -395,3 +395,40 @@ async def test_failed_mutation_is_skipped_not_propagated():
         and not c.kwargs["name"].startswith("aetna_cardiac_payer/mut_")
         for c in upsert_calls
     )
+
+
+@pytest.mark.asyncio
+async def test_round_result_exposes_per_population_scoreboards():
+    """writer_scoreboard and payer_scoreboard cover ALL contestants, sorted best-first."""
+    writers = [_writer("w1", "winning body w1"), _writer("w2", "losing body w2")]
+    payers = [_payer("p1", "strict"), _payer("p2", "lenient")]
+    # pair order from tournament cross-product: (w1,p1),(w1,p2),(w2,p1),(w2,p2)
+    # defensibility values chosen so:
+    #   w1 mean defensibility = (8 + 6) / 2 = 7.0  --> winner
+    #   w2 mean defensibility = (4 + 2) / 2 = 3.0  --> loser
+    #   p1 inverse mean = ((10-8) + (10-4)) / 2 = (2+6)/2 = 4.0
+    #   p2 inverse mean = ((10-6) + (10-2)) / 2 = (4+8)/2 = 6.0 --> p2 wins payer side
+    scores = [_score(8), _score(6), _score(4), _score(2)]
+    driver, _, _, _ = _make_driver(
+        writers=writers, payers=payers, score_side_effect=scores
+    )
+
+    outcome = await driver.round()
+
+    # writer_scoreboard: both writers present, sorted by mean defensibility descending
+    assert hasattr(outcome, "writer_scoreboard")
+    assert len(outcome.writer_scoreboard) == 2
+    w_ids = [entry[0] for entry in outcome.writer_scoreboard]
+    assert w_ids[0] == "w1"   # winner first
+    assert w_ids[1] == "w2"   # loser second
+    assert outcome.writer_scoreboard[0][1] == pytest.approx((8 + 6) / 2)  # 7.0
+    assert outcome.writer_scoreboard[1][1] == pytest.approx((4 + 2) / 2)  # 3.0
+
+    # payer_scoreboard: both payers present, sorted by mean inverse defensibility descending
+    assert hasattr(outcome, "payer_scoreboard")
+    assert len(outcome.payer_scoreboard) == 2
+    p_ids = [entry[0] for entry in outcome.payer_scoreboard]
+    assert p_ids[0] == "p2"   # p2 has higher inverse mean (6.0 > 4.0)
+    assert p_ids[1] == "p1"
+    assert outcome.payer_scoreboard[0][1] == pytest.approx(((10 - 6) + (10 - 2)) / 2)  # 6.0
+    assert outcome.payer_scoreboard[1][1] == pytest.approx(((10 - 8) + (10 - 4)) / 2)  # 4.0

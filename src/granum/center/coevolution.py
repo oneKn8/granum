@@ -58,6 +58,11 @@ class CoEvolutionRoundResult:
     defensibility_composite: float
     english_feedback: str
     adversary_reset_fired: bool = False
+    # Per-population scoreboards: (id, mean_score) sorted best-first.
+    # writer_scoreboard ranks by mean defensibility descending; tie-break prompt_id asc.
+    # payer_scoreboard ranks by mean inverse defensibility (10 - def) descending; same tie-break.
+    writer_scoreboard: tuple[tuple[str, float], ...] = ()
+    payer_scoreboard: tuple[tuple[str, float], ...] = ()
 
 
 def _extract_persona_id(prompt_name: str) -> str:
@@ -271,6 +276,41 @@ class CoEvolutionDriver:
                 composite = 0.0
                 english_feedback = ""
 
+            # Build per-population scoreboards covering ALL contestants.
+            # writer_scoreboard: mean defensibility per writer, sorted best-first.
+            # Mirror the ordering in triangular_tournament._rank_writers:
+            #   key = (-mean_defensibility, prompt_id)
+            all_writer_ids: list[str] = [w[0] for w in writer_refs]
+            writer_scores_map: dict[str, list[int]] = {wid: [] for wid in all_writer_ids}
+            for ps in result.all_pair_scores:
+                writer_scores_map[ps.writer_id].append(ps.score.defensibility)
+            writer_scoreboard: tuple[tuple[str, float], ...] = tuple(
+                sorted(
+                    (
+                        (wid, sum(vals) / len(vals) if vals else 0.0)
+                        for wid, vals in writer_scores_map.items()
+                    ),
+                    key=lambda item: (-item[1], item[0]),
+                )
+            )
+
+            # payer_scoreboard: mean inverse defensibility (10 - def) per payer,
+            # sorted best-first. Mirror triangular_tournament._rank_payers:
+            #   key = (-mean_inverse_defensibility, prompt_id)
+            all_payer_ids: list[str] = [p[0] for p in payer_refs]
+            payer_inv_map: dict[str, list[int]] = {pid: [] for pid in all_payer_ids}
+            for ps in result.all_pair_scores:
+                payer_inv_map[ps.payer_id].append(10 - ps.score.defensibility)
+            payer_scoreboard: tuple[tuple[str, float], ...] = tuple(
+                sorted(
+                    (
+                        (pid, sum(vals) / len(vals) if vals else 0.0)
+                        for pid, vals in payer_inv_map.items()
+                    ),
+                    key=lambda item: (-item[1], item[0]),
+                )
+            )
+
             # 7. Dataset writeback
             with _tracer.start_as_current_span(
                 "granum.coevolution.dataset_writeback"
@@ -346,6 +386,8 @@ class CoEvolutionDriver:
                 defensibility_composite=composite,
                 english_feedback=english_feedback,
                 adversary_reset_fired=adversary_reset_fired,
+                writer_scoreboard=writer_scoreboard,
+                payer_scoreboard=payer_scoreboard,
             )
             self._round_index += 1
             return outcome
