@@ -354,6 +354,7 @@ def coevolve(
     from granum.center.coevolution_run import CoEvolutionRun
     from granum.center.defensibility_judge import DefensibilityJudge
     from granum.center.mutation_strategies import propose_mutations
+    from granum.center.prompt_mutation import make_llm_mutator
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell, seed_payers
     from granum.tools.gemini_client import GeminiClient
@@ -426,6 +427,7 @@ def coevolve(
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
                 antigen=antigen,
+                prompt_mutator=make_llm_mutator(client=gemini, model=model),
             )
             run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell=cell, rounds=rounds)
             result = await run.run()

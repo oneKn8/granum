@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Awaitable, Callable, Protocol
 
 from opentelemetry import trace
 
@@ -47,6 +47,15 @@ class _MutationProposer(Protocol):
     ) -> list[Mutation]: ...
 
 
+# Feedback-directed mutation: given the writer winner's STRATEGY body + the
+# judge's English critique of its appeal, return N improved (body, note)
+# variants. This is directed optimization — daughters can genuinely beat the
+# parent — unlike the mechanical citation-swap proposer. When absent, the
+# driver falls back to the mechanical proposer (preserving legacy behavior).
+# Returns: list of (improved_strategy_body, short_change_note).
+_PromptMutator = Callable[[str, str, int], Awaitable[list[tuple[str, str]]]]
+
+
 @dataclass(frozen=True)
 class CoEvolutionRoundResult:
     cell: str
@@ -65,6 +74,9 @@ class CoEvolutionRoundResult:
     # payer_scoreboard ranks by mean inverse defensibility (10 - def) descending; same tie-break.
     writer_scoreboard: tuple[tuple[str, float], ...] = ()
     payer_scoreboard: tuple[tuple[str, float], ...] = ()
+    # Per-writer-mutant change notes: (prompt_id, note). Populated by the
+    # feedback-directed mutator's change summaries; empty for the templated path.
+    writer_mutant_notes: tuple[tuple[str, str], ...] = ()
 
 
 def _extract_persona_id(prompt_name: str) -> str:
@@ -113,6 +125,7 @@ class CoEvolutionDriver:
         adversary_reset_every: int = 5,
         appeal_generator: AppealGenerator | None = None,
         antigen: Denial | None = None,
+        prompt_mutator: _PromptMutator | None = None,
     ) -> None:
         if not (0.0 <= mutation_rate_cap <= 1.0):
             raise ValueError(
@@ -128,6 +141,11 @@ class CoEvolutionDriver:
         self._cell = cell
         self._gold = load_gold_appeals(gold_path)
         self._propose_mutations = mutation_proposer
+        # Feedback-directed writer mutator (the real arms-race climb). When set,
+        # writer clonal expansion rewrites the winner's strategy from the judge's
+        # English critique instead of applying templated citation swaps. The payer
+        # side always stays templated.
+        self._prompt_mutator = prompt_mutator
         self._mutation_count = mutation_count
         self._mutation_rate_cap = mutation_rate_cap
         self._adversary_reset_every = adversary_reset_every
@@ -219,6 +237,24 @@ class CoEvolutionDriver:
                     payer_winner_id, payer_winner_version, "production"
                 )
 
+            # Winner's mean defensibility composite + the judge's English critique
+            # of its appeal. Computed BEFORE writer clonal expansion so the
+            # feedback-directed mutator can rewrite the winning strategy from this
+            # critique. The judge produces per-pair composite scores; we average
+            # the composites across all payers the writer-winner faced.
+            winner_pair_scores = [
+                ps for ps in result.all_pair_scores
+                if ps.writer_id == writer_winner_id
+            ]
+            if winner_pair_scores:
+                composite = sum(
+                    ps.score.composite for ps in winner_pair_scores
+                ) / len(winner_pair_scores)
+                english_feedback = winner_pair_scores[0].score.english_feedback
+            else:  # pragma: no cover — defensive
+                composite = 0.0
+                english_feedback = ""
+
             # 6. Clonal expansion — writer winner
             writer_effective_count = self._effective_mutation_count(
                 len(writer_refs)
@@ -227,25 +263,44 @@ class CoEvolutionDriver:
                 "granum.coevolution.clonal_expansion_writers"
             ):
                 writer_mutant_ids: list[str] = []
-                writer_mutations = self._propose_mutations(
-                    parent=writer_winner_body, n=writer_effective_count
-                )
-                for i, mutation in enumerate(writer_mutations):
-                    try:
-                        mutant_body = apply_mutation(writer_winner_body, mutation)
-                    except ValueError as e:
-                        _log.warning(
-                            "writer mutation %d on winner %s failed: %s — skipping",
-                            i, writer_winner_id, e,
-                        )
-                        continue
-                    if mutant_body == writer_winner_body:
-                        continue
-                    name = f"{self._cell}/bcell_mut_{writer_winner_id}_{i}"
-                    pv = await self._phoenix.upsert_prompt(
-                        name=name, body=mutant_body, tags=("experimental",)
+                writer_mutant_notes: list[tuple[str, str]] = []
+                if self._prompt_mutator is not None:
+                    # Feedback-directed: rewrite the winning strategy to address
+                    # the judge's critique. Directed optimization — daughters can
+                    # genuinely beat the parent, so writers climb the arms race.
+                    variants = await self._prompt_mutator(
+                        writer_winner_body, english_feedback, writer_effective_count
                     )
-                    writer_mutant_ids.append(pv.prompt_id)
+                    for i, (mutant_body, note) in enumerate(variants):
+                        if not mutant_body or mutant_body == writer_winner_body:
+                            continue  # empty or no-op daughter
+                        name = f"{self._cell}/bcell_mut_{writer_winner_id}_{i}"
+                        pv = await self._phoenix.upsert_prompt(
+                            name=name, body=mutant_body, tags=("experimental",)
+                        )
+                        writer_mutant_ids.append(pv.prompt_id)
+                        writer_mutant_notes.append((pv.prompt_id, note))
+                else:
+                    # Mechanical fallback (templated citation swaps / reframes).
+                    writer_mutations = self._propose_mutations(
+                        parent=writer_winner_body, n=writer_effective_count
+                    )
+                    for i, mutation in enumerate(writer_mutations):
+                        try:
+                            mutant_body = apply_mutation(writer_winner_body, mutation)
+                        except ValueError as e:
+                            _log.warning(
+                                "writer mutation %d on winner %s failed: %s — skipping",
+                                i, writer_winner_id, e,
+                            )
+                            continue
+                        if mutant_body == writer_winner_body:
+                            continue
+                        name = f"{self._cell}/bcell_mut_{writer_winner_id}_{i}"
+                        pv = await self._phoenix.upsert_prompt(
+                            name=name, body=mutant_body, tags=("experimental",)
+                        )
+                        writer_mutant_ids.append(pv.prompt_id)
 
             # 6b. Clonal expansion — payer winner
             payer_effective_count = self._effective_mutation_count(
@@ -279,22 +334,6 @@ class CoEvolutionDriver:
                     )
                     payer_mutant_ids.append(pv.prompt_id)
                     payer_mutant_versions.append((pv.prompt_id, pv.version_id))
-
-            # Compute winner's mean defensibility composite across all the
-            # payers it faced — the judge produces per-pair composite scores;
-            # we average the composites of the writer-winner's pair scores.
-            winner_pair_scores = [
-                ps for ps in result.all_pair_scores
-                if ps.writer_id == writer_winner_id
-            ]
-            if winner_pair_scores:
-                composite = sum(
-                    ps.score.composite for ps in winner_pair_scores
-                ) / len(winner_pair_scores)
-                english_feedback = winner_pair_scores[0].score.english_feedback
-            else:  # pragma: no cover — defensive
-                composite = 0.0
-                english_feedback = ""
 
             # Build per-population scoreboards covering ALL contestants.
             # writer_scoreboard: mean defensibility per writer, sorted best-first.
@@ -418,6 +457,7 @@ class CoEvolutionDriver:
                 adversary_reset_fired=adversary_reset_fired,
                 writer_scoreboard=writer_scoreboard,
                 payer_scoreboard=payer_scoreboard,
+                writer_mutant_notes=tuple(writer_mutant_notes),
             )
             self._round_index += 1
             return outcome

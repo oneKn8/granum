@@ -141,3 +141,83 @@ async def test_run_accumulates_both_lineages_and_serializes_payload():
     assert writers_by_id["w2"]["killedAt"] is not None
     assert payers_by_id["p2"]["killedAt"] is not None
     assert payers_by_id["p1"]["killedAt"] is None
+
+
+@pytest.mark.asyncio
+async def test_node_keeps_max_fitness_across_rounds_not_last_seen():
+    """Because the adversary co-evolves, a survivor's later-round score can be
+    LOWER than an early-round peak. The node must keep its MAX fitness so the
+    champion never displays lower fitness than a node tombstoned early."""
+    driver = MagicMock()
+    driver.round = AsyncMock(
+        side_effect=[
+            # Round 0: w1 peaks at 9.0; w2 (tombstoned this round) sits at 3.0.
+            _round(
+                round_index=0,
+                writer_scoreboard=[("w1", 9.0), ("w2", 3.0)],
+                payer_scoreboard=[("p1", 6.0)],
+                writer_winner_id="w1",
+                payer_winner_id="p1",
+                writer_loser_ids=("w2",),
+                payer_loser_ids=(),
+                writer_mutant_ids=(),
+                payer_mutant_ids=(),
+            ),
+            # Round 1: the adversary got harder; w1's score DIPS to 4.0.
+            # Last-seen tracking would record 4.0 (< w2's 3.0? no — but below the
+            # peak). MAX tracking must keep 9.0.
+            _round(
+                round_index=1,
+                writer_scoreboard=[("w1", 4.0)],
+                payer_scoreboard=[("p1", 7.0)],
+                writer_winner_id="w1",
+                payer_winner_id="p1",
+                writer_loser_ids=(),
+                payer_loser_ids=(),
+                writer_mutant_ids=(),
+                payer_mutant_ids=(),
+            ),
+        ]
+    )
+
+    phoenix = _phoenix_with_sweep(dead_ids={"w2"})
+    run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell="aetna_cardiac", rounds=2)
+    payload = (await run.run()).to_payload()
+
+    writers_by_id = {s["id"]: s for s in payload["writers"]}
+    # w1 keeps its round-0 peak (9.0 → 0.9), NOT the round-1 dip (4.0 → 0.4).
+    assert writers_by_id["w1"]["fitness"] == pytest.approx(0.9)
+    # w1 is the genuine max → champion; the early-tombstoned w2 (0.3) never wins.
+    assert writers_by_id["w1"]["status"] == "champion"
+    assert writers_by_id["w2"]["status"] == "tombstoned"
+
+
+@pytest.mark.asyncio
+async def test_writer_mutant_node_carries_change_note_from_round():
+    """Writer mutant nodes pick up their mutation_note from the round's
+    writer_mutant_notes (feedback-directed change summaries), not always None."""
+    driver = MagicMock()
+    round0 = _round(
+        round_index=0,
+        writer_scoreboard=[("w1", 7.0)],
+        payer_scoreboard=[("p1", 6.0)],
+        writer_winner_id="w1",
+        payer_winner_id="p1",
+        writer_loser_ids=(),
+        payer_loser_ids=(),
+        writer_mutant_ids=("wm1",),
+        payer_mutant_ids=(),
+    )
+    # Attach the change note for the writer mutant.
+    round0 = CoEvolutionRoundResult(
+        **{**round0.__dict__, "writer_mutant_notes": (("wm1", "tighter citations"),)}
+    )
+    driver.round = AsyncMock(side_effect=[round0])
+
+    phoenix = _phoenix_with_sweep(dead_ids=set())
+    run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell="aetna_cardiac", rounds=1)
+    payload = (await run.run()).to_payload()
+
+    writers_by_id = {s["id"]: s for s in payload["writers"]}
+    assert writers_by_id["wm1"]["mutationNote"] == "tighter citations"
+    assert writers_by_id["wm1"]["parentId"] == "w1"

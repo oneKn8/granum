@@ -88,7 +88,10 @@ class CoEvolutionRun:
         for round_idx in range(self._rounds):
             result = await self._driver.round()
 
-            # Update writer nodes from scoreboard
+            # Update writer nodes from scoreboard. Track the MAX fitness a node
+            # ever scored — because the adversary co-evolves, a survivor's later
+            # score can dip below a node tombstoned early, which would otherwise
+            # let a tombstoned node out-rank the champion in the display.
             for pid, fitness in result.writer_scoreboard:
                 node = writers.get(pid)
                 if node is None:
@@ -100,9 +103,9 @@ class CoEvolutionRun:
                         fitness=fitness,
                     )
                 else:
-                    node.fitness = fitness
+                    node.fitness = max(node.fitness, fitness)
 
-            # Update payer nodes from scoreboard
+            # Update payer nodes from scoreboard (same MAX-fitness rule)
             for pid, fitness in result.payer_scoreboard:
                 node = payers.get(pid)
                 if node is None:
@@ -114,9 +117,11 @@ class CoEvolutionRun:
                         fitness=fitness,
                     )
                 else:
-                    node.fitness = fitness
+                    node.fitness = max(node.fitness, fitness)
 
-            # Register writer mutants as children of this round's writer winner
+            # Register writer mutants as children of this round's writer winner.
+            # Carry the feedback-directed mutator's change note when present.
+            writer_notes_by_id = dict(result.writer_mutant_notes)
             for mid in result.writer_mutant_ids:
                 writers.setdefault(
                     mid,
@@ -124,7 +129,7 @@ class CoEvolutionRun:
                         id=mid,
                         generation=round_idx + 1,
                         parent_id=result.writer_winner_id,
-                        mutation_note=None,
+                        mutation_note=writer_notes_by_id.get(mid),
                     ),
                 )
 

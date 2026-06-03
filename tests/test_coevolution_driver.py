@@ -83,6 +83,7 @@ def _make_driver(
     score_side_effect: list[DefensibilityScore] | None = None,
     mutation_proposer=None,
     mutation_count: int = 2,
+    prompt_mutator=None,
 ) -> tuple[CoEvolutionDriver, AsyncMock, AsyncMock, AsyncMock]:
     mock_phoenix = AsyncMock(spec=PhoenixClient)
     mock_phoenix.list_active_prompts.side_effect = [writers, payers]
@@ -142,6 +143,7 @@ def _make_driver(
         mutation_count=mutation_count,
         appeal_generator=mock_appeal_generator,
         antigen=_antigen(),
+        prompt_mutator=prompt_mutator,
     )
     return driver, mock_phoenix, mock_payer, mock_judge
 
@@ -292,6 +294,103 @@ async def test_writer_mutations_spawned_from_writer_winner_body():
         "aetna_cardiac/bcell_mut_w1_0",
         "aetna_cardiac/bcell_mut_w1_1",
     ]
+
+
+@pytest.mark.asyncio
+async def test_feedback_directed_writer_mutator_rewrites_strategy_from_critique():
+    """When a prompt_mutator is wired, writer clonal expansion rewrites the
+    winning STRATEGY from the judge's English critique (directed optimization)
+    instead of applying templated citation swaps. The mutator is awaited with
+    (winner_body, english_feedback, effective_count), the IMPROVED body is
+    upserted (not a templated mutation), and the change note is exposed on
+    outcome.writer_mutant_notes."""
+    writers = [_writer("w1", "ORIGINAL STRATEGY BODY")]
+    payers = [_payer("p1", "strict")]
+    # The judge's critique is what the mutator must receive.
+    judge_score = _score(8, feedback="cite exact CPB section numbers")
+
+    # Mock feedback-directed mutator: ignores templated mutations entirely and
+    # returns a wholesale rewritten strategy + an English change note.
+    prompt_mutator = AsyncMock(
+        return_value=[("IMPROVED STRATEGY BODY", "tighter citations")]
+    )
+
+    # A templated proposer is still supplied (the fallback) but MUST NOT be used
+    # when the prompt_mutator is wired.
+    templated_proposer = MagicMock(return_value=[])
+
+    driver, mock_phoenix, _, _ = _make_driver(
+        writers=writers,
+        payers=payers,
+        score_side_effect=[judge_score],
+        mutation_proposer=templated_proposer,
+        mutation_count=1,
+        prompt_mutator=prompt_mutator,
+    )
+
+    outcome = await driver.round()
+
+    # (a) prompt_mutator awaited with winner body + english_feedback + count.
+    prompt_mutator.assert_awaited_once()
+    call_args = prompt_mutator.await_args.args
+    assert call_args[0] == "ORIGINAL STRATEGY BODY"  # winner body
+    assert call_args[1] == "cite exact CPB section numbers"  # english_feedback
+    assert call_args[2] == 1  # effective mutation count
+
+    # The templated fallback proposer is never consulted with the WRITER body
+    # (it may still be called for the payer side). The writer winner body must
+    # not appear in any templated-proposer call.
+    for call in templated_proposer.call_args_list:
+        assert call.kwargs.get("parent") != "ORIGINAL STRATEGY BODY"
+
+    # (b) The IMPROVED body (not a templated mutation) was upserted.
+    upsert_calls = mock_phoenix.upsert_prompt.await_args_list
+    writer_mutant_upserts = [
+        c for c in upsert_calls
+        if c.kwargs["name"].startswith("aetna_cardiac/bcell_mut_")
+    ]
+    assert len(writer_mutant_upserts) == 1
+    assert writer_mutant_upserts[0].kwargs["name"] == "aetna_cardiac/bcell_mut_w1_0"
+    assert writer_mutant_upserts[0].kwargs["body"] == "IMPROVED STRATEGY BODY"
+    assert writer_mutant_upserts[0].kwargs["tags"] == ("experimental",)
+
+    # (c) outcome.writer_mutant_notes carries (prompt_id, note).
+    assert len(outcome.writer_mutant_notes) == 1
+    mutant_id, note = outcome.writer_mutant_notes[0]
+    assert note == "tighter citations"
+    assert mutant_id in outcome.writer_mutant_ids
+
+
+@pytest.mark.asyncio
+async def test_feedback_mutator_skips_empty_and_parent_equal_variants():
+    """Feedback-directed variants that are empty or identical to the parent are
+    skipped — no upsert, no note."""
+    writers = [_writer("w1", "PARENT BODY")]
+    payers = [_payer("p1", "strict")]
+    prompt_mutator = AsyncMock(
+        return_value=[
+            ("", "empty skipped"),
+            ("PARENT BODY", "noop skipped"),
+            ("REAL IMPROVEMENT", "kept"),
+        ]
+    )
+    driver, mock_phoenix, _, _ = _make_driver(
+        writers=writers,
+        payers=payers,
+        score_side_effect=[_score(8)],
+        mutation_count=3,
+        prompt_mutator=prompt_mutator,
+    )
+
+    outcome = await driver.round()
+
+    writer_mutant_upserts = [
+        c for c in mock_phoenix.upsert_prompt.await_args_list
+        if c.kwargs["name"].startswith("aetna_cardiac/bcell_mut_")
+    ]
+    assert len(writer_mutant_upserts) == 1
+    assert writer_mutant_upserts[0].kwargs["body"] == "REAL IMPROVEMENT"
+    assert [n for _, n in outcome.writer_mutant_notes] == ["kept"]
 
 
 @pytest.mark.asyncio
