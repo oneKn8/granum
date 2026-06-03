@@ -46,8 +46,27 @@ class JudgeScore:
 
 class _GenClient(Protocol):
     async def generate(
-        self, *, model: str, prompt: str, temperature: float = 0.0
+        self,
+        *,
+        model: str,
+        prompt: str,
+        temperature: float = 0.0,
+        json_mode: bool = False,
     ) -> str: ...
+
+
+def _loads(raw: str) -> dict[str, Any]:
+    """Parse model JSON, tolerating ```json fences / prose around the object."""
+    text = raw.strip()
+    if text.startswith("```"):
+        # ```json\n{...}\n```  → drop the fence lines
+        text = text.split("\n", 1)[-1]
+        if text.rstrip().endswith("```"):
+            text = text.rstrip()[:-3]
+    start, end = text.find("{"), text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        text = text[start : end + 1]
+    return json.loads(text)
 
 
 class LLMJudge:
@@ -76,12 +95,12 @@ class LLMJudge:
         responses = await asyncio.gather(
             *[
                 self._client.generate(
-                    model=self._model, prompt=prompt, temperature=0.0
+                    model=self._model, prompt=prompt, temperature=0.0, json_mode=True
                 )
                 for _ in range(3)
             ]
         )
-        parsed: list[dict[str, Any]] = [json.loads(r) for r in responses]
+        parsed: list[dict[str, Any]] = [_loads(r) for r in responses]
         return JudgeScore(
             clinical_specificity=int(
                 statistics.median(p["clinical_specificity"] for p in parsed)

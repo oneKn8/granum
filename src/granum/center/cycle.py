@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Awaitable, Callable, Protocol
 
 from opentelemetry import trace
 
@@ -40,6 +40,12 @@ class _MutationProposer(Protocol):
     ) -> list[Mutation]: ...
 
 
+# Generates an appeal letter from a B-cell system prompt + the denial.
+# Optional: when provided, the cycle judges GENERATED appeals (the honest loop);
+# when absent, it judges the prompt bodies directly (preserves legacy behavior).
+_AppealGenerator = Callable[[str, Denial], Awaitable[str]]
+
+
 @dataclass(frozen=True)
 class CycleOutcome:
     cell: str
@@ -51,6 +57,9 @@ class CycleOutcome:
     winner_composite_score: float
     tombstoned_ids: tuple[str, ...]
     mutant_ids: tuple[str, ...]
+    winner_appeal: str = ""
+    english_feedback: str = ""
+    scoreboard: tuple[tuple[str, float], ...] = ()
 
 
 class GerminalCycle:
@@ -64,6 +73,7 @@ class GerminalCycle:
         gold_path: str | Path,
         mutation_proposer: _MutationProposer,
         mutation_count: int = 2,
+        appeal_generator: _AppealGenerator | None = None,
     ) -> None:
         self._phoenix = phoenix
         self._judge = judge
@@ -72,6 +82,7 @@ class GerminalCycle:
         self._gold = load_gold_appeals(gold_path)
         self._propose_mutations = mutation_proposer
         self._mutation_count = mutation_count
+        self._generate_appeal = appeal_generator
 
     async def run(self, *, denial: Denial) -> CycleOutcome:
         with _tracer.start_as_current_span(f"granum.cycle.{self._cell}") as span:
@@ -107,15 +118,33 @@ class GerminalCycle:
                     f"No survivors after negative selection in cell {self._cell}"
                 )
 
-            # 3. Tournament
+            # 2.5 Appeal generation (the honest loop): each surviving B-cell drafts
+            # an appeal for THIS denial; the judge then scores the GENERATED appeal,
+            # not the strategy text. Falls back to judging the prompt body directly
+            # when no generator is wired (keeps the pure-unit path intact).
+            prompt_body_by_id = {pv.prompt_id: pv.body for pv in survivors}
+            appeal_by_id: dict[str, str] = {}
+            if self._generate_appeal is not None:
+                with _tracer.start_as_current_span("granum.cycle.appeal_generation"):
+                    for pv in survivors:
+                        appeal_by_id[pv.prompt_id] = await self._generate_appeal(
+                            pv.body, denial
+                        )
+            else:
+                appeal_by_id = dict(prompt_body_by_id)
+
+            # 3. Tournament — judge the generated appeals
             with _tracer.start_as_current_span("granum.cycle.tournament"):
                 tournament = Tournament(judge=self._judge, gold=self._gold)
                 candidates = [
-                    (pv.prompt_id, pv.version_id, pv.body) for pv in survivors
+                    (pv.prompt_id, pv.version_id, appeal_by_id[pv.prompt_id])
+                    for pv in survivors
                 ]
                 tournament_result = await tournament.run(candidates=candidates)
 
-            winner_id, winner_version, winner_body = tournament_result.winner
+            winner_id, winner_version, winner_appeal = tournament_result.winner
+            # Mutation operates on the winning PROMPT, never the generated appeal.
+            winner_body = prompt_body_by_id[winner_id]
 
             # 4. Apoptosis losers
             with _tracer.start_as_current_span("granum.cycle.apoptosis"):
@@ -154,21 +183,31 @@ class GerminalCycle:
                     )
                     mutant_ids.append(pv.prompt_id)
 
-            # 7. Dataset writeback
-            with _tracer.start_as_current_span("granum.cycle.dataset_writeback"):
-                await self._phoenix.add_dataset_examples(
-                    dataset_name=f"granum/{self._cell}/outcomes",
-                    examples=[{
-                        "denial_id": denial.denial_id,
-                        "winner_prompt_id": winner_id,
-                        "winner_version_id": winner_version,
-                        "winner_composite": tournament_result.winner_score.composite,
-                        "rejected_count": len(rejected),
-                        "loser_count": len(tournament_result.losers),
-                        "mutant_count": len(mutant_ids),
-                        "english_feedback": tournament_result.winner_score.english_feedback,
-                    }],
-                )
+            # 7. Dataset writeback (best-effort — Phoenix MCP has no create-dataset,
+            # so the outcomes dataset may not exist on a first live run. A missing
+            # dataset must NOT abort the evolution core, which is already committed
+            # to Phoenix via the prompt-version tags above.)
+            with _tracer.start_as_current_span("granum.cycle.dataset_writeback") as ws:
+                try:
+                    await self._phoenix.add_dataset_examples(
+                        dataset_name=f"granum/{self._cell}/outcomes",
+                        examples=[{
+                            "denial_id": denial.denial_id,
+                            "winner_prompt_id": winner_id,
+                            "winner_version_id": winner_version,
+                            "winner_composite": tournament_result.winner_score.composite,
+                            "rejected_count": len(rejected),
+                            "loser_count": len(tournament_result.losers),
+                            "mutant_count": len(mutant_ids),
+                            "english_feedback": tournament_result.winner_score.english_feedback,
+                        }],
+                    )
+                except Exception as exc:  # noqa: BLE001 — writeback is supplementary
+                    ws.set_attribute("granum.dataset_writeback.ok", False)
+                    _log.warning(
+                        "dataset writeback to granum/%s/outcomes failed (dataset may "
+                        "not exist yet): %s", self._cell, exc,
+                    )
 
             return CycleOutcome(
                 cell=self._cell,
@@ -184,4 +223,10 @@ class GerminalCycle:
                 winner_composite_score=tournament_result.winner_score.composite,
                 tombstoned_ids=tuple(tombstoned_ids),
                 mutant_ids=tuple(mutant_ids),
+                winner_appeal=winner_appeal,
+                english_feedback=tournament_result.winner_score.english_feedback,
+                scoreboard=tuple(
+                    (s.prompt_id, s.score.composite)
+                    for s in tournament_result.all_scores
+                ),
             )

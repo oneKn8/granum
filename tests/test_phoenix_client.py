@@ -1,124 +1,229 @@
-"""Phoenix MCP+REST client wrapper — unit tests with mocked transports.
+"""Phoenix MCP+REST client wrapper — unit tests against the REAL schema.
 
-This client is the SOLE seam between Granum and Phoenix. All Phoenix tool
-names and REST paths appear ONLY here. Business logic talks to this client
-via typed methods. Path B apoptosis (tag-based) is enforced.
+Retrofitted 2026-06-02 (Phase 1.10b) to the verified-live Phoenix MCP shapes in
+`research/phoenix-mcp-schemas.md`:
+  - upsert-prompt → `template`, returns version id under `id`, tag-after.
+  - add-prompt-version-tag → {prompt_version_id, name}; tags read back via REST.
+  - list-prompts → no filter/tags; active resolution via get-prompt-version-by-tag.
+  - `/` in names is normalized to `__` (Phoenix strips `/`).
+  - apoptosis tag removal is REST DELETE /v1/prompt_versions/{vid}/tags/{tag}.
 """
 from unittest.mock import AsyncMock
 
 import httpx
 import pytest
 
-from granum.tools.phoenix_client import PhoenixClient, PromptVersion
+from granum.tools.phoenix_client import PhoenixClient, PhoenixToolError, PromptVersion
+
+
+def _client(mock_mcp, mock_rest=None):
+    if mock_rest is None:
+        mock_rest = AsyncMock(spec=httpx.AsyncClient)
+    return PhoenixClient(
+        mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006"
+    )
 
 
 @pytest.mark.asyncio
-async def test_upsert_prompt_creates_new_version():
+async def test_upsert_prompt_maps_body_to_template_and_normalizes_name():
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {
-        "promptId": "p123",
-        "versionId": "v1",
-        "tags": ["experimental"],
-    }
-    mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_mcp.call_tool.return_value = {"id": "v1"}  # version GlobalID
+    client = _client(mock_mcp)
+
     pv = await client.upsert_prompt(name="aetna_cardiac/bcell_1", body="…appeal template…")
+
     assert isinstance(pv, PromptVersion)
-    assert pv.prompt_id == "p123"
+    # slash normalized to __
+    assert pv.prompt_id == "aetna_cardiac__bcell_1"
+    assert pv.name == "aetna_cardiac__bcell_1"
+    assert pv.version_id == "v1"
     assert "experimental" in pv.tags
+    # upsert-prompt was called with `template`, GOOGLE provider, NO `body`/`tags`
+    upsert_args = mock_mcp.call_tool.call_args_list[0][0]
+    assert upsert_args[0] == "upsert-prompt"
+    assert upsert_args[1]["template"] == "…appeal template…"
+    assert upsert_args[1]["model_provider"] == "GOOGLE"
+    assert "body" not in upsert_args[1]
+    assert "tags" not in upsert_args[1]
+    # tag applied in a follow-up add-prompt-version-tag call
+    tag_args = mock_mcp.call_tool.call_args_list[1][0]
+    assert tag_args[0] == "add-prompt-version-tag"
+    assert tag_args[1] == {"prompt_version_id": "v1", "name": "experimental"}
 
 
 @pytest.mark.asyncio
-async def test_add_version_tag_uses_mcp():
+async def test_add_version_tag_uses_mcp_and_reads_back_tags():
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {"tags": ["experimental", "production"]}
+    mock_mcp.call_tool.return_value = {}
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_rest.get.return_value = httpx.Response(
+        200, json={"data": [{"name": "experimental"}, {"name": "production"}]}
+    )
+    client = _client(mock_mcp, mock_rest)
+
     result = await client.add_version_tag("p123", "v1", "production")
+
     assert "production" in result
-    # Verify MCP, not REST, was used
     mock_mcp.call_tool.assert_called_once()
+    args = mock_mcp.call_tool.call_args[0]
+    assert args[0] == "add-prompt-version-tag"
+    assert args[1] == {"prompt_version_id": "v1", "name": "production"}
+    # tag set read back via REST GET, never via REST DELETE
+    mock_rest.get.assert_called_once()
     mock_rest.delete.assert_not_called()
 
 
 @pytest.mark.asyncio
-async def test_remove_version_tag_uses_rest():
-    """Tag removal is REST-only per Phoenix MCP audit; client must use REST."""
+async def test_remove_version_tag_uses_rest_keyed_on_version_id():
+    """Tag removal is REST-only and keyed on the VERSION id, per the live schema."""
     mock_mcp = AsyncMock()
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
     mock_rest.delete.return_value = httpx.Response(status_code=204)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    client = _client(mock_mcp, mock_rest)
+
     await client.remove_version_tag("p123", "v1", "production")
-    # REST DELETE was called
+
     mock_rest.delete.assert_called_once()
     called_url = mock_rest.delete.call_args[0][0]
     assert "/v1/prompt_versions/v1/tags/production" in called_url
-    # MCP was NOT called (tag removal not in MCP)
     mock_mcp.call_tool.assert_not_called()
 
 
 @pytest.mark.asyncio
 async def test_tombstone_removes_production_adds_tombstoned():
-    """Functional apoptosis: remove 'production' tag (REST), add 'tombstoned' tag (MCP)."""
+    """Apoptosis Path B: remove 'production' (REST), add 'tombstoned' (MCP)."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {"tags": ["experimental", "tombstoned"]}
+    mock_mcp.call_tool.return_value = {}
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
     mock_rest.delete.return_value = httpx.Response(status_code=204)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    client = _client(mock_mcp, mock_rest)
+
     await client.tombstone("p123", "v1")
-    # Both transports used
+
     assert mock_rest.delete.call_count == 1
     assert mock_mcp.call_tool.call_count == 1
-    # MCP call was add-prompt-version-tag with 'tombstoned'
-    mcp_call_args = mock_mcp.call_tool.call_args
-    assert mcp_call_args[0][0] == "add-prompt-version-tag"
-    assert mcp_call_args[0][1]["tag"] == "tombstoned"
+    mcp_call_args = mock_mcp.call_tool.call_args[0]
+    assert mcp_call_args[0] == "add-prompt-version-tag"
+    assert mcp_call_args[1]["name"] == "tombstoned"
+    assert mcp_call_args[1]["prompt_version_id"] == "v1"
 
 
 @pytest.mark.asyncio
 async def test_tombstone_tolerates_404_on_remove():
-    """If 'production' tag wasn't on the version, REST returns 404; tombstone proceeds."""
+    """If 'production' wasn't on the version, REST returns 404; tombstone proceeds."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {"tags": ["experimental", "tombstoned"]}
+    mock_mcp.call_tool.return_value = {}
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
     mock_rest.delete.return_value = httpx.Response(status_code=404)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
-    # Should not raise
-    await client.tombstone("p123", "v1")
+    client = _client(mock_mcp, mock_rest)
+
+    await client.tombstone("p123", "v1")  # must not raise
+
     assert mock_mcp.call_tool.call_count == 1  # add-tombstoned still called
 
 
 @pytest.mark.asyncio
-async def test_list_prompts_returns_active_population_only():
-    """Selection logic must filter out tombstoned versions."""
+async def test_list_active_prompts_resolves_production_filters_tombstoned_and_prefix():
+    """Real flow: list-prompts → prefix filter → get-prompt-version-by-tag(production).
+
+    bcell_1 → production resolves, kept.
+    bcell_2 → production resolves but version is ALSO tombstoned → filtered.
+    bcell_3 → production miss (PhoenixToolError) → extinct lineage, skipped.
+    other__x → wrong prefix → skipped.
+    """
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {
-        "prompts": [
-            {"promptId": "p1", "versionId": "v1", "tags": ["production"], "body": "alive 1"},
-            {"promptId": "p2", "versionId": "v1", "tags": ["production", "tombstoned"], "body": "dead"},
-            {"promptId": "p3", "versionId": "v1", "tags": ["production"], "body": "alive 2"},
-        ]
-    }
+
+    async def call_tool(name, args):
+        if name == "list-prompts":
+            return {
+                "items": [
+                    {"name": "aetna_cardiac__bcell_1", "id": "P1"},
+                    {"name": "aetna_cardiac__bcell_2", "id": "P2"},
+                    {"name": "aetna_cardiac__bcell_3", "id": "P3"},
+                    {"name": "other__x", "id": "P9"},
+                ]
+            }
+        if name == "get-prompt-version-by-tag":
+            ident = args["prompt_identifier"]
+            if ident == "aetna_cardiac__bcell_3":
+                raise PhoenixToolError("404 Not Found")
+            return {"id": "v_" + ident, "template": "body of " + ident}
+        return {}
+
+    mock_mcp.call_tool.side_effect = call_tool
+
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+
+    async def rest_get(url):
+        if "v_aetna_cardiac__bcell_2" in url:
+            return httpx.Response(
+                200, json={"data": [{"name": "production"}, {"name": "tombstoned"}]}
+            )
+        return httpx.Response(200, json={"data": [{"name": "production"}]})
+
+    mock_rest.get.side_effect = rest_get
+    client = _client(mock_mcp, mock_rest)
+
     active = await client.list_active_prompts(name_prefix="aetna_cardiac/")
-    assert len(active) == 2
-    assert {p.prompt_id for p in active} == {"p1", "p3"}
+
+    assert {p.prompt_id for p in active} == {"aetna_cardiac__bcell_1"}
+    p = active[0]
+    assert p.version_id == "v_aetna_cardiac__bcell_1"
+    assert p.body == "body of aetna_cardiac__bcell_1"
+    assert "production" in p.tags
 
 
 @pytest.mark.asyncio
-async def test_add_dataset_examples_via_mcp():
+async def test_list_active_prompts_extracts_body_from_chat_template():
+    """get-prompt-version-by-tag returns a chat-wrapped template; body is unwrapped."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = None
+
+    async def call_tool(name, args):
+        if name == "list-prompts":
+            return {"items": [{"name": "aetna_cardiac__bcell_1", "id": "P1"}]}
+        if name == "get-prompt-version-by-tag":
+            return {
+                "id": "v9",
+                "template": {
+                    "type": "chat",
+                    "messages": [
+                        {"role": "user", "content": [
+                            {"type": "text", "text": "the real appeal body"}
+                        ]}
+                    ],
+                },
+            }
+        return {}
+
+    mock_mcp.call_tool.side_effect = call_tool
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_rest.get.return_value = httpx.Response(200, json={"data": [{"name": "production"}]})
+    client = _client(mock_mcp, mock_rest)
+
+    active = await client.list_active_prompts(name_prefix="aetna_cardiac/")
+
+    assert len(active) == 1
+    assert active[0].body == "the real appeal body"
+
+
+@pytest.mark.asyncio
+async def test_add_dataset_examples_wraps_flat_rows():
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {}
+    client = _client(mock_mcp)
+
     await client.add_dataset_examples(
         dataset_name="granum/aetna_cardiac/outcomes",
         examples=[{"denial_id": "d1", "winner": "p1", "score": 8.4}],
     )
+
     mock_mcp.call_tool.assert_called_once()
-    args = mock_mcp.call_tool.call_args[0]
-    assert args[0] == "add-dataset-examples"
+    name, payload = mock_mcp.call_tool.call_args[0]
+    assert name == "add-dataset-examples"
+    assert payload["dataset_name"] == "granum/aetna_cardiac/outcomes"
+    ex = payload["examples"][0]
+    assert set(ex.keys()) == {"input", "output", "metadata"}
+    assert ex["output"]["denial_id"] == "d1"
 
 
 # === Co-evolution: dual-lineage state + writeback ===
@@ -126,57 +231,73 @@ async def test_add_dataset_examples_via_mcp():
 
 @pytest.mark.asyncio
 async def test_list_coevolution_state_returns_writers_and_payers_separately():
-    """Returns (writers, payers) tuple from two separate prefix queries."""
+    """Returns (writers, payers); the {cell}__ vs {cell}_payer__ prefixes don't bleed."""
     mock_mcp = AsyncMock()
 
-    async def call_tool(name: str, arguments: dict) -> dict:
-        prefix = arguments.get("namePrefix", "")
-        if prefix == "aetna_cardiac/":
+    async def call_tool(name, args):
+        if name == "list-prompts":
             return {
-                "prompts": [
-                    {"promptId": "pw1", "versionId": "v1", "tags": ["production"], "body": "writer1", "name": "aetna_cardiac/bcell_1"},
-                    {"promptId": "pw2", "versionId": "v1", "tags": ["production"], "body": "writer2", "name": "aetna_cardiac/bcell_2"},
+                "items": [
+                    {"name": "aetna_cardiac__bcell_1", "id": "P1"},
+                    {"name": "aetna_cardiac__bcell_2", "id": "P2"},
+                    {"name": "aetna_cardiac_payer__strict", "id": "P3"},
                 ]
             }
-        if prefix == "aetna_cardiac_payer/":
-            return {
-                "prompts": [
-                    {"promptId": "pp1", "versionId": "v1", "tags": ["production"], "body": "payer1", "name": "aetna_cardiac_payer/strict"},
-                ]
-            }
-        return {"prompts": []}
+        if name == "get-prompt-version-by-tag":
+            ident = args["prompt_identifier"]
+            return {"id": "v_" + ident, "template": ident}
+        return {}
 
     mock_mcp.call_tool.side_effect = call_tool
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_rest.get.return_value = httpx.Response(200, json={"data": [{"name": "production"}]})
+    client = _client(mock_mcp, mock_rest)
+
     writers, payers = await client.list_coevolution_state(cell="aetna_cardiac")
-    assert [w.prompt_id for w in writers] == ["pw1", "pw2"]
-    assert [p.prompt_id for p in payers] == ["pp1"]
+
+    assert [w.prompt_id for w in writers] == [
+        "aetna_cardiac__bcell_1",
+        "aetna_cardiac__bcell_2",
+    ]
+    assert [p.prompt_id for p in payers] == ["aetna_cardiac_payer__strict"]
 
 
 @pytest.mark.asyncio
-async def test_list_coevolution_state_uses_correct_prefixes():
-    """Verifies the two list-prompts calls use {cell}/ and {cell}_payer/ prefixes."""
+async def test_list_coevolution_state_payer_never_bleeds_into_writers():
+    """A payer-prefixed prompt must not satisfy the writer prefix and vice versa."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = {"prompts": []}
+
+    async def call_tool(name, args):
+        if name == "list-prompts":
+            return {
+                "items": [
+                    {"name": "aetna_cardiac__bcell_1", "id": "P1"},
+                    {"name": "aetna_cardiac_payer__strict", "id": "P2"},
+                ]
+            }
+        if name == "get-prompt-version-by-tag":
+            return {"id": "v_" + args["prompt_identifier"], "template": "x"}
+        return {}
+
+    mock_mcp.call_tool.side_effect = call_tool
     mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
-    await client.list_coevolution_state(cell="aetna_cardiac")
-    assert mock_mcp.call_tool.call_count == 2
-    prefixes_called = [
-        call.args[1]["namePrefix"] for call in mock_mcp.call_tool.call_args_list
-    ]
-    assert "aetna_cardiac/" in prefixes_called
-    assert "aetna_cardiac_payer/" in prefixes_called
+    mock_rest.get.return_value = httpx.Response(200, json={"data": [{"name": "production"}]})
+    client = _client(mock_mcp, mock_rest)
+
+    writers, payers = await client.list_coevolution_state(cell="aetna_cardiac")
+
+    writer_names = {w.name for w in writers}
+    payer_names = {p.name for p in payers}
+    assert "aetna_cardiac_payer__strict" not in writer_names
+    assert "aetna_cardiac__bcell_1" not in payer_names
 
 
 @pytest.mark.asyncio
 async def test_add_coevolution_example_writes_correct_dataset_name():
-    """Writeback targets the granum/{cell}/coevolution dataset."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = None
-    mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_mcp.call_tool.return_value = {}
+    client = _client(mock_mcp)
+
     await client.add_coevolution_example(
         cell="aetna_cardiac",
         round_index=3,
@@ -185,19 +306,19 @@ async def test_add_coevolution_example_writes_correct_dataset_name():
         defensibility_composite=7.2,
         english_feedback="Writer cited CPB 0119 §IV.A directly.",
     )
+
     mock_mcp.call_tool.assert_called_once()
-    args = mock_mcp.call_tool.call_args[0]
-    assert args[0] == "add-dataset-examples"
-    assert args[1]["datasetName"] == "granum/aetna_cardiac/coevolution"
+    name, payload = mock_mcp.call_tool.call_args[0]
+    assert name == "add-dataset-examples"
+    assert payload["dataset_name"] == "granum/aetna_cardiac/coevolution"
 
 
 @pytest.mark.asyncio
 async def test_add_coevolution_example_payload_schema():
-    """Payload contains exactly the 5 required keys with correct values."""
     mock_mcp = AsyncMock()
-    mock_mcp.call_tool.return_value = None
-    mock_rest = AsyncMock(spec=httpx.AsyncClient)
-    client = PhoenixClient(mcp_session=mock_mcp, rest=mock_rest, base_url="http://localhost:6006")
+    mock_mcp.call_tool.return_value = {}
+    client = _client(mock_mcp)
+
     await client.add_coevolution_example(
         cell="aetna_cardiac",
         round_index=3,
@@ -206,9 +327,10 @@ async def test_add_coevolution_example_payload_schema():
         defensibility_composite=7.2,
         english_feedback="Writer cited CPB 0119 §IV.A directly.",
     )
-    examples = mock_mcp.call_tool.call_args[0][1]["examples"]
-    assert len(examples) == 1
-    row = examples[0]
+
+    ex = mock_mcp.call_tool.call_args[0][1]["examples"][0]
+    assert set(ex.keys()) == {"input", "output", "metadata"}
+    row = ex["output"]
     assert set(row.keys()) == {
         "round_index",
         "writer_winner_id",

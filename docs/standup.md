@@ -267,3 +267,25 @@
   - When Cloud Run deploys: re-run the audit against the production-build URL; append second row to `videos/audit/SUMMARY.md` scoreboard; that becomes the submission-ready number.
   - When user provides `ELEVENLABS_API_KEY` + locks voice: `uv run scripts/render_voiceover.py --render` → `videos/audio/granum_demo.mp3`.
 - FILES TOUCHED THIS SESSION (audit + refresh half): `videos/audit/*.{md,html,json}`, `.gitignore`, `docs/submission.md`, `docs/standup.md`. Cumulative across both Phase 6 halves: `docs/{submission.md, demo-script.md, voiceover.txt, standup.md}`, `scripts/{render_voiceover.py, audit_web_quality.sh}`, `videos/audit/*`, `.gitignore`. NO `src/**`, NO `web/**`, NO `data/**`, NO `pyproject.toml` / `LICENSE` / `infra/**`.
+
+## [Solo] — 2026-06-03 (Phase 1.10b PhoenixClient retrofit + 1.10c FIRST LIVE CYCLE)
+- CONTEXT: AgentGov shipped; Granum is sole focus. Picked up at the make-or-break gate — 159 mocked tests, germinal loop had NEVER run live (PhoenixClient authored against a fictional MCP schema). Name locked: **Granum** (no rename).
+- **Phase 1.10b — PhoenixClient schema retrofit (DONE, verified live):**
+  - Captured the REAL Phoenix MCP schemas live (`scripts/capture_phoenix_schemas{,_2,_3}.py`) → `research/phoenix-mcp-schemas.md`. The 4 documented mismatches were the tip; live capture found deeper ones:
+    - `list-prompts` has NO name filter and returns NO tags/versions (only names + prompt ids, cap 100). The whole `list_active_prompts(name_prefix, filter-by-tags)` design was incompatible.
+    - `upsert-prompt` returns only the VERSION id under `id` (text-prefixed envelope); `add-prompt-version-tag` keys on `prompt_version_id`+`name`; `/` is stripped from names; `add-dataset-examples` rows are `{input,output,metadata}`.
+  - Rebuilt `src/granum/tools/phoenix_client.py` on real tools (list-prompts → prefix filter → `get-prompt-version-by-tag(production)`; apoptosis via REST `DELETE .../tags/{tag}`), preserving ALL public signatures so co-evolution/transfer/immune-memory/driver consumers + their `AsyncMock(spec=...)` tests are untouched. `/`→`__` normalization centralized in the client (callers keep logical `/`).
+  - **Bug found + fixed:** the `_MCPDictAdapter` prefix-stripper checked `{` before `[`, slicing into the middle of bare-array responses (list-prompts) → empty population. Fixed to cut from the earliest marker; added 4 adapter regression tests. This is exactly why `list_active_prompts` returned 0 on the first live read.
+  - Updated `test_phoenix_client.py` + one write-shape test in `test_transfer_edge.py` to the verified-live shapes.
+- **Phase 1.10c — FIRST LIVE GERMINAL CYCLE (DONE, verified live):**
+  - Built `src/granum/tools/gemini_client.py` (Vertex `GeminiClient`, async via `to_thread`, JSON mode for the judge). Judge now requests JSON mode + parses defensively.
+  - Made the loop HONEST: optional `appeal_generator` on `GerminalCycle` → each B-cell drafts an appeal for the denial, judge scores the GENERATED appeal (mutation still operates on the winning prompt). Backward-compatible (absent generator = legacy judge-the-body), so existing tests/driver unchanged.
+  - Wired `granum cycle --cell aetna_cardiac --seed-value 42`: live Phoenix + Vertex judge + appeal generator + OTel spans exported to Phoenix + on-disk run artifact (`runs/`, gitignored).
+  - Seeded 3 real Aetna B-cells (`seed_cell.py`), then ran the cycle LIVE:
+    - Judge scored 3 generated appeals: bcell_1_baseline **8.80** (WIN), bcell_3_conservative 7.40, bcell_2_aggressive 6.00.
+    - **Live-verified apoptosis:** both losers had `production` REMOVED + `tombstoned` tag ADDED in Phoenix; active production population = exactly `[bcell_1_baseline]`. Winner promoted; 1 mutant version spawned.
+    - 3,414-char real appeal letter persisted (correctly cites the denial's ICD-10 I25.110 / CPT 33533).
+- TESTS: 159 → **164 passed**; ruff clean.
+- CLEANUP: removed 3 schema-probe prompts from the Phoenix space via REST (204) — space is demo-clean.
+- KNOWN (Phase B): mutant naming double-nests (`bcell_mut_{cell}__{winner}_{i}`) — fine for 1 generation, needs a generation-counter scheme for an 8–12 gen run. Dataset writeback is best-effort (no MCP `create-dataset`; the outcomes dataset must be pre-created for real writeback).
+- NEXT (Phase B): multi-generation evolution (8–12 gens on 2–3 cells) → real lineage tree + fitness climb + Gen1-vs-GenN diff persisted as API-served artifacts; Cloud Run deploy; flip `NEXT_PUBLIC_USE_REAL_API=true`.

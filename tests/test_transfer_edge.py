@@ -53,10 +53,12 @@ async def test_add_transfer_edge_writes_correct_dataset_name_and_payload() -> No
     mock_mcp.call_tool.assert_awaited_once()
     tool_name, payload = mock_mcp.call_tool.call_args[0]
     assert tool_name == "add-dataset-examples"
-    assert payload["datasetName"] == "granum/transfer_edges"
+    assert payload["dataset_name"] == "granum/transfer_edges"
     assert len(payload["examples"]) == 1
-    row = payload["examples"][0]
-    assert row == {
+    ex = payload["examples"][0]
+    # flat analytics row is wrapped into Phoenix's {input, output, metadata} shape
+    assert set(ex.keys()) == {"input", "output", "metadata"}
+    assert ex["output"] == {
         "source_cell": "aetna_cardiac",
         "target_cell": "united_oncology",
         "source_prompt_id": "bc_ae_writer_007",

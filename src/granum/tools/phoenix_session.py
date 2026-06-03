@@ -36,7 +36,7 @@ import httpx
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from granum.tools.phoenix_client import PhoenixClient
+from granum.tools.phoenix_client import PhoenixClient, PhoenixToolError
 
 
 def _require_env(name: str) -> str:
@@ -70,22 +70,35 @@ class _MCPDictAdapter:
         result = await self._raw.call_tool(name, arguments)
         # CallToolResult.content is list[TextContent | ImageContent | EmbeddedResource]
         content = getattr(result, "content", None) or []
-        if not content:
-            return {}
-        # We only handle the text-content case (Phoenix MCP always returns JSON text).
-        first = content[0]
-        text = getattr(first, "text", None)
+        text = next(
+            (t for item in content if (t := getattr(item, "text", None)) is not None),
+            None,
+        )
+
+        # A tool error (e.g. get-prompt-version-by-tag 404 on a tag/prompt miss)
+        # surfaces as isError=True with the 404 line in the text. Raise so callers
+        # can treat it as a genuine miss rather than a malformed success.
+        if getattr(result, "isError", False):
+            raise PhoenixToolError(text or f"{name} returned isError with no content")
+
         if text is None:
             return {}
+
+        # Phoenix often prefixes JSON with a sentence (e.g. upsert-prompt:
+        # `Successfully created prompt "X":\n{...}`). Isolate the JSON tail by
+        # cutting from whichever of `{`/`[` appears EARLIEST — checking `{` first
+        # would slice into the middle of a bare array response (list-prompts).
+        payload = text
+        starts = [i for i in (text.find("{"), text.find("[")) if i != -1]
+        if starts:
+            payload = text[min(starts):]
         try:
-            parsed = json.loads(text)
+            parsed = json.loads(payload)
         except json.JSONDecodeError:
-            # Some Phoenix MCP tools return naked strings ("success", etc.). Wrap.
+            # Some tools return naked strings ("Successfully added tag ..."). Wrap.
             return {"_raw_text": text}
-        # Phoenix tools return either a JSON object or a JSON array. Normalize
-        # array responses by wrapping in {"items": [...]} so callers can do
-        # `.get("items", [])`. (PhoenixClient currently expects dict-shaped
-        # responses keyed by `prompts`, `spans`, `tags`, etc.)
+
+        # Normalize array responses (e.g. list-prompts) to {"items": [...]}.
         if isinstance(parsed, list):
             return {"items": parsed}
         if not isinstance(parsed, dict):
