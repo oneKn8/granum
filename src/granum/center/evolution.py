@@ -18,6 +18,7 @@ a live Phoenix/MCP dependency at request time).
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from statistics import mean
 
@@ -79,12 +80,29 @@ class EvolutionResult:
         return points
 
     def to_payload(self) -> dict:
-        """Render the camelCase CellPayload (docs/api-contract.md)."""
+        """Render the camelCase CellPayload matching web/lib/types.ts (the consumer).
+
+        Status maps to the frontend's vocabulary: tombstoned lineages are
+        ``tombstoned``; among the survivors the highest-fitness one is the
+        ``champion`` and the rest are ``alive``. ``fitness`` is normalized to
+        [0,1] (judge composite / 10) — the demo labels this "appeal fitness",
+        NOT a real-world overturn rate (we have no real outcomes).
+        """
         payer, _, diagnosis = self.cell.partition("_")
         fitness = self.fitness_curve()
         apoptosis_total = sum(p["apoptosisCount"] for p in fitness)
         final_max = max((p["maxFitness"] for p in fitness), default=0.0)
         first_max = fitness[0]["maxFitness"] if fitness else 0.0
+
+        survivors = [s for s in self.strategies if s.status != "tombstoned"]
+        champion_id = (
+            max(survivors, key=lambda s: s.fitness).id if survivors else None
+        )
+
+        def _status(s: _StrategyAccum) -> str:
+            if s.status == "tombstoned":
+                return "tombstoned"
+            return "champion" if s.id == champion_id else "alive"
 
         strategies = [
             {
@@ -96,8 +114,9 @@ class EvolutionResult:
                 "promptBody": s.body,
                 "mutationNote": s.mutation_note,
                 "fitness": round(s.fitness / 10.0, 4),
-                "tag": s.tag,
-                "status": s.status,
+                "tag": "production" if s.status != "tombstoned" else "experimental",
+                "status": _status(s),
+                "citations": _citations(s.body),
             }
             for s in self.strategies
         ]
@@ -120,18 +139,26 @@ class EvolutionResult:
                 "id": self.cell,
                 "payer": payer,
                 "diagnosis": diagnosis,
-                "baselineFitness": first_max,
-                "currentFitness": final_max,
+                "baselineOverturn": first_max,
+                "currentOverturn": final_max,
                 "generations": len(self.generations),
-                "populationSize": sum(
-                    1 for s in self.strategies if s.status == "production"
-                ),
+                "populationSize": len(survivors),
                 "apoptosisTotal": apoptosis_total,
             },
             "strategies": strategies,
             "rounds": rounds,
             "fitness": fitness,
         }
+
+
+_CITATION_RE = re.compile(
+    r"(?:Aetna )?CPB \d{3,4}|ACC/AHA \d{4}(?:\s*§[\d.]+)?|29 CFR [\d.\-]+"
+)
+
+
+def _citations(body: str) -> list[str]:
+    """Extract the policy/guideline citations a strategy preferentially cites."""
+    return sorted(set(_CITATION_RE.findall(body)))
 
 
 def _label(s: _StrategyAccum) -> str:
