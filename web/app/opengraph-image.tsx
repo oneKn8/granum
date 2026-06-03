@@ -72,10 +72,10 @@ export default function OG() {
         >
           <div style={{ display: "flex", gap: 32 }}>
             <span>
-              <span style={{ color: TOMB }}>41%</span> →{" "}
-              <span style={{ color: CHAMPION }}>79%</span> overturn
+              <span style={{ color: TOMB }}>40%</span> →{" "}
+              <span style={{ color: CHAMPION }}>98%</span> appeal fitness
             </span>
-            <span>aetna · cardiac · 8 generations</span>
+            <span>aetna · cardiac · 10 generations</span>
           </div>
           <div style={{ display: "flex", gap: 16 }}>
             <span style={{ color: SURVIVOR }}>● alive</span>

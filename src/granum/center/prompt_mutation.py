@@ -50,6 +50,8 @@ the critique while keeping what already works. Each variant MUST:
 exact policy-clause citations with section numbers, explicit procedural/deadline \
 compliance, tighter argument structure),
 - NEVER instruct the writer to fabricate citations, guidelines, or clinical facts,
+- ALWAYS keep at least one real Aetna CPB citation (e.g. CPB 0119) and the 30-day /
+  29 CFR 2560.503-1 appeal-deadline reference (these are required downstream),
 - stay under 220 words.
 
 Return ONLY a JSON array of exactly {n} objects, each:
