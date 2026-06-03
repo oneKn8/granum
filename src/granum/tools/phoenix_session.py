@@ -27,6 +27,7 @@ Env vars optional:
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from contextlib import asynccontextmanager
@@ -63,47 +64,104 @@ class _MCPDictAdapter:
     Tools that return no content (None / empty) → returns {}.
     """
 
+    # Retry knobs — read from env so tests can override without patching internals.
+    _MAX_ATTEMPTS = int(os.getenv("GRANUM_MCP_MAX_ATTEMPTS", "4"))
+    _BASE_BACKOFF = float(os.getenv("GRANUM_MCP_BASE_BACKOFF", "2.0"))
+    _MAX_BACKOFF = 30.0
+
+    # Keywords that identify a TRANSIENT server-side error (case-insensitive).
+    _TRANSIENT_MARKERS = (
+        "500",
+        "502",
+        "503",
+        "504",
+        "internal server error",
+        "service unavailable",
+        "bad gateway",
+        "gateway timeout",
+        "timeout",
+        "timed out",
+        "temporarily",
+    )
+
     def __init__(self, raw: ClientSession) -> None:
         self._raw = raw
+        # Re-read knobs at construction time so monkeypatch/env changes in tests
+        # are picked up per-adapter-instance.
+        self._max_attempts = int(os.getenv("GRANUM_MCP_MAX_ATTEMPTS", "4"))
+        self._base_backoff = float(os.getenv("GRANUM_MCP_BASE_BACKOFF", "2.0"))
+
+    @staticmethod
+    def _is_transient(text: str) -> bool:
+        low = text.lower()
+        return any(marker in low for marker in _MCPDictAdapter._TRANSIENT_MARKERS)
 
     async def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-        result = await self._raw.call_tool(name, arguments)
-        # CallToolResult.content is list[TextContent | ImageContent | EmbeddedResource]
-        content = getattr(result, "content", None) or []
-        text = next(
-            (t for item in content if (t := getattr(item, "text", None)) is not None),
-            None,
-        )
+        max_attempts = self._max_attempts
+        base_backoff = self._base_backoff
 
-        # A tool error (e.g. get-prompt-version-by-tag 404 on a tag/prompt miss)
-        # surfaces as isError=True with the 404 line in the text. Raise so callers
-        # can treat it as a genuine miss rather than a malformed success.
-        if getattr(result, "isError", False):
-            raise PhoenixToolError(text or f"{name} returned isError with no content")
+        for attempt in range(max_attempts):
+            is_last = attempt == max_attempts - 1
+            backoff = min(base_backoff * (2 ** attempt), self._MAX_BACKOFF)
+            try:
+                result = await self._raw.call_tool(name, arguments)
+            except PhoenixToolError:
+                # A PhoenixToolError raised intentionally (genuine error) must
+                # never be swallowed by the transport-exception handler.
+                raise
+            except Exception:
+                # Transport / timeout exception — transient by definition.
+                if is_last:
+                    raise
+                await asyncio.sleep(backoff)
+                continue
 
-        if text is None:
-            return {}
+            # CallToolResult.content is list[TextContent | ImageContent | EmbeddedResource]
+            content = getattr(result, "content", None) or []
+            text = next(
+                (t for item in content if (t := getattr(item, "text", None)) is not None),
+                None,
+            )
 
-        # Phoenix often prefixes JSON with a sentence (e.g. upsert-prompt:
-        # `Successfully created prompt "X":\n{...}`). Isolate the JSON tail by
-        # cutting from whichever of `{`/`[` appears EARLIEST — checking `{` first
-        # would slice into the middle of a bare array response (list-prompts).
-        payload = text
-        starts = [i for i in (text.find("{"), text.find("[")) if i != -1]
-        if starts:
-            payload = text[min(starts):]
-        try:
-            parsed = json.loads(payload)
-        except json.JSONDecodeError:
-            # Some tools return naked strings ("Successfully added tag ..."). Wrap.
-            return {"_raw_text": text}
+            # A tool error surfaces as isError=True.
+            # If the error is TRANSIENT (5xx/timeout keywords) and we have retries
+            # left, sleep and retry.  Otherwise — genuine 4xx miss or last attempt —
+            # raise PhoenixToolError so callers (e.g. sweep probing tag absence) get
+            # the signal they rely on.
+            if getattr(result, "isError", False):
+                error_text = text or f"{name} returned isError with no content"
+                if not is_last and self._is_transient(error_text):
+                    await asyncio.sleep(backoff)
+                    continue
+                raise PhoenixToolError(error_text)
 
-        # Normalize array responses (e.g. list-prompts) to {"items": [...]}.
-        if isinstance(parsed, list):
-            return {"items": parsed}
-        if not isinstance(parsed, dict):
-            return {"_raw_value": parsed}
-        return parsed
+            # ---- success path (unchanged) ----
+            if text is None:
+                return {}
+
+            # Phoenix often prefixes JSON with a sentence (e.g. upsert-prompt:
+            # `Successfully created prompt "X":\n{...}`). Isolate the JSON tail by
+            # cutting from whichever of `{`/`[` appears EARLIEST — checking `{` first
+            # would slice into the middle of a bare array response (list-prompts).
+            payload = text
+            starts = [i for i in (text.find("{"), text.find("[")) if i != -1]
+            if starts:
+                payload = text[min(starts):]
+            try:
+                parsed = json.loads(payload)
+            except json.JSONDecodeError:
+                # Some tools return naked strings ("Successfully added tag ..."). Wrap.
+                return {"_raw_text": text}
+
+            # Normalize array responses (e.g. list-prompts) to {"items": [...]}.
+            if isinstance(parsed, list):
+                return {"items": parsed}
+            if not isinstance(parsed, dict):
+                return {"_raw_value": parsed}
+            return parsed
+
+        # Unreachable — loop always returns or raises — but satisfies type checker.
+        raise PhoenixToolError(f"{name} exhausted all {max_attempts} attempts")
 
 
 @asynccontextmanager

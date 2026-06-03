@@ -1,12 +1,15 @@
-"""Unit tests for phoenix_session bootstrap — env var enforcement only.
+"""Unit tests for phoenix_session bootstrap — env var enforcement + retry logic.
 
 Live MCP/REST behavior is not tested here (covered by smoke scripts +
-integration runs). This file just guards the env-var contract so failures
-are loud and immediate, not deep inside MCP stdio plumbing.
+integration runs). This file guards:
+  - env-var contract: failures are loud and immediate
+  - _MCPDictAdapter retry logic: transient 5xx/timeout errors are retried,
+    genuine 4xx errors are NOT retried (preserves tag-miss semantics)
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -94,3 +97,116 @@ async def test_raises_when_phoenix_collector_endpoint_missing(monkeypatch):
     with pytest.raises(RuntimeError, match="PHOENIX_COLLECTOR_ENDPOINT"):
         async with phoenix_client_from_env():
             pass
+
+
+# === _MCPDictAdapter retry logic ===
+
+
+@dataclass
+class _FakeText2:
+    text: str
+
+
+@dataclass
+class _FakeResult2:
+    content: list
+    isError: bool = False
+
+
+def _transient_error_result(text: str) -> _FakeResult2:
+    return _FakeResult2(content=[_FakeText2(text)], isError=True)
+
+
+def _success_result(json_text: str) -> _FakeResult2:
+    return _FakeResult2(content=[_FakeText2(json_text)], isError=False)
+
+
+@pytest.mark.asyncio
+async def test_call_tool_retries_on_transient_500_then_succeeds(monkeypatch):
+    """500 Internal Server Error is transient; should retry and return success."""
+    call_count = 0
+
+    async def fake_call_tool(name, arguments):
+        nonlocal call_count
+        call_count += 1
+        if call_count <= 2:
+            return _transient_error_result("500 Internal Server Error")
+        return _success_result('{"id": "p1"}')
+
+    class FakeRaw:
+        async def call_tool(self, name, arguments):
+            return await fake_call_tool(name, arguments)
+
+    adapter = _MCPDictAdapter(FakeRaw())
+    sleep_mock = AsyncMock()
+    with patch("granum.tools.phoenix_session.asyncio.sleep", sleep_mock):
+        result = await adapter.call_tool("list-prompts", {})
+
+    assert result == {"id": "p1"}
+    assert call_count == 3
+    assert sleep_mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_call_tool_does_not_retry_genuine_404(monkeypatch):
+    """404 not found is a genuine miss — must raise PhoenixToolError after 1 call."""
+    call_count = 0
+
+    class FakeRaw:
+        async def call_tool(self, name, arguments):
+            nonlocal call_count
+            call_count += 1
+            return _transient_error_result("404 not found")
+
+    adapter = _MCPDictAdapter(FakeRaw())
+    sleep_mock = AsyncMock()
+    with patch("granum.tools.phoenix_session.asyncio.sleep", sleep_mock):
+        with pytest.raises(PhoenixToolError):
+            await adapter.call_tool("get-prompt-version-by-tag", {"tag": "production"})
+
+    assert call_count == 1
+    sleep_mock.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_call_tool_retries_on_transport_exception(monkeypatch):
+    """Transport-level exceptions (connection reset) are transient and should retry."""
+    call_count = 0
+
+    class FakeRaw:
+        async def call_tool(self, name, arguments):
+            nonlocal call_count
+            call_count += 1
+            if call_count <= 2:
+                raise RuntimeError("connection reset")
+            return _success_result('{"id": "p2"}')
+
+    adapter = _MCPDictAdapter(FakeRaw())
+    sleep_mock = AsyncMock()
+    with patch("granum.tools.phoenix_session.asyncio.sleep", sleep_mock):
+        result = await adapter.call_tool("get-prompt", {})
+
+    assert result == {"id": "p2"}
+    assert call_count == 3
+    assert sleep_mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_call_tool_gives_up_after_max_attempts_on_500(monkeypatch):
+    """When all attempts are exhausted on a transient 503, raises PhoenixToolError."""
+    call_count = 0
+
+    class FakeRaw:
+        async def call_tool(self, name, arguments):
+            nonlocal call_count
+            call_count += 1
+            return _transient_error_result("503 Service Unavailable")
+
+    monkeypatch.setenv("GRANUM_MCP_MAX_ATTEMPTS", "2")
+    adapter = _MCPDictAdapter(FakeRaw())
+    sleep_mock = AsyncMock()
+    with patch("granum.tools.phoenix_session.asyncio.sleep", sleep_mock):
+        with pytest.raises(PhoenixToolError):
+            await adapter.call_tool("list-prompts", {})
+
+    assert call_count == 2
