@@ -47,5 +47,132 @@ def cycle_all(
     typer.echo("cycle-all stub — live wiring lands when Phoenix client is connected (Phase 1.10).")
 
 
+@app.command()
+def cycle(
+    cell: str = typer.Option("aetna_cardiac", "--cell", help="Cell id, e.g. aetna_cardiac"),
+    seed_value: int = typer.Option(42, "--seed-value", help="Deterministic denial seed"),
+    mutation_count: int = typer.Option(2, "--mutation-count", help="Mutants spawned from winner"),
+) -> None:
+    """Run ONE live germinal cycle for a cell against real Phoenix + Vertex Gemini.
+
+    The honest loop: each active B-cell drafts an appeal for a synthetic denial,
+    a Vertex Gemini judge scores the appeals, the loser strategies are tombstoned
+    in Phoenix (apoptosis, Path B), the winner is promoted to `production`, and
+    K mutant prompt-versions are spawned. A run artifact is written to runs/.
+    """
+    import asyncio
+    import json
+    import os
+    from pathlib import Path
+
+    required = ("GOOGLE_CLOUD_PROJECT", "PHOENIX_API_KEY", "PHOENIX_COLLECTOR_ENDPOINT")
+    missing = [k for k in required if not os.getenv(k)]
+    if missing:
+        typer.echo(
+            f"cycle requires env: {', '.join(missing)}. Run `set -a; source .env; set +a` first.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        payer, diagnosis = cell.split("_", 1)
+    except ValueError:
+        typer.echo(f"--cell must look like 'payer_diagnosis' (got {cell!r})", err=True)
+        raise typer.Exit(code=2)
+
+    model = os.getenv("GEMINI_MODEL", "gemini-3.1-pro-preview")
+
+    from granum.center.cycle import GerminalCycle
+    from granum.center.judge import LLMJudge
+    from granum.center.mutation_strategies import propose_mutations
+    from granum.data.denials import Denial, generate_denial
+    from granum.tools.gemini_client import GeminiClient
+    from granum.tools.phoenix_session import phoenix_client_from_env
+
+    gemini = GeminiClient()
+
+    async def gen_appeal(system_prompt: str, denial: Denial) -> str:
+        prompt = (
+            f"{system_prompt}\n\n"
+            f"## Denial to appeal\n{denial.denial_text}\n\n"
+            f"Payer: {denial.payer} | Diagnosis: {denial.diagnosis} | "
+            f"CPT {denial.cpt_code} | ICD-10 {denial.icd10_code} | "
+            f"Patient age {denial.patient_age_range} | "
+            f"Appeal deadline {denial.appeal_deadline_days} days.\n\n"
+            "Write the complete appeal letter now. Output only the letter."
+        )
+        return await gemini.generate(model=model, prompt=prompt, temperature=0.3)
+
+    async def _run() -> None:
+        # Export the cycle's OTel spans to Phoenix so the run shows up as real
+        # traces (Phoenix is the demo's system of record).
+        try:
+            from phoenix.otel import register
+
+            endpoint = os.environ["PHOENIX_COLLECTOR_ENDPOINT"].rstrip("/")
+            api_key = os.environ["PHOENIX_API_KEY"]
+            register(
+                project_name=os.getenv("PHOENIX_PROJECT_NAME", "granum"),
+                endpoint=f"{endpoint}/v1/traces",
+                headers={"api_key": api_key, "authorization": f"Bearer {api_key}"},
+                batch=False,
+                set_global_tracer_provider=True,
+            )
+        except Exception as exc:  # noqa: BLE001 — tracing is supplementary
+            typer.echo(f"WARN: Phoenix tracer registration failed: {exc}", err=True)
+
+        judge = LLMJudge(client=gemini, model=model, rubric_path=Path("data/judge_rubric.md"))
+        denial = generate_denial(payer=payer, diagnosis=diagnosis, seed=seed_value)
+        typer.echo(f"Denial {denial.denial_id} ({denial.denial_reason}) — running live cycle…")
+
+        async with phoenix_client_from_env() as phoenix:
+            cyc = GerminalCycle(
+                phoenix=phoenix,
+                judge=judge,
+                cell=cell,
+                valid_citations_path=f"data/{cell}/valid_citations.json",
+                gold_path=f"data/{cell}/gold_appeals.jsonl",
+                mutation_proposer=propose_mutations,
+                mutation_count=mutation_count,
+                appeal_generator=gen_appeal,
+            )
+            outcome = await cyc.run(denial=denial)
+
+        runs_dir = Path("runs")
+        runs_dir.mkdir(exist_ok=True)
+        artifact = runs_dir / f"{cell}_seed{seed_value}_{denial.denial_id}.json"
+        artifact.write_text(
+            json.dumps(
+                {
+                    "cell": outcome.cell,
+                    "denial_id": outcome.denial_id,
+                    "model": model,
+                    "winner_id": outcome.winner_id,
+                    "winner_version_id": outcome.winner_version_id,
+                    "winner_composite_score": outcome.winner_composite_score,
+                    "scoreboard": [list(s) for s in outcome.scoreboard],
+                    "rejected_by_negative_selection": list(outcome.rejected_by_negative_selection),
+                    "tombstoned_ids": list(outcome.tombstoned_ids),
+                    "mutant_ids": list(outcome.mutant_ids),
+                    "english_feedback": outcome.english_feedback,
+                    "winner_appeal": outcome.winner_appeal,
+                },
+                indent=2,
+            )
+        )
+
+        typer.echo("")
+        typer.echo("=== CYCLE COMPLETE (live) ===")
+        for pid, comp in sorted(outcome.scoreboard, key=lambda x: -x[1]):
+            marker = "WIN " if pid == outcome.winner_id else "    "
+            typer.echo(f"  {marker}{pid}: composite={comp:.2f}")
+        typer.echo(f"  winner: {outcome.winner_id} (composite {outcome.winner_composite_score:.2f})")
+        typer.echo(f"  tombstoned: {list(outcome.tombstoned_ids)}")
+        typer.echo(f"  mutants spawned: {list(outcome.mutant_ids)}")
+        typer.echo(f"  artifact: {artifact}")
+
+    asyncio.run(_run())
+
+
 if __name__ == "__main__":
     app()

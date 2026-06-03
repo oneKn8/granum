@@ -17,3 +17,6 @@ synthetic-secrets/
 
 # Web-quality audit raw traces (regenerable; multi-MB)
 videos/audit/*_trace.json
+
+# Live germinal-cycle run artifacts (reproducible via `granum cycle`)
+runs/
