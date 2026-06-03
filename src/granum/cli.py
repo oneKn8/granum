@@ -85,6 +85,7 @@ def cycle(
     from granum.center.cycle import GerminalCycle
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
+    from granum.center.prompt_mutation import make_llm_mutator
     from granum.data.denials import Denial, generate_denial
     from granum.tools.gemini_client import GeminiClient
     from granum.tools.phoenix_session import phoenix_client_from_env
@@ -135,6 +136,7 @@ def cycle(
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
+                prompt_mutator=make_llm_mutator(client=gemini, model=model),
             )
             outcome = await cyc.run(denial=denial)
 
@@ -213,6 +215,7 @@ def evolve(
     from granum.center.evolution import GenerationalEvolution
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
+    from granum.center.prompt_mutation import make_llm_mutator
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell
     from granum.tools.gemini_client import GeminiClient
@@ -270,6 +273,7 @@ def evolve(
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
+                prompt_mutator=make_llm_mutator(client=gemini, model=model),
             )
             evolution = GenerationalEvolution(
                 cycle=cyc, phoenix=phoenix, cell=cell, generations=generations

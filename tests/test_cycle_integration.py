@@ -112,6 +112,64 @@ async def test_full_cycle_negative_selects_then_tournaments_then_tombstones():
 
 
 @pytest.mark.asyncio
+async def test_cycle_uses_feedback_directed_mutator_when_provided():
+    """When a prompt_mutator is wired, daughters come from it (fed the judge's
+    critique), NOT the mechanical proposer."""
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.return_value = [
+        PromptVersion(
+            prompt_id="bc1",
+            version_id="v1",
+            tags=("production",),
+            body="Per Aetna CPB 0119 §IV.A we appeal. ACC/AHA 2021 §6.2 supports. Per 29 CFR 2560.503-1 we request reconsideration within 30 days.",
+        ),
+    ]
+    phoenix.tombstone.return_value = None
+    phoenix.add_version_tag.return_value = ("production",)
+    phoenix.upsert_prompt.side_effect = [
+        PromptVersion(prompt_id="g1m0", version_id="v1", tags=("production",), body="improved 1"),
+        PromptVersion(prompt_id="g1m1", version_id="v1", tags=("production",), body="improved 2"),
+    ]
+
+    judge = AsyncMock()
+    judge.score.return_value = JudgeScore(8, 8, 8, 8, 8, "needs sharper section-level citations")
+
+    async def gen_appeal(body, denial):
+        return "appeal letter generated from " + body[:10]
+
+    # Mechanical proposer must NOT be used when a prompt_mutator is present.
+    mechanical = lambda **kw: (_ for _ in ()).throw(AssertionError("mechanical used"))  # noqa: E731
+    mutator = AsyncMock(
+        return_value=[("improved 1", "sharper citations"), ("improved 2", "more evidence")]
+    )
+
+    cycle = GerminalCycle(
+        phoenix=phoenix,
+        judge=judge,
+        cell="aetna_cardiac",
+        valid_citations_path="data/aetna_cardiac/valid_citations.json",
+        gold_path="data/aetna_cardiac/gold_appeals.jsonl",
+        mutation_proposer=mechanical,
+        mutation_count=2,
+        appeal_generator=gen_appeal,
+        prompt_mutator=mutator,
+    )
+    denial = generate_denial(payer="aetna", diagnosis="cardiac", seed=42)
+    outcome = await cycle.run(denial=denial, generation=0)
+
+    # mutator received the winner's body + the judge's feedback + the count
+    mutator.assert_awaited_once()
+    args = mutator.await_args[0]
+    assert args[1] == "needs sharper section-level citations"
+    assert args[2] == 2
+    # 2 daughters spawned from the mutator output, with its notes
+    assert len(outcome.mutant_ids) == 2
+    assert phoenix.upsert_prompt.await_count == 2
+    notes = dict(outcome.mutant_notes)
+    assert notes["g1m0"] == "sharper citations"
+
+
+@pytest.mark.asyncio
 async def test_cycle_raises_when_all_fail_negative_selection():
     phoenix = AsyncMock(spec=PhoenixClient)
     phoenix.list_active_prompts.return_value = [
