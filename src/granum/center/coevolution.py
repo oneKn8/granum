@@ -15,7 +15,9 @@ OTel spans bracket each phase for Phoenix trace introspection.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Awaitable, Callable, Protocol
@@ -141,6 +143,8 @@ class CoEvolutionDriver:
         self._cell = cell
         self._gold = load_gold_appeals(gold_path)
         self._propose_mutations = mutation_proposer
+        self._load_attempts = int(os.getenv("GRANUM_COEVO_LOAD_ATTEMPTS", "8"))
+        self._load_delay = float(os.getenv("GRANUM_COEVO_LOAD_DELAY", "2.0"))
         # Feedback-directed writer mutator (the real arms-race climb). When set,
         # writer clonal expansion rewrites the winner's strategy from the judge's
         # English critique instead of applying templated citation swaps. The payer
@@ -155,6 +159,27 @@ class CoEvolutionDriver:
         self._antigen = antigen
         self._round_index = 0
 
+    async def _load_active_with_retry(
+        self, name_prefix: str, *, label: str
+    ) -> list:
+        """Load active prompts, retrying on empty reads (Phoenix read inconsistency).
+
+        An empty result is always a transient flake in this loop: the round
+        only tombstones losers and always promotes the winner, so an active
+        population can never legitimately reach zero mid-run.
+        """
+        for attempt in range(self._load_attempts):
+            prompts = await self._phoenix.list_active_prompts(
+                name_prefix=name_prefix
+            )
+            if prompts:
+                return prompts
+            if attempt < self._load_attempts - 1:
+                await asyncio.sleep(self._load_delay)
+        raise RuntimeError(
+            f"co-evolution cell {self._cell} has empty {label} population"
+        )
+
     def _effective_mutation_count(self, population_size: int) -> int:
         cap = max(1, int(population_size * self._mutation_rate_cap))
         return min(self._mutation_count, cap)
@@ -166,22 +191,14 @@ class CoEvolutionDriver:
 
             # 1. Load active writer population
             with _tracer.start_as_current_span("granum.coevolution.load_writers"):
-                writers = await self._phoenix.list_active_prompts(
-                    name_prefix=f"{self._cell}/"
-                )
-            if not writers:
-                raise RuntimeError(
-                    f"co-evolution cell {self._cell} has empty writer population"
+                writers = await self._load_active_with_retry(
+                    f"{self._cell}/", label="writer"
                 )
 
             # 2. Load active payer population
             with _tracer.start_as_current_span("granum.coevolution.load_payers"):
-                payers = await self._phoenix.list_active_prompts(
-                    name_prefix=f"{self._cell}_payer/"
-                )
-            if not payers:
-                raise RuntimeError(
-                    f"co-evolution cell {self._cell} has empty payer population"
+                payers = await self._load_active_with_retry(
+                    f"{self._cell}_payer/", label="payer"
                 )
 
             writer_refs: list[WriterRef] = [

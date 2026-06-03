@@ -219,21 +219,163 @@ async def test_full_round_promotes_both_winners_tombstones_both_losers():
 
 
 @pytest.mark.asyncio
-async def test_round_raises_when_writer_population_empty():
-    driver, mock_phoenix, _, _ = _make_driver(
-        writers=[], payers=[_payer("p1", "strict")]
+async def test_round_raises_when_writer_population_empty(monkeypatch):
+    """After all retry attempts, still-empty writer population raises RuntimeError."""
+    monkeypatch.setenv("GRANUM_COEVO_LOAD_ATTEMPTS", "2")
+    writers = []
+    payer_list = [_payer("p1", "strict")]
+
+    # Build a driver manually so we can supply a side_effect function.
+    mock_phoenix = AsyncMock(spec=PhoenixClient)
+    # Writer prefix always returns empty; payer prefix returns payer_list.
+    def _list_active(*, name_prefix):
+        if name_prefix.startswith("aetna_cardiac/"):
+            return writers
+        return payer_list
+    mock_phoenix.list_active_prompts.side_effect = _list_active
+    mock_phoenix.tombstone.return_value = None
+    mock_phoenix.add_version_tag.return_value = ("production",)
+    mock_phoenix.add_dataset_examples.return_value = None
+    async def _upsert(*, name, body, tags=("experimental",)):
+        return PromptVersion(
+            prompt_id=f"upserted_{name}", version_id="v1",
+            tags=tuple(tags), body=body, name=name,
+        )
+    mock_phoenix.upsert_prompt.side_effect = _upsert
+
+    from unittest.mock import patch
+    mock_payer = AsyncMock(spec=PayerAgent)
+    from granum.data.denials import Denial, DenialReason
+    mock_payer.deny.return_value = Denial(
+        denial_id="adv_x", payer="aetna", diagnosis="cardiac",
+        cpt_code="93306", icd10_code="I25.10", patient_age_range="adv",
+        denial_reason=DenialReason.NOT_MEDICALLY_NECESSARY,
+        denial_text="t", submission_date="adversarial",
     )
-    with pytest.raises(RuntimeError, match="empty writer population"):
-        await driver.round()
+    mock_judge = AsyncMock(spec=DefensibilityJudge)
+    mock_judge.score.return_value = _score(5)
+
+    driver = CoEvolutionDriver(
+        phoenix=mock_phoenix,
+        payer_agent=mock_payer,
+        judge=mock_judge,
+        cell="aetna_cardiac",
+        gold_path=_GOLD_PATH,
+        mutation_proposer=MagicMock(return_value=[]),
+    )
+
+    with patch("asyncio.sleep", new=AsyncMock(return_value=None)):
+        with pytest.raises(RuntimeError, match="empty writer population"):
+            await driver.round()
 
 
 @pytest.mark.asyncio
-async def test_round_raises_when_payer_population_empty():
-    driver, mock_phoenix, _, _ = _make_driver(
-        writers=[_writer("w1")], payers=[]
+async def test_round_raises_when_payer_population_empty(monkeypatch):
+    """After all retry attempts, still-empty payer population raises RuntimeError."""
+    monkeypatch.setenv("GRANUM_COEVO_LOAD_ATTEMPTS", "2")
+    writer_list = [_writer("w1")]
+    payers = []
+
+    mock_phoenix = AsyncMock(spec=PhoenixClient)
+    # Payer prefix always returns empty; writer prefix returns writer_list.
+    def _list_active(*, name_prefix):
+        if name_prefix.startswith("aetna_cardiac_payer/"):
+            return payers
+        return writer_list
+    mock_phoenix.list_active_prompts.side_effect = _list_active
+    mock_phoenix.tombstone.return_value = None
+    mock_phoenix.add_version_tag.return_value = ("production",)
+    mock_phoenix.add_dataset_examples.return_value = None
+    async def _upsert(*, name, body, tags=("experimental",)):
+        return PromptVersion(
+            prompt_id=f"upserted_{name}", version_id="v1",
+            tags=tuple(tags), body=body, name=name,
+        )
+    mock_phoenix.upsert_prompt.side_effect = _upsert
+
+    mock_payer = AsyncMock(spec=PayerAgent)
+    from granum.data.denials import Denial, DenialReason
+    mock_payer.deny.return_value = Denial(
+        denial_id="adv_x", payer="aetna", diagnosis="cardiac",
+        cpt_code="93306", icd10_code="I25.10", patient_age_range="adv",
+        denial_reason=DenialReason.NOT_MEDICALLY_NECESSARY,
+        denial_text="t", submission_date="adversarial",
     )
-    with pytest.raises(RuntimeError, match="empty payer population"):
-        await driver.round()
+    mock_judge = AsyncMock(spec=DefensibilityJudge)
+    mock_judge.score.return_value = _score(5)
+
+    driver = CoEvolutionDriver(
+        phoenix=mock_phoenix,
+        payer_agent=mock_payer,
+        judge=mock_judge,
+        cell="aetna_cardiac",
+        gold_path=_GOLD_PATH,
+        mutation_proposer=MagicMock(return_value=[]),
+    )
+
+    from unittest.mock import patch
+    with patch("asyncio.sleep", new=AsyncMock(return_value=None)):
+        with pytest.raises(RuntimeError, match="empty payer population"):
+            await driver.round()
+
+
+@pytest.mark.asyncio
+async def test_population_load_retries_on_transient_empty_then_succeeds(monkeypatch):
+    """Payer prefix returns [] once then the real list; round() proceeds without raising."""
+    monkeypatch.setenv("GRANUM_COEVO_LOAD_ATTEMPTS", "8")
+    writer_list = [_writer("w1")]
+    payer_list = [_payer("p1", "strict")]
+    payer_call_count = {"n": 0}
+
+    mock_phoenix = AsyncMock(spec=PhoenixClient)
+
+    def _list_active(*, name_prefix):
+        if name_prefix.startswith("aetna_cardiac_payer/"):
+            payer_call_count["n"] += 1
+            # First call returns empty (transient); subsequent calls return real list.
+            if payer_call_count["n"] == 1:
+                return []
+            return payer_list
+        return writer_list
+    mock_phoenix.list_active_prompts.side_effect = _list_active
+    mock_phoenix.tombstone.return_value = None
+    mock_phoenix.add_version_tag.return_value = ("production",)
+    mock_phoenix.add_dataset_examples.return_value = None
+    async def _upsert(*, name, body, tags=("experimental",)):
+        return PromptVersion(
+            prompt_id=f"upserted_{name}", version_id="v1",
+            tags=tuple(tags), body=body, name=name,
+        )
+    mock_phoenix.upsert_prompt.side_effect = _upsert
+
+    mock_payer = AsyncMock(spec=PayerAgent)
+    from granum.data.denials import Denial, DenialReason
+    mock_payer.deny.return_value = Denial(
+        denial_id="adv_x", payer="aetna", diagnosis="cardiac",
+        cpt_code="93306", icd10_code="I25.10", patient_age_range="adv",
+        denial_reason=DenialReason.NOT_MEDICALLY_NECESSARY,
+        denial_text="t", submission_date="adversarial",
+    )
+    mock_judge = AsyncMock(spec=DefensibilityJudge)
+    mock_judge.score.return_value = _score(5)
+
+    driver = CoEvolutionDriver(
+        phoenix=mock_phoenix,
+        payer_agent=mock_payer,
+        judge=mock_judge,
+        cell="aetna_cardiac",
+        gold_path=_GOLD_PATH,
+        mutation_proposer=MagicMock(return_value=[]),
+    )
+
+    from unittest.mock import patch
+    with patch("asyncio.sleep", new=AsyncMock(return_value=None)):
+        # Must not raise — retried and succeeded on second payer read.
+        outcome = await driver.round()
+
+    assert isinstance(outcome, CoEvolutionRoundResult)
+    # Payer prefix was queried at least twice (one empty + one successful).
+    assert payer_call_count["n"] >= 2
 
 
 @pytest.mark.asyncio
