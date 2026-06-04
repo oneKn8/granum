@@ -498,7 +498,9 @@ async def test_feedback_directed_writer_mutator_rewrites_strategy_from_critique(
     assert len(writer_mutant_upserts) == 1
     assert writer_mutant_upserts[0].kwargs["name"] == "aetna_cardiac/bcell_mut_r0_w1_0"
     assert writer_mutant_upserts[0].kwargs["body"] == "IMPROVED STRATEGY BODY"
-    assert writer_mutant_upserts[0].kwargs["tags"] == ("experimental",)
+    # Mutants MUST be tagged production so list_active_prompts loads them as
+    # active next round (it filters to production); experimental = benched forever.
+    assert writer_mutant_upserts[0].kwargs["tags"] == ("production",)
 
     # (c) outcome.writer_mutant_notes carries (prompt_id, note).
     assert len(outcome.writer_mutant_notes) == 1
@@ -594,6 +596,11 @@ async def test_payer_mutations_spawned_from_payer_winner_body():
         "aetna_cardiac_payer/mut_r0_strict_0",
         "aetna_cardiac_payer/mut_r0_strict_1",
     ]
+    # Payer mutants production-tagged so they compete next round (not benched).
+    payer_mutant_upserts = [
+        c for c in upsert_calls if c.kwargs["name"].startswith("aetna_cardiac_payer/mut_")
+    ]
+    assert all(c.kwargs["tags"] == ("production",) for c in payer_mutant_upserts)
 
 
 @pytest.mark.asyncio
@@ -830,6 +837,9 @@ async def test_adversary_reset_fires_by_default_on_due_round():
         if "/baseline_" in c.kwargs["name"]
     ]
     assert len(reseed) == len(SEEDED_PERSONAS)
+    # Reseeded payers MUST be production so the next round can load them as
+    # active (regression: experimental reseeds → "empty payer population" crash).
+    assert all(c.kwargs["tags"] == ("production",) for c in reseed)
 
 
 @pytest.mark.asyncio

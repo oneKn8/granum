@@ -8,7 +8,8 @@ Pipeline (mirrors GerminalCycle but dual-population):
 4. Apoptosis losers in BOTH populations (tombstone via Phoenix client).
 5. Promote winners in BOTH populations (production tag on each).
 6. Clonal expansion: propose K mutations on writer winner, K on payer
-   winner, upsert each as new experimental prompts.
+   winner, upsert each as new production prompts so they compete next round
+   (experimental prompts are never returned by list_active_prompts → benched).
 7. Dataset writeback to `granum/{cell}/coevolution`.
 
 OTel spans bracket each phase for Phoenix trace introspection.
@@ -305,7 +306,7 @@ class CoEvolutionDriver:
                             f"{writer_winner_id}_{i}"
                         )
                         pv = await self._phoenix.upsert_prompt(
-                            name=name, body=mutant_body, tags=("experimental",)
+                            name=name, body=mutant_body, tags=("production",)
                         )
                         writer_mutant_ids.append(pv.prompt_id)
                         writer_mutant_notes.append((pv.prompt_id, note))
@@ -330,7 +331,7 @@ class CoEvolutionDriver:
                             f"{writer_winner_id}_{i}"
                         )
                         pv = await self._phoenix.upsert_prompt(
-                            name=name, body=mutant_body, tags=("experimental",)
+                            name=name, body=mutant_body, tags=("production",)
                         )
                         writer_mutant_ids.append(pv.prompt_id)
 
@@ -363,7 +364,7 @@ class CoEvolutionDriver:
                         f"{payer_winner_persona}_{i}"
                     )
                     pv = await self._phoenix.upsert_prompt(
-                        name=name, body=mutant_body, tags=("experimental",)
+                        name=name, body=mutant_body, tags=("production",)
                     )
                     payer_mutant_ids.append(pv.prompt_id)
                     payer_mutant_versions.append((pv.prompt_id, pv.version_id))
@@ -476,7 +477,7 @@ class CoEvolutionDriver:
                                 f"baseline_{persona.persona_id}"
                             ),
                             body=persona.system_prompt,
-                            tags=("experimental",),
+                            tags=("production",),
                         )
 
             outcome = CoEvolutionRoundResult(
