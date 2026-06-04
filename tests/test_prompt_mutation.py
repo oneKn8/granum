@@ -3,7 +3,25 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from granum.center.prompt_mutation import make_llm_mutator
+from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
+
+
+def test_resolve_mutator_model_defaults_when_unset(monkeypatch):
+    """No GRANUM_MUTATOR_MODEL → fall back to the run's main model."""
+    monkeypatch.delenv("GRANUM_MUTATOR_MODEL", raising=False)
+    assert resolve_mutator_model("gemini-3.5-flash") == "gemini-3.5-flash"
+
+
+def test_resolve_mutator_model_uses_env_when_set(monkeypatch):
+    """GRANUM_MUTATOR_MODEL overrides the main model for the writer mutator only."""
+    monkeypatch.setenv("GRANUM_MUTATOR_MODEL", "gemini-3.1-pro-preview")
+    assert resolve_mutator_model("gemini-3.5-flash") == "gemini-3.1-pro-preview"
+
+
+def test_resolve_mutator_model_treats_blank_as_unset(monkeypatch):
+    """A blank/whitespace env value is ignored (acts as unset)."""
+    monkeypatch.setenv("GRANUM_MUTATOR_MODEL", "   ")
+    assert resolve_mutator_model("gemini-3.5-flash") == "gemini-3.5-flash"
 
 
 @pytest.mark.asyncio

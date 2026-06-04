@@ -14,7 +14,22 @@ hallucinated citation through.
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, Awaitable, Callable, Protocol
+
+
+def resolve_mutator_model(default_model: str) -> str:
+    """Pick the model the writer mutator runs on.
+
+    The mutator is the one place that genuinely needs a strong model: rewriting
+    a whole strategy from English critique is what drives the fitness climb (the
+    proven 0.40→0.98 arc used gemini-3.1-pro). The high-volume judge / payer /
+    appeal-generation calls can stay on a cheap, fast model. ``GRANUM_MUTATOR_MODEL``
+    lets the writer mutator use a stronger model than the rest of the run; unset
+    or blank falls back to the run's main model.
+    """
+    override = os.getenv("GRANUM_MUTATOR_MODEL", "").strip()
+    return override or default_model
 
 
 class _GenClient(Protocol):

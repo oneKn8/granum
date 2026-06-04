@@ -85,7 +85,7 @@ def cycle(
     from granum.center.cycle import GerminalCycle
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator
+    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
     from granum.data.denials import Denial, generate_denial
     from granum.tools.gemini_client import GeminiClient
     from granum.tools.phoenix_session import phoenix_client_from_env
@@ -136,7 +136,9 @@ def cycle(
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
-                prompt_mutator=make_llm_mutator(client=gemini, model=model),
+                prompt_mutator=make_llm_mutator(
+                    client=gemini, model=resolve_mutator_model(model)
+                ),
             )
             outcome = await cyc.run(denial=denial)
 
@@ -215,7 +217,7 @@ def evolve(
     from granum.center.evolution import GenerationalEvolution
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator
+    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell
     from granum.tools.gemini_client import GeminiClient
@@ -256,6 +258,9 @@ def evolve(
             f"Antigen {denial.denial_id} ({denial.denial_reason}); "
             f"evolving {generations} generations…"
         )
+        typer.echo(
+            f"  models: judge/appeal={model}  writer-mutator={resolve_mutator_model(model)}"
+        )
 
         async with phoenix_client_from_env() as phoenix:
             if reset:
@@ -273,7 +278,9 @@ def evolve(
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
-                prompt_mutator=make_llm_mutator(client=gemini, model=model),
+                prompt_mutator=make_llm_mutator(
+                    client=gemini, model=resolve_mutator_model(model)
+                ),
             )
             evolution = GenerationalEvolution(
                 cycle=cyc, phoenix=phoenix, cell=cell, generations=generations
@@ -354,7 +361,7 @@ def coevolve(
     from granum.center.coevolution_run import CoEvolutionRun
     from granum.center.defensibility_judge import DefensibilityJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator
+    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell, seed_payers, wait_for_active_population
     from granum.tools.gemini_client import GeminiClient
@@ -399,6 +406,9 @@ def coevolve(
             f"Antigen {antigen.denial_id} ({antigen.denial_reason}); "
             f"co-evolving {rounds} rounds…"
         )
+        typer.echo(
+            f"  models: judge/payer/appeal={model}  writer-mutator={resolve_mutator_model(model)}"
+        )
 
         async with phoenix_client_from_env() as phoenix:
             if reset:
@@ -431,7 +441,9 @@ def coevolve(
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
                 antigen=antigen,
-                prompt_mutator=make_llm_mutator(client=gemini, model=model),
+                prompt_mutator=make_llm_mutator(
+                    client=gemini, model=resolve_mutator_model(model)
+                ),
             )
             run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell=cell, rounds=rounds)
             result = await run.run()
