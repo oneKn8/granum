@@ -299,6 +299,7 @@ def evolve(
                 prompt_mutator=make_llm_mutator(
                     client=gemini, model=resolve_mutator_model(model)
                 ),
+                read_self_observability=True,  # Arize bonus: read own telemetry back
             )
             evolution = GenerationalEvolution(
                 cycle=cyc, phoenix=phoenix, cell=cell, generations=generations

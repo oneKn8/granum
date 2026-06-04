@@ -222,6 +222,93 @@ async def test_top_k_elitist_survival_keeps_best_k_alive():
 
 
 @pytest.mark.asyncio
+async def test_self_observability_augments_mutator_feedback_at_gen_gt_0():
+    """Arize bonus loop: at gen>0 the cycle reads its own prior-generation
+    telemetry back from Phoenix and feeds the distilled digest into the mutator,
+    so the mutation is driven by the agent's observability data — not just the
+    last in-memory score."""
+    from granum.center.observability import GenerationObservation
+
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.return_value = [
+        PromptVersion(
+            prompt_id="bc1", version_id="v1", tags=("production",),
+            body="Per Aetna CPB 0119 §IV.A we appeal. ACC/AHA 2021 §6.2. Per 29 CFR 2560.503-1 within 30 days.",
+        ),
+    ]
+    phoenix.tombstone.return_value = None
+    phoenix.add_version_tag.return_value = ("production",)
+    phoenix.upsert_prompt.side_effect = [
+        PromptVersion(prompt_id="g2m0", version_id="v1", tags=("production",), body="improved"),
+    ]
+    # The agent's own telemetry, read back from Phoenix.
+    phoenix.read_self_improvement_history.return_value = [
+        GenerationObservation(generation=0, winner_fitness=4.0, critique="lacks section-level citations"),
+    ]
+
+    judge = AsyncMock()
+    judge.score.return_value = JudgeScore(7, 7, 7, 7, 7, "this gen: weak on procedure")
+
+    async def gen_appeal(body, denial):
+        return "appeal " + body[:10]
+
+    mutator = AsyncMock(return_value=[("improved", "tighter citations")])
+
+    cycle = GerminalCycle(
+        phoenix=phoenix, judge=judge, cell="aetna_cardiac",
+        valid_citations_path="data/aetna_cardiac/valid_citations.json",
+        gold_path="data/aetna_cardiac/gold_appeals.jsonl",
+        mutation_proposer=lambda **kw: [], mutation_count=1,
+        appeal_generator=gen_appeal, prompt_mutator=mutator,
+        read_self_observability=True,
+    )
+    denial = generate_denial(payer="aetna", diagnosis="cardiac", seed=42)
+    await cycle.run(denial=denial, generation=1)
+
+    # The agent read its own telemetry back...
+    phoenix.read_self_improvement_history.assert_awaited_once()
+    # ...and the mutator's feedback contains the Phoenix-sourced digest AND this
+    # generation's critique.
+    feedback_arg = mutator.await_args[0][1]
+    assert "lacks section-level citations" in feedback_arg  # from prior-gen telemetry
+    assert "Phoenix telemetry" in feedback_arg
+    assert "this gen: weak on procedure" in feedback_arg  # current eval still included
+
+
+@pytest.mark.asyncio
+async def test_self_observability_skipped_at_gen_0():
+    """Gen 0 has no prior telemetry — no read-back attempted."""
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.return_value = [
+        PromptVersion(
+            prompt_id="bc1", version_id="v1", tags=("production",),
+            body="Per Aetna CPB 0119 we appeal within 30 days. Per 29 CFR 2560.503-1.",
+        ),
+    ]
+    phoenix.tombstone.return_value = None
+    phoenix.add_version_tag.return_value = ("production",)
+    phoenix.upsert_prompt.side_effect = [
+        PromptVersion(prompt_id="g1m0", version_id="v1", tags=("production",), body="x"),
+    ]
+    judge = AsyncMock()
+    judge.score.return_value = JudgeScore(6, 6, 6, 6, 6, "fb")
+
+    async def gen_appeal(body, denial):
+        return "appeal"
+
+    cycle = GerminalCycle(
+        phoenix=phoenix, judge=judge, cell="aetna_cardiac",
+        valid_citations_path="data/aetna_cardiac/valid_citations.json",
+        gold_path="data/aetna_cardiac/gold_appeals.jsonl",
+        mutation_proposer=lambda **kw: [], mutation_count=1,
+        appeal_generator=gen_appeal, prompt_mutator=AsyncMock(return_value=[]),
+        read_self_observability=True,
+    )
+    await cycle.run(denial=generate_denial(payer="aetna", diagnosis="cardiac", seed=1), generation=0)
+    phoenix.read_self_improvement_history.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_cycle_raises_when_all_fail_negative_selection():
     phoenix = AsyncMock(spec=PhoenixClient)
     phoenix.list_active_prompts.return_value = [

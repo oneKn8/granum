@@ -24,6 +24,7 @@ from opentelemetry import trace
 from granum.center.judge import LLMJudge
 from granum.center.mutation import Mutation, apply_mutation
 from granum.center.negative_selection import verify_citations
+from granum.center.observability import cycle_story_attributes, format_telemetry_digest
 from granum.center.tournament import Tournament
 from granum.data.denials import Denial
 from granum.data.gold import load_gold_appeals
@@ -85,6 +86,7 @@ class GerminalCycle:
         survival_count: int = 1,
         appeal_generator: _AppealGenerator | None = None,
         prompt_mutator: _PromptMutator | None = None,
+        read_self_observability: bool = False,
     ) -> None:
         if survival_count < 1:
             raise ValueError(f"survival_count must be >= 1; got {survival_count!r}")
@@ -101,6 +103,9 @@ class GerminalCycle:
         self._survival_count = survival_count
         self._generate_appeal = appeal_generator
         self._mutate_prompt = prompt_mutator
+        # Arize bonus loop: when True, gen>0 reads this cell's own prior-generation
+        # telemetry back from Phoenix (get-spans) to inform the mutation.
+        self._read_self_observability = read_self_observability
 
     async def run(self, *, denial: Denial, generation: int = 0) -> CycleOutcome:
         with _tracer.start_as_current_span(f"granum.cycle.{self._cell}") as span:
@@ -188,6 +193,34 @@ class GerminalCycle:
                     winner_id, winner_version, "production"
                 )
 
+            # 5.5 Self-improvement observability loop (Arize bonus). Before
+            # mutating, read this cell's OWN prior-generation telemetry back from
+            # Phoenix (get-spans) and let the mutator optimize against the
+            # weaknesses its observability data reveals across generations.
+            # Best-effort: a cold/failed read falls back to this generation's
+            # in-memory critique, so the loop never breaks the run.
+            mutator_feedback = winner_feedback
+            if (
+                self._read_self_observability
+                and generation > 0
+                and self._mutate_prompt is not None
+            ):
+                with _tracer.start_as_current_span(
+                    "granum.cycle.read_self_observability"
+                ) as obs_span:
+                    history = await self._phoenix.read_self_improvement_history(
+                        cell=self._cell
+                    )
+                    digest = format_telemetry_digest(history)
+                    obs_span.set_attribute(
+                        "granum.observability_readback_generations", len(history)
+                    )
+                    if digest:
+                        mutator_feedback = (
+                            f"{digest}\n\n## This generation's evaluation\n"
+                            f"{winner_feedback}"
+                        )
+
             # 6. Clonal expansion — winning lineage proliferates into mutated
             # daughters. Mutants are tagged `production` (NOT experimental): in a
             # germinal center the daughters are active members that compete in the
@@ -203,7 +236,7 @@ class GerminalCycle:
                     # judge's critique. Directed optimization — daughters can beat
                     # the parent, so the champion genuinely evolves.
                     proposals = await self._mutate_prompt(
-                        winner_body, winner_feedback, self._mutation_count
+                        winner_body, mutator_feedback, self._mutation_count
                     )
                 else:
                     # Mechanical fallback (citation swaps / reframes). Seeded by
@@ -231,6 +264,23 @@ class GerminalCycle:
                     )
                     mutant_ids.append(pv.prompt_id)
                     mutant_notes.append((pv.prompt_id, note))
+
+            # Rich span attributes: make the Phoenix trace tell the self-improvement
+            # story (winner, fitness, apoptosis, mutations, the judge's critique) so
+            # a judge reading the trace sees the climb — and so the NEXT generation
+            # can read this telemetry back (the bonus loop in step 5.5).
+            for _key, _val in cycle_story_attributes(
+                cell=self._cell,
+                generation=generation,
+                winner_id=winner_id,
+                winner_fitness=tournament_result.winner_score.composite,
+                population_size=len(ranked) - len(culled),
+                apoptosis_ids=tuple(tombstoned_ids),
+                mutant_notes=tuple(mutant_notes),
+                rejected_count=len(rejected),
+                critique=winner_feedback,
+            ).items():
+                span.set_attribute(_key, _val)
 
             # 7. Dataset writeback (best-effort — Phoenix MCP has no create-dataset,
             # so the outcomes dataset may not exist on a first live run. A missing

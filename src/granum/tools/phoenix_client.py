@@ -27,10 +27,14 @@ Phoenix version GlobalID used for tagging/removal.
 from __future__ import annotations
 
 import logging
+import os
 from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import httpx
+
+if TYPE_CHECKING:
+    from granum.center.observability import GenerationObservation
 
 _log = logging.getLogger(__name__)
 
@@ -440,3 +444,27 @@ class PhoenixClient:
             {"project_identifier": project_name},
         )
         return resp.get("items") or resp.get("spans") or []
+
+    async def read_self_improvement_history(
+        self, *, cell: str, project_name: str | None = None
+    ) -> list["GenerationObservation"]:
+        """Read the cell's own prior-generation telemetry back from Phoenix.
+
+        The Arize bonus loop: the agent introspects its OWN observability data
+        (the rich per-generation spans it emitted) to inform the next mutation.
+        Returns the per-generation trajectory ascending; empty on a cold/failed
+        read so the caller falls back to the in-memory critique.
+        """
+        from granum.center.observability import parse_generation_history
+
+        project = (
+            os.getenv("PHOENIX_PROJECT_NAME", "granum")
+            if project_name is None
+            else project_name
+        )
+        try:
+            spans = await self.get_spans(project_name=project)
+        except Exception:  # noqa: BLE001 — read-back is best-effort, never fatal
+            _log.warning("self-observability read-back failed; using in-memory feedback")
+            return []
+        return parse_generation_history(spans, cell=cell)

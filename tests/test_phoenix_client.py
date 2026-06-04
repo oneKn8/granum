@@ -364,3 +364,43 @@ async def test_add_coevolution_example_payload_schema():
     assert row["payer_winner_id"] == "pp_winner"
     assert row["defensibility_composite"] == 7.2
     assert row["english_feedback"] == "Writer cited CPB 0119 §IV.A directly."
+
+
+@pytest.mark.asyncio
+async def test_read_self_improvement_history_reads_own_telemetry():
+    """The Arize bonus loop: read prior-generation telemetry back from Phoenix
+    spans (get-spans) and return the per-generation trajectory ascending."""
+    from granum.center.observability import GenerationObservation
+
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {
+        "spans": [
+            {
+                "name": "granum.cycle.aetna_cardiac",
+                "start_time": "2026-06-04T00:01:00Z",
+                "attributes": {
+                    "granum.cell": "aetna_cardiac", "granum.generation": 1,
+                    "granum.winner_fitness": 5.4,
+                    "granum.judge_critique": "citations not section-level",
+                },
+            },
+            {
+                "name": "granum.cycle.aetna_cardiac",
+                "start_time": "2026-06-04T00:00:00Z",
+                "attributes": {
+                    "granum.cell": "aetna_cardiac", "granum.generation": 0,
+                    "granum.winner_fitness": 4.0, "granum.judge_critique": "naive",
+                },
+            },
+            {"name": "granum.cycle.tournament", "start_time": "t", "attributes": {}},
+        ]
+    }
+    client = _client(mock_mcp)
+    hist = await client.read_self_improvement_history(
+        cell="aetna_cardiac", project_name="granum"
+    )
+
+    assert mock_mcp.call_tool.await_args[0][0] == "get-spans"
+    assert all(isinstance(o, GenerationObservation) for o in hist)
+    assert [o.generation for o in hist] == [0, 1]
+    assert hist[1].critique == "citations not section-level"
