@@ -2,9 +2,8 @@
 # Deploy the Granum API to Cloud Run.
 #
 # The API is a thin static server over the evolution artifacts (granum.web.api).
-# This script curates the latest `runs/cell_payloads/*.json` into the tracked
-# `api_data/` dir (which the Docker image bakes in), then deploys via Cloud Run
-# source build (uses the root Dockerfile).
+# It deploys the CURATED, committed `api_data/` artifacts (which the Docker image
+# bakes in) via a Cloud Run source build (uses the root Dockerfile).
 #
 # The Next.js frontend deploys separately (Vercel recommended) with:
 #   NEXT_PUBLIC_USE_REAL_API=true
@@ -22,18 +21,21 @@ SERVICE="${GRANUM_API_SERVICE:-granum-api}"
 
 cd "$(dirname "$0")/.."
 
-# 1. Curate the freshest evolution artifacts into the image data dir.
-mkdir -p api_data
-if compgen -G "runs/cell_payloads/*.json" > /dev/null; then
-  cp -v runs/cell_payloads/*.json api_data/
-else
-  echo "WARN: no runs/cell_payloads/*.json found — deploying whatever is in api_data/" >&2
-fi
-
+# 1. Deploy the CURATED, committed api_data/ artifacts — the demo source of truth.
+#    We deliberately do NOT auto-copy raw runs/cell_payloads/ output: that would
+#    un-curate the artifacts (re-add un-judged frontier nodes) and could clobber
+#    the demo with whatever run happens to be on disk.
+#
+#    To refresh the demo from a fresh run, BAKE explicitly before deploying:
+#      env -u PYTHONPATH uv run python scripts/bake_demo_artifact.py \
+#        --src runs/cell_payloads/aetna_cardiac.json --dest api_data/aetna_cardiac.json
+#    (then curate the coevolution artifact, review, and `git commit`), and re-run this.
 if ! compgen -G "api_data/*.json" > /dev/null; then
-  echo "ERROR: api_data/ is empty. Run 'granum evolve --reset' first." >&2
+  echo "ERROR: api_data/ has no artifacts. Bake one first (see comment above)." >&2
   exit 1
 fi
+echo "Deploying curated artifacts:"
+for f in api_data/*.json; do echo "  - $f"; done
 
 # 2. Deploy (Cloud Run source build uses the root Dockerfile).
 gcloud run deploy "$SERVICE" \
