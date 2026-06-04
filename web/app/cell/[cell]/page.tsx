@@ -5,7 +5,7 @@ import { CellDashboard } from "@/components/CellDashboard";
 import { CellSelector } from "@/components/CellSelector";
 import { LivePoll } from "@/components/LivePoll";
 import { ApiError, getCellPayload, getCoEvolution, listCellMetas } from "@/lib/api";
-import { ALL_CELLS, CELL_LABEL, cellLabelFromMeta } from "@/lib/mock-data";
+import { ALL_CELLS, CELL_LABEL, cellLabelFromMeta, titleCase } from "@/lib/mock-data";
 import type { CellId, CellMeta, CellPayload, CoEvolutionState } from "@/lib/types";
 
 interface CellPageProps {
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: CellPageProps): Promise<Metad
     if (err instanceof ApiError && err.status === 404) return { title: "Cell not found" };
     throw err;
   }
-  const title = `${meta.payer} · ${meta.diagnosis}`;
+  const title = `${titleCase(meta.payer)} · ${titleCase(meta.diagnosis)}`;
   const description = `Granum lineage for ${title}. A seed strategy matures from ${(meta.baselineOverturn * 100).toFixed(0)}% to ${(meta.currentOverturn * 100).toFixed(0)}% appeal fitness across ${meta.generations} generations.`;
   const path = `/cell/${cell}`;
   return {
@@ -88,15 +88,15 @@ export default async function CellPage({ params }: CellPageProps) {
 
       <main id="main" className="mx-auto max-w-screen-2xl px-6 py-8">
         <h1 className="sr-only">
-          {meta.payer}, {meta.diagnosis} lineage
+          {titleCase(meta.payer)}, {titleCase(meta.diagnosis)} lineage
         </h1>
 
         <section
           className="mb-8 grid grid-cols-2 gap-x-6 gap-y-5 border border-border bg-surface/70 p-6 lg:grid-cols-5"
           aria-label="Cell summary"
         >
-          {stat("payer", meta.payer)}
-          {stat("diagnosis", meta.diagnosis)}
+          {stat("payer", titleCase(meta.payer))}
+          {stat("diagnosis", titleCase(meta.diagnosis))}
           {stat("generations", <span className="font-mono">{meta.generations}</span>)}
           {stat(
             "alive · apoptosed",

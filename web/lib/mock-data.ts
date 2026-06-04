@@ -572,7 +572,7 @@ export function getCell(id: CellId): CellPayload {
   return ALL_CELLS[id];
 }
 
-const titleCase = (s: string): string =>
+export const titleCase = (s: string): string =>
   s.replace(/\b\w/g, (c) => c.toUpperCase());
 
 /**
