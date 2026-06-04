@@ -193,7 +193,7 @@ class CoEvolutionDriver:
         cap = max(1, int(population_size * self._mutation_rate_cap))
         return min(self._mutation_count, cap)
 
-    async def round(self) -> CoEvolutionRoundResult:
+    async def round(self, *, is_final: bool = False) -> CoEvolutionRoundResult:
         with _tracer.start_as_current_span("granum.coevolution.round") as span:
             span.set_attribute("granum.cell", self._cell)
             span.set_attribute("granum.round_index", self._round_index)
@@ -434,9 +434,12 @@ class CoEvolutionDriver:
             # multiple of adversary_reset_every. Wipes the FULL current payer
             # population (active payers + just-spawned mutants, dedup'd
             # against tournament-loser tombstones) and re-seeds from
-            # SEEDED_PERSONAS.
+            # SEEDED_PERSONAS. NEVER fires on the final round: a reset there
+            # would leave the run ending with an all-tombstoned payer population
+            # (no payer champion, no contested-equilibrium snapshot to display).
             adversary_reset_fired = (
-                (self._round_index + 1) % self._adversary_reset_every == 0
+                not is_final
+                and (self._round_index + 1) % self._adversary_reset_every == 0
             )
             if adversary_reset_fired:
                 with _tracer.start_as_current_span(

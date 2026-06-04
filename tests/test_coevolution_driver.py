@@ -84,6 +84,7 @@ def _make_driver(
     mutation_proposer=None,
     mutation_count: int = 2,
     prompt_mutator=None,
+    adversary_reset_every: int = 5,
 ) -> tuple[CoEvolutionDriver, AsyncMock, AsyncMock, AsyncMock]:
     mock_phoenix = AsyncMock(spec=PhoenixClient)
     mock_phoenix.list_active_prompts.side_effect = [writers, payers]
@@ -144,6 +145,7 @@ def _make_driver(
         appeal_generator=mock_appeal_generator,
         antigen=_antigen(),
         prompt_mutator=prompt_mutator,
+        adversary_reset_every=adversary_reset_every,
     )
     return driver, mock_phoenix, mock_payer, mock_judge
 
@@ -800,6 +802,55 @@ async def test_round_result_exposes_per_population_scoreboards():
     assert p_ids[1] == "p1"
     assert outcome.payer_scoreboard[0][1] == pytest.approx(((10 - 6) + (10 - 2)) / 2)  # 6.0
     assert outcome.payer_scoreboard[1][1] == pytest.approx(((10 - 8) + (10 - 4)) / 2)  # 4.0
+
+
+# ---------------------------------------------------------------------------
+# Bug 2 (this session): adversary reset must NOT fire on the FINAL round
+# ---------------------------------------------------------------------------
+
+from granum.adversary.payer_persona import SEEDED_PERSONAS  # noqa: E402
+
+
+@pytest.mark.asyncio
+async def test_adversary_reset_fires_by_default_on_due_round():
+    """Default behavior preserved: on a reset-due round the full payer pop is
+    wiped and re-seeded from SEEDED_PERSONAS."""
+    writers = [_writer("w1")]
+    payers = [_payer("p1", "strict")]
+    driver, mock_phoenix, _, _ = _make_driver(
+        writers=writers, payers=payers, score_side_effect=[_score(7)],
+        adversary_reset_every=1,  # round_index 0 → (0+1)%1==0 → due
+    )
+
+    outcome = await driver.round()
+
+    assert outcome.adversary_reset_fired is True
+    reseed = [
+        c for c in mock_phoenix.upsert_prompt.await_args_list
+        if "/baseline_" in c.kwargs["name"]
+    ]
+    assert len(reseed) == len(SEEDED_PERSONAS)
+
+
+@pytest.mark.asyncio
+async def test_adversary_reset_skipped_on_final_round():
+    """Regression: a reset-due round that is ALSO the final round must NOT reset
+    (otherwise the run ends with an all-tombstoned payer population, no champion)."""
+    writers = [_writer("w1")]
+    payers = [_payer("p1", "strict")]
+    driver, mock_phoenix, _, _ = _make_driver(
+        writers=writers, payers=payers, score_side_effect=[_score(7)],
+        adversary_reset_every=1,  # would be due on round_index 0
+    )
+
+    outcome = await driver.round(is_final=True)
+
+    assert outcome.adversary_reset_fired is False
+    reseed = [
+        c for c in mock_phoenix.upsert_prompt.await_args_list
+        if "/baseline_" in c.kwargs["name"]
+    ]
+    assert reseed == []
 
 
 # ---------------------------------------------------------------------------

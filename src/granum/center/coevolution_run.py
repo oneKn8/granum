@@ -86,7 +86,9 @@ class CoEvolutionRun:
         payers: dict[str, _CoEvNode] = {}
 
         for round_idx in range(self._rounds):
-            result = await self._driver.round()
+            result = await self._driver.round(
+                is_final=(round_idx == self._rounds - 1)
+            )
 
             # Update writer nodes from scoreboard. Track the MAX fitness a node
             # ever scored — because the adversary co-evolves, a survivor's later
