@@ -13,11 +13,7 @@ export interface CellNavItem {
 interface CellSelectorProps {
   current?: CellId;
   className?: string;
-  /**
-   * Cells to offer. When omitted, falls back to the full static list (mock
-   * mode). Server components pass the live API's served cells here so the nav
-   * never links to a cell the deployed API can't render.
-   */
+  /** Cells to offer. Omitted falls back to the full static list (mock mode). */
   items?: CellNavItem[];
 }
 
@@ -30,9 +26,9 @@ export function CellSelector({ current, className, items }: CellSelectorProps) {
   const cells = items && items.length > 0 ? items : FALLBACK_ITEMS;
   return (
     <nav
-      aria-label="Select a (payer × diagnosis) cell"
+      aria-label="Select a payer and diagnosis"
       className={cn(
-        "flex flex-wrap items-center gap-px border border-stroke-1 bg-bg-1 p-px",
+        "flex flex-wrap items-center gap-px overflow-hidden rounded-[3px] border border-border bg-border",
         className,
       )}
     >
@@ -46,8 +42,8 @@ export function CellSelector({ current, className, items }: CellSelectorProps) {
             className={cn(
               "px-3 py-1.5 font-mono text-xs transition-colors duration-200",
               isCurrent
-                ? "bg-bg-3 text-fg-0"
-                : "bg-bg-1 text-fg-1 hover:bg-bg-2 hover:text-fg-0",
+                ? "bg-primary text-on-primary"
+                : "bg-surface text-ink-muted hover:bg-agar hover:text-ink",
             )}
           >
             {label}

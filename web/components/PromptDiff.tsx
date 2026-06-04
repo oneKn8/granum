@@ -17,8 +17,8 @@ function renderSide(changes: Change[], side: "parent" | "mutant") {
       return (
         <ins
           key={i}
-          className="bg-champion/15 text-champion no-underline"
-          aria-label="added in mutant"
+          className="bg-primary-tint text-primary-strong no-underline decoration-clone"
+          aria-label="added in this strategy"
         >
           {c.value}
         </ins>
@@ -28,8 +28,8 @@ function renderSide(changes: Change[], side: "parent" | "mutant") {
       return (
         <del
           key={i}
-          className="bg-apoptosis/15 text-apoptosis line-through"
-          aria-label="removed from parent"
+          className="bg-removed-tint text-removed line-through decoration-clone"
+          aria-label="removed from the parent"
         >
           {c.value}
         </del>
@@ -47,15 +47,12 @@ export function PromptDiff({ parent, mutant }: PromptDiffProps) {
 
   if (!parent) {
     return (
-      <section
-        className="border border-stroke-1 bg-bg-1 p-4"
-        aria-label="Prompt diff (root strategy)"
-      >
-        <header className="mb-3 flex items-baseline justify-between font-sans text-sm">
-          <span className="text-fg-1">Prompt — root strategy</span>
-          <span className="font-mono text-xs text-fg-2">gen {mutant.generation}</span>
+      <section className="border border-border bg-surface/70 p-4" aria-label="Strategy prompt (the seed)">
+        <header className="mb-3 flex items-baseline justify-between font-body text-sm">
+          <span className="font-medium text-ink">The seed strategy</span>
+          <span className="font-mono text-xs text-ink-subtle">gen {mutant.generation}</span>
         </header>
-        <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-fg-0">
+        <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-ink">
           {mutant.promptBody}
         </pre>
       </section>
@@ -66,63 +63,61 @@ export function PromptDiff({ parent, mutant }: PromptDiffProps) {
   const citationsRemoved = parent.citations.filter((c) => !mutant.citations.includes(c));
 
   return (
-    <section
-      className="border border-stroke-1 bg-bg-1 p-4"
-      aria-label="Prompt diff between parent and mutant"
-    >
-      <header className="mb-3 flex items-baseline justify-between font-sans text-sm">
-        <span className="text-fg-1">
-          Prompt diff —{" "}
-          <span className="font-mono text-xs text-fg-2">
-            {parent.label} → {mutant.label}
+    <section className="border border-border bg-surface/70 p-4" aria-label="What changed from parent to this strategy">
+      <header className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 font-body text-sm">
+        <span className="font-medium text-ink">
+          What changed{" "}
+          <span className="font-mono text-xs font-normal text-ink-subtle">
+            {parent.label} <span aria-hidden>→</span> {mutant.label}
           </span>
         </span>
-        <span className="font-mono text-xs text-fg-2">
-          fitness {parent.fitness.toFixed(2)} → {mutant.fitness.toFixed(2)}
+        <span className="font-mono text-xs text-ink-subtle">
+          fitness {parent.fitness.toFixed(2)} <span aria-hidden>→</span>{" "}
+          <span className="text-champion-ink">{mutant.fitness.toFixed(2)}</span>
         </span>
       </header>
 
       {mutant.mutationNote && (
         <p
-          className="mb-3 border-l border-stroke-2 bg-bg-2/40 px-3 py-2 font-mono text-xs text-fg-1"
+          className="mb-3 border-l-2 border-primary/40 bg-primary-tint/50 px-3 py-2 font-mono text-xs text-ink-muted"
           role="note"
         >
-          mutation · {mutant.mutationNote}
+          this mutation: {mutant.mutationNote}
         </p>
       )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-fg-2">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
             parent · gen {parent.generation}
           </div>
-          <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-fg-0">
+          <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-ink">
             {renderSide(changes, "parent")}
           </pre>
         </div>
         <div>
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-fg-2">
-            mutant · gen {mutant.generation}
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+            this strategy · gen {mutant.generation}
           </div>
-          <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-fg-0">
+          <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-ink">
             {renderSide(changes, "mutant")}
           </pre>
         </div>
       </div>
 
       {(citationsAdded.length > 0 || citationsRemoved.length > 0) && (
-        <div className="mt-4 border-t border-stroke-1 pt-3">
-          <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-fg-2">
-            citation delta
+        <div className="mt-4 border-t border-border pt-3">
+          <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+            citations it learned to cite
           </div>
           <ul className="space-y-1 font-mono text-xs">
             {citationsAdded.map((c) => (
-              <li key={`add-${c}`} className="text-champion">
+              <li key={`add-${c}`} className="text-primary-strong">
                 + {c}
               </li>
             ))}
             {citationsRemoved.map((c) => (
-              <li key={`del-${c}`} className="text-apoptosis line-through">
+              <li key={`del-${c}`} className="text-removed line-through">
                 − {c}
               </li>
             ))}
