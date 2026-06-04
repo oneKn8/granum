@@ -2,17 +2,18 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const alt =
-  "Granum — an immune system for medical appeals. Lineage tree visualization.";
+  "Granum, an immune system for medical appeals. A seed strategy matures into a champion across ten generations.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BG = "oklch(0.16 0.020 285)";
-const FG = "oklch(0.96 0.005 285)";
-const FG_DIM = "oklch(0.74 0.020 285)";
-const SURVIVOR = "oklch(0.74 0.16 230)";
-const CHAMPION = "oklch(0.80 0.18 65)";
-const TOMB = "oklch(0.42 0.010 285)";
-const STROKE = "oklch(0.30 0.030 285)";
+// Light "agar" palette (hex, for Satori safety).
+const BG = "#f7f2e8";
+const FG = "#26221a";
+const FG_DIM = "#6d685b";
+const ALIVE = "#2e7d52";
+const CHAMPION = "#9c7322";
+const DEAD = "#8f897a";
+const STROKE = "#ddd8cb";
 
 export default function OG() {
   return new ImageResponse(
@@ -44,18 +45,17 @@ export default function OG() {
         </div>
         <div
           style={{
-            fontSize: 78,
-            lineHeight: 1.05,
+            fontSize: 74,
+            lineHeight: 1.06,
             fontWeight: 500,
-            letterSpacing: -1,
+            letterSpacing: -1.5,
             display: "flex",
             flexWrap: "wrap",
-            maxWidth: 980,
+            maxWidth: 1000,
           }}
         >
-          Strategies that lose
-          <br />
-          are <span style={{ color: SURVIVOR }}>permanently</span> deleted.
+          A denied appeal that gets{" "}
+          <span style={{ color: ALIVE }}>&nbsp;better&nbsp;</span> every time it loses.
         </div>
         <div
           style={{
@@ -72,15 +72,15 @@ export default function OG() {
         >
           <div style={{ display: "flex", gap: 32 }}>
             <span>
-              <span style={{ color: TOMB }}>40%</span> →{" "}
-              <span style={{ color: CHAMPION }}>98%</span> appeal fitness
+              <span style={{ color: DEAD }}>0.40</span> →{" "}
+              <span style={{ color: CHAMPION }}>0.98</span> appeal fitness
             </span>
             <span>aetna · cardiac · 10 generations</span>
           </div>
           <div style={{ display: "flex", gap: 16 }}>
-            <span style={{ color: SURVIVOR }}>● alive</span>
+            <span style={{ color: ALIVE }}>● alive</span>
             <span style={{ color: CHAMPION }}>● champion</span>
-            <span style={{ color: TOMB }}>● apoptosed</span>
+            <span style={{ color: DEAD }}>○ apoptosed</span>
           </div>
         </div>
       </div>

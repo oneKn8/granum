@@ -1,146 +1,170 @@
 import Link from "next/link";
 import { LineageTree } from "@/components/LineageTree";
 import { CellSelector } from "@/components/CellSelector";
-import { getCellPayload } from "@/lib/api";
+import { LivePoll } from "@/components/LivePoll";
+import { Reveal } from "@/components/Reveal";
+import { getCellPayload, listCellMetas } from "@/lib/api";
+import { cellLabelFromMeta } from "@/lib/mock-data";
 
 export default async function LandingPage() {
-  const aetna = await getCellPayload("aetna_cardiac");
+  const [aetna, cellMetas] = await Promise.all([
+    getCellPayload("aetna_cardiac"),
+    listCellMetas(),
+  ]);
+  const navItems = cellMetas.map((m) => ({ id: m.id, label: cellLabelFromMeta(m) }));
+  const { baselineOverturn, currentOverturn, generations, apoptosisTotal } = aetna.meta;
+  const pct = (v: number) => `${Math.round(v * 100)}%`;
 
   return (
     <div className="min-h-dvh">
-      {/* Top bar — static, minimal */}
-      <header className="border-b border-stroke-1">
+      {/* Top bar */}
+      <header className="border-b border-border">
         <div className="mx-auto flex max-w-screen-2xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="flex items-baseline gap-3 font-serif text-fg-0">
-            <span className="text-lg leading-none">Granum</span>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
+          <Link href="/" className="flex items-baseline gap-3 text-ink">
+            <span className="font-display text-lg leading-none fraunces-head">Granum</span>
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.16em] text-ink-subtle sm:inline">
               an immune system for medical appeals
             </span>
           </Link>
-          <nav aria-label="Primary" className="font-mono text-xs text-fg-1">
-            <Link href="/cell/aetna_cardiac" className="hover:text-fg-0">
-              explore cells →
+          <nav aria-label="Primary" className="font-mono text-xs text-ink-muted">
+            <Link href="/cell/aetna_cardiac" className="hover:text-ink">
+              explore cells <span aria-hidden>→</span>
             </Link>
           </nav>
         </div>
       </header>
 
       <main id="main">
-        {/* Hero — asymmetric, serif headline left, tree right */}
-        <section className="border-b border-stroke-1">
-          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 px-6 py-16 lg:py-24">
-            <div className="col-span-12 lg:col-span-6">
-              <p className="mb-6 font-mono text-xs uppercase tracking-widest text-fg-2">
-                Google Cloud Rapid Agent · Arize Phoenix track · 2026
+        <LivePoll />
+
+        {/* Hero */}
+        <section className="border-b border-border">
+          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 items-center gap-x-10 gap-y-12 px-6 py-16 lg:py-24">
+            <Reveal className="col-span-12 lg:col-span-5">
+              <p className="mb-6 font-mono text-xs uppercase tracking-[0.16em] text-seed-ink">
+                Google Cloud Rapid Agent · Arize Phoenix · 2026
               </p>
-              <h1 className="font-serif text-3xl text-fg-0 lg:text-[64px] lg:leading-[68px]">
-                Strategies that lose are{" "}
-                <span className="text-apoptosis">permanently</span> deleted.
+              <h1 className="font-display text-ink">
+                A denied appeal that gets better every time it loses.
               </h1>
-              <p className="mt-6 max-w-prose font-serif text-base text-fg-1 lg:text-[20px] lg:leading-[30px]">
-                When your insurance denies medically necessary care, 83% of physician
-                appeals succeed — but only 10% are ever filed. Writing one costs 12 hours
-                of physician time. The math kills the appeal before it&rsquo;s written.
+              <p className="mt-6 font-body text-base text-ink-muted lg:text-lg">
+                Granum evolves insurance-appeal letters like an immune system. A naive draft matures into a
+                champion that wins.
               </p>
-              <p className="mt-4 max-w-prose font-serif text-base text-fg-1 lg:text-[20px] lg:leading-[30px]">
-                Granum is an agent that drafts those appeals. It maintains an evolving
-                population of strategies per (payer × diagnosis) — surviving lineages
-                branch and mutate; losing ones undergo apoptosis. The lineage is the
-                system of record.
-              </p>
-              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-xs text-fg-2">
+              <dl className="mt-8 flex flex-wrap gap-x-9 gap-y-5">
+                {[
+                  ["83%", "overturned when filed"],
+                  ["10%", "ever appealed"],
+                  ["12h", "to write by hand"],
+                ].map(([n, label]) => (
+                  <div key={label}>
+                    <dt className="font-display text-2xl font-light leading-none text-ink">{n}</dt>
+                    <dd className="mt-1.5 font-mono text-[11px] text-ink-muted">{label}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-xs">
                 <Link
                   href="/cell/aetna_cardiac"
-                  className="border-b border-survivor pb-px text-survivor hover:text-fg-0"
+                  className="border-b border-primary pb-px text-primary-strong transition-colors hover:text-ink"
                 >
-                  open the aetna · cardiac cell →
+                  open the Aetna cardiac cell <span aria-hidden>→</span>
                 </Link>
                 <a
-                  href="https://github.com/"
-                  className="text-fg-1 hover:text-fg-0"
+                  href="https://github.com/oneKn8/granum"
+                  className="text-ink-muted transition-colors hover:text-ink"
                   rel="noreferrer noopener"
                   target="_blank"
                 >
-                  source on github →
+                  source on GitHub <span aria-hidden>→</span>
                 </a>
               </div>
-            </div>
+            </Reveal>
 
-            <div className="col-span-12 mt-10 lg:col-span-6 lg:mt-0 lg:-ml-12">
+            <Reveal delay={0.12} className="col-span-12 lg:col-span-7">
               <LineageTree
                 strategies={aetna.strategies}
-                caption="Aetna · Cardiac — 8 generations, 6 apoptosed"
+                caption={`${cellLabelFromMeta(aetna.meta)}, ${generations} generations`}
                 height={520}
               />
-            </div>
+              <p className="mt-3 font-body text-sm text-ink-muted">
+                One strategy starts at <span className="font-mono text-ink">0.40</span> and climbs to a{" "}
+                <span className="font-mono text-champion-ink">0.98</span> champion. The losers stay on the
+                page, struck out.
+              </p>
+            </Reveal>
           </div>
         </section>
 
-        {/* Mechanism strip — single editorial column, no 3-card grid */}
-        <section className="border-b border-stroke-1">
-          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 px-6 py-16">
-            <div className="col-span-12 lg:col-span-3">
-              <p className="font-mono text-xs uppercase tracking-widest text-fg-2">
-                mechanism
-              </p>
-            </div>
+        {/* Mechanism */}
+        <section className="border-b border-border">
+          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 gap-y-8 px-6 py-16 lg:py-20">
+            <Reveal className="col-span-12 lg:col-span-3">
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-ink-subtle">how it works</p>
+            </Reveal>
             <div className="col-span-12 lg:col-span-9 lg:col-start-4">
-              <h2 className="font-serif text-xl text-fg-0 lg:text-2xl">
-                Affinity maturation, applied to prompts.
-              </h2>
-              <p className="mt-4 max-w-prose font-serif text-base text-fg-1 lg:text-lg">
-                Each (payer × diagnosis) cell holds a small population of B-cell appeal
-                strategies. A new denial arrives; surviving strategies generate candidate
-                appeals; an LLM-as-judge scores them against a gold dataset of prior
-                overturned appeals. The winning candidate is submitted. The losing
-                strategies&rsquo; prompt versions are deleted from the Phoenix registry —
-                no revert, no archive, no &ldquo;keep around in case.&rdquo;
-              </p>
-              <dl className="mt-10 grid grid-cols-1 gap-x-8 gap-y-6 border-t border-stroke-1 pt-8 sm:grid-cols-3">
-                <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-                    aetna · cardiac · baseline
-                  </dt>
-                  <dd className="mt-2 font-serif text-2xl text-fg-tomb">40%</dd>
-                  <dd className="font-mono text-xs text-fg-2">appeal fitness, naive gen 0</dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-                    after 10 generations
-                  </dt>
-                  <dd className="mt-2 font-serif text-2xl text-champion">98%</dd>
-                  <dd className="font-mono text-xs text-fg-2">appeal fitness, champion</dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-widest text-fg-2">
-                    strategies apoptosed
-                  </dt>
-                  <dd className="mt-2 font-serif text-2xl text-apoptosis">20</dd>
-                  <dd className="font-mono text-xs text-fg-2">
-                    permanent removal from registry
-                  </dd>
-                </div>
-              </dl>
+              <Reveal>
+                <h2 className="font-display text-xl text-ink lg:text-2xl fraunces-head">
+                  It treats each appeal strategy like a living cell.
+                </h2>
+                <p className="mt-5 max-w-prose font-body text-base text-ink-muted lg:text-lg">
+                  Every payer and diagnosis gets its own population. On each denial the strategies draft
+                  competing letters, a judge scores them against real overturned cases, and the losers are
+                  deleted from the registry for good. Winners branch.
+                </p>
+              </Reveal>
+              <Reveal delay={0.08}>
+                <dl className="mt-10 grid grid-cols-1 gap-x-8 gap-y-7 border-t border-border pt-8 sm:grid-cols-3">
+                  <div>
+                    <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+                      Aetna · cardiac · seed
+                    </dt>
+                    <dd className="mt-2 font-display text-2xl font-light text-ink-subtle">
+                      {pct(baselineOverturn)}
+                    </dd>
+                    <dd className="font-mono text-xs text-ink-subtle">appeal fitness, naive gen 0</dd>
+                  </div>
+                  <div>
+                    <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+                      after {generations} generations
+                    </dt>
+                    <dd className="mt-2 font-display text-2xl font-light text-champion-ink">
+                      {pct(currentOverturn)}
+                    </dd>
+                    <dd className="font-mono text-xs text-ink-subtle">appeal fitness, champion</dd>
+                  </div>
+                  <div>
+                    <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+                      strategies apoptosed
+                    </dt>
+                    <dd className="mt-2 font-display text-2xl font-light text-removed">{apoptosisTotal}</dd>
+                    <dd className="font-mono text-xs text-ink-subtle">deleted from the registry, kept on record</dd>
+                  </div>
+                </dl>
+              </Reveal>
             </div>
           </div>
         </section>
 
-        {/* Explore cells */}
+        {/* Explore */}
         <section>
           <div className="mx-auto max-w-screen-2xl px-6 py-16">
-            <div className="mb-6 flex items-baseline justify-between">
-              <h2 className="font-serif text-xl text-fg-0">Explore the cells.</h2>
-              <p className="font-mono text-xs text-fg-2">5 (payer × diagnosis) cells</p>
-            </div>
-            <CellSelector />
+            <Reveal className="mb-6 flex items-baseline justify-between gap-4">
+              <h2 className="font-display text-xl text-ink fraunces-head">Look inside a cell.</h2>
+              <p className="font-mono text-xs text-ink-subtle">
+                {navItems.length} payer{navItems.length === 1 ? "" : "s"} and diagnoses
+              </p>
+            </Reveal>
+            <Reveal delay={0.06}>
+              <CellSelector items={navItems} />
+            </Reveal>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-stroke-1">
-        <div className="mx-auto max-w-screen-2xl px-6 py-6 font-mono text-[11px] text-fg-2">
-          Apache-2.0 · built on Google ADK + Gemini + Arize Phoenix · synthetic data only,
-          no PHI
+      <footer className="border-t border-border">
+        <div className="mx-auto max-w-screen-2xl px-6 py-6 font-mono text-[11px] text-ink-subtle">
+          Apache-2.0 · built on Google ADK, Gemini, and Arize Phoenix · synthetic data only, no PHI
         </div>
       </footer>
     </div>

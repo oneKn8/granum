@@ -1,89 +1,141 @@
 @import "tailwindcss";
 
-/* -------- Theme tokens (Tailwind 4) -------- */
-/* All tokens registered with @theme become first-class Tailwind utilities. */
-/* Source of truth: web/DESIGN.md (Germinal Lab — Cinematic Dark). */
+/* ============================================================================
+   Granum — "Agar Lab" light theme.  Source of truth: web/DESIGN.md.
+   Warm bone/agar paper · chlorophyll-green lineage · brightfield, not darkfield.
+   ========================================================================== */
 
 @theme {
-  /* Surfaces — violet-tinted near-black, slide-mount feel */
-  --color-bg-0: oklch(0.16 0.020 285);
-  --color-bg-1: oklch(0.21 0.025 285);
-  --color-bg-2: oklch(0.26 0.030 285);
-  --color-bg-3: oklch(0.32 0.035 285);
+  /* ---- One-knob hues ---- */
+  --brand-hue: 150;   /* chlorophyll / granum */
+  --seed-hue: 75;     /* amber */
 
-  /* Foregrounds */
-  --color-fg-0: oklch(0.96 0.005 285);
-  --color-fg-1: oklch(0.74 0.020 285);
-  --color-fg-2: oklch(0.58 0.015 285);
-  --color-fg-tomb: oklch(0.42 0.010 285);
+  /* ---- Paper / agar / bone (warm, never #fff, never gray-50) ---- */
+  --color-paper: oklch(0.985 0.012 95);
+  --color-agar: oklch(0.970 0.018 95);
+  --color-surface: oklch(0.994 0.008 95);
+  --color-well: oklch(0.955 0.020 92);
 
-  /* Semantic biology-stain accents */
-  --color-survivor: oklch(0.74 0.16 230);
-  --color-champion: oklch(0.80 0.18 65);
-  --color-mutant: oklch(0.68 0.22 320);
-  --color-apoptosis: oklch(0.60 0.22 25);
+  /* ---- Ink (warm near-black) ---- */
+  --color-ink: oklch(0.205 0.020 95);
+  --color-ink-muted: oklch(0.470 0.022 110);
+  --color-ink-subtle: oklch(0.505 0.020 110);
 
-  /* Strokes */
-  --color-stroke-1: oklch(0.30 0.030 285 / 0.6);
-  --color-stroke-2: oklch(0.40 0.040 285 / 0.4);
+  /* ---- Primary: chlorophyll green ---- */
+  --color-primary: oklch(0.520 0.130 150);
+  --color-primary-strong: oklch(0.430 0.120 150);
+  --color-primary-tint: oklch(0.945 0.045 150);
+  --color-on-primary: oklch(0.985 0.012 95);
 
-  /* Type scale (modular ratio 1.25) */
-  --text-xs: 0.75rem;   --text-xs--line-height: 1rem;
-  --text-sm: 0.875rem;  --text-sm--line-height: 1.25rem;
-  --text-base: 1rem;    --text-base--line-height: 1.625rem;
-  --text-lg: 1.25rem;   --text-lg--line-height: 1.75rem;
-  --text-xl: 1.75rem;   --text-xl--line-height: 2.125rem;
-  --text-2xl: 2.5rem;   --text-2xl--line-height: 3rem;
-  --text-3xl: 4rem;     --text-3xl--line-height: 4.25rem;
+  /* ---- Lineage status ramp + stains ---- */
+  --color-alive: oklch(0.560 0.135 152);
+  --color-alive-tint: oklch(0.940 0.050 152);
+  --color-mutant: oklch(0.560 0.130 330);
+  --color-champion: oklch(0.715 0.150 82);
+  --color-champion-ink: oklch(0.470 0.110 78);
+  --color-dead: oklch(0.555 0.016 110);
+  --color-dead-ink: oklch(0.470 0.022 110);
 
-  /* Font families bind to next/font CSS variables set on <html> in layout.tsx */
-  --font-serif: var(--font-plex-serif), ui-serif, Georgia, serif;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
+  /* ---- Diff semantics (added = growth green, removed = clay) ---- */
+  --color-removed: oklch(0.520 0.130 28);
+  --color-removed-tint: oklch(0.940 0.045 28);
 
-  /* Motion */
-  --ease-out-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  /* ---- Seed amber ---- */
+  --color-seed: oklch(0.620 0.130 75);
+  --color-seed-tint: oklch(0.945 0.050 75);
+  --color-seed-ink: oklch(0.420 0.090 75);
+
+  /* ---- Lines + lineage edges ---- */
+  --color-border: oklch(0.890 0.012 110);
+  --color-border-strong: oklch(0.800 0.018 110);
+  --color-edge: oklch(0.520 0.110 150 / 0.40);
+  --color-edge-faded: oklch(0.560 0.030 110 / 0.5);
+  --color-ring: oklch(0.520 0.130 150 / 0.55);
+
+  /* ---- Type scale (~1.28) ---- */
+  --text-xs: 0.75rem;     --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;    --text-sm--line-height: 1.3125rem;
+  --text-base: 1.03125rem;--text-base--line-height: 1.6875rem;
+  --text-lg: 1.3125rem;   --text-lg--line-height: 1.8125rem;
+  --text-xl: 1.875rem;    --text-xl--line-height: 2.25rem;
+  --text-2xl: 2.75rem;    --text-2xl--line-height: 3.125rem;
+  --text-3xl: 4.25rem;    --text-3xl--line-height: 4.375rem;
+
+  /* ---- Fonts (bound to next/font vars set on <html> in layout.tsx) ---- */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
+  --font-body: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* ---- Motion ---- */
+  --ease-organic: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-settle: cubic-bezier(0.34, 1.3, 0.5, 1);
 }
 
-/* -------- Base reset -------- */
+/* ---------------------------------------------------------------- base ---- */
+
+html {
+  background: var(--color-paper);
+  color-scheme: light;
+}
 
 html, body {
-  background: var(--color-bg-0);
-  color: var(--color-fg-0);
-  font-family: var(--font-sans);
-  /* Use 100dvh, never 100vh. */
+  color: var(--color-ink);
+  font-family: var(--font-body);
   min-height: 100dvh;
 }
 
 body {
-  font-feature-settings: "ss01", "cv11", "cv02";
+  position: relative;
+  font-feature-settings: "ss01", "cv11";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Selection — eosin blue */
+/* Paper grain — feTurbulence over the warm ground so nothing reads as flat. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 190px 190px;
+}
+
+/* Selection — chlorophyll tint */
 ::selection {
-  background: oklch(0.74 0.16 230 / 0.32);
-  color: var(--color-fg-0);
+  background: oklch(0.520 0.130 150 / 0.18);
+  color: var(--color-ink);
 }
 
-/* Hairline strokes everywhere */
+/* Focus ring — chlorophyll, never default Chrome blue */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* Default hairline border color */
 * {
-  border-color: var(--color-stroke-1);
+  border-color: var(--color-border);
 }
 
-/* Typography defaults — balance hero headlines, pretty body */
+/* Headlines — Fraunces, balanced */
 h1, h2, h3, h4 {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   text-wrap: balance;
-  font-feature-settings: "ss01", "kern";
-  letter-spacing: -0.01em;
+  letter-spacing: -0.012em;
+  font-feature-settings: "kern";
 }
 
 h1 {
   font-size: var(--text-3xl);
   line-height: var(--text-3xl--line-height);
-  font-weight: 500;
+  font-weight: 380;
+  font-variation-settings: "opsz" 120, "SOFT" 48, "WONK" 0;
 }
 
 p, li, blockquote {
@@ -91,15 +143,17 @@ p, li, blockquote {
   hyphens: auto;
 }
 
-/* Mono for any element that wants it.
- * All mono spans are used for data (fitness, generation, counts, IDs), so
- * tabular-nums is enforced globally to keep columns aligned. */
+/* Mono — instrument readout, always tabular */
 .font-mono, code, pre, kbd, samp {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* Reduced motion — honored everywhere */
+/* ---- Fraunces expressive helpers ---- */
+.fraunces-soft { font-variation-settings: "opsz" 120, "SOFT" 60, "WONK" 0; }
+.fraunces-head { font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 0; }
+
+/* -------------------------------------------------------- reduced motion -- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -109,49 +163,78 @@ p, li, blockquote {
   }
 }
 
-/* Focus ring — eosin blue, never default Chrome blue */
-:focus-visible {
-  outline: 2px solid var(--color-survivor);
-  outline-offset: 2px;
-  border-radius: 1px;
+/* ============================================================ lineage ==== */
+
+/* Brightfield slide — warm light pooling on agar, NOT a dark vignette.
+   A bright warm center, a faint chlorophyll wash lower-left (the seed end) and a
+   ripening-gold wash upper-right (where the champion climbs to). */
+.lineage-canvas {
+  background:
+    radial-gradient(120% 90% at 22% 80%, oklch(0.560 0.135 152 / 0.06), transparent 55%),
+    radial-gradient(110% 80% at 82% 24%, oklch(0.715 0.150 82 / 0.07), transparent 52%),
+    radial-gradient(150% 130% at 50% 45%, oklch(0.998 0.006 95 / 0.9), transparent 62%),
+    var(--color-surface);
 }
 
-/* Lineage tree primitives */
-.lineage-node {
-  transition: opacity 600ms ease-out, filter 600ms ease-out, transform 200ms var(--ease-out-apple);
+/* One orchestrated reveal on first paint */
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: fade-rise 700ms var(--ease-organic) both; }
+
+/* Lineage primitives ----------------------------------------------------
+   Note: enter/opacity/scale are owned by Motion (motion/react) on the node
+   group. No CSS transition on opacity/transform here, or it would fight
+   Motion's per-frame inline writes. */
+
+/* Champion — one slow breath (compositor only). The single heartbeat. */
+@keyframes breathe {
+  0%, 100% { opacity: 0.40; transform: scale(1); }
+  50%      { opacity: 0.80; transform: scale(1.12); }
+}
+.champion-breath {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe 3.4s var(--ease-organic) infinite;
+}
+/* Pause the loop when the tree is scrolled off-screen (set via IntersectionObserver). */
+.lineage-canvas.motion-paused .champion-breath {
+  animation-play-state: paused;
 }
 
-.lineage-node[data-status="tombstoned"] {
-  opacity: 0.35;
-  filter: saturate(0);
-}
-
-.lineage-node[data-status="champion"] {
-  filter: drop-shadow(0 0 8px oklch(0.80 0.18 65 / 0.5));
-}
-
+/* Edges — translucent green, curved; spine overrides below. */
 .lineage-edge {
-  stroke: var(--color-survivor);
-  stroke-opacity: 0.7;
-  stroke-width: 1.25;
   fill: none;
-  transition: stroke-opacity 200ms ease-out, opacity 600ms ease-out;
+  stroke: var(--color-edge);
+  stroke-linecap: round;
+  /* opacity + pathLength are Motion-owned; keep CSS off those properties. */
+  transition: stroke-opacity 240ms ease-out;
 }
 
-.lineage-edge[data-status="champion"] {
+/* Survival spine seed→champion — thick, gold, soft-shadow (no additive glow on
+   light). Width is set per-edge in the component; Motion drives the draw-in via
+   pathLength, so no CSS stroke-dasharray here (it would conflict). */
+.lineage-edge[data-spine="true"] {
   stroke: var(--color-champion);
-  stroke-opacity: 0.9;
-  stroke-width: 1.5;
+  filter: drop-shadow(0 1px 1.5px oklch(0.715 0.150 82 / 0.45));
 }
 
 .lineage-edge[data-status="tombstoned"] {
-  stroke: var(--color-stroke-2);
-  stroke-dasharray: 2 3;
-  stroke-opacity: 0.4;
+  stroke: var(--color-edge-faded);
+  stroke-dasharray: 2 4;
 }
 
-/* Hide scrollbar in lineage scroll regions while keeping scroll */
+/* Scroll regions keep a thin warm scrollbar */
 .tree-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-stroke-2) transparent;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+/* Narrative pills floated over the canvas (seed / champion anchors) */
+.lineage-anno {
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translateY(-50%);
 }

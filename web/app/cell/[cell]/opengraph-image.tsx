@@ -7,13 +7,14 @@ export const alt = "Granum cell lineage";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const BG = "oklch(0.16 0.020 285)";
-const FG = "oklch(0.96 0.005 285)";
-const FG_DIM = "oklch(0.74 0.020 285)";
-const SURVIVOR = "oklch(0.74 0.16 230)";
-const CHAMPION = "oklch(0.80 0.18 65)";
-const TOMB = "oklch(0.42 0.010 285)";
-const STROKE = "oklch(0.30 0.030 285)";
+// Light "agar" palette (hex, for Satori safety).
+const BG = "#f7f2e8";
+const FG = "#26221a";
+const FG_DIM = "#6d685b";
+const ALIVE = "#2e7d52";
+const CHAMPION = "#9c7322";
+const DEAD = "#8f897a";
+const STROKE = "#ddd8cb";
 
 function isCellId(id: string): id is CellId {
   return id in ALL_CELLS;
@@ -46,6 +47,13 @@ export default async function CellOG({ params }: { params: { cell: string } }) {
   const meta = ALL_CELLS[cell].meta;
   const baseline = (meta.baselineOverturn * 100).toFixed(0);
   const current = (meta.currentOverturn * 100).toFixed(0);
+
+  const stat = (label: string, value: string, color: string) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <span style={{ fontSize: 14, color: FG_DIM, letterSpacing: 2 }}>{label}</span>
+      <span style={{ color }}>{value}</span>
+    </div>
+  );
 
   return new ImageResponse(
     (
@@ -81,7 +89,7 @@ export default async function CellOG({ params }: { params: { cell: string } }) {
             fontWeight: 500,
             letterSpacing: -1,
             display: "flex",
-            maxWidth: 980,
+            maxWidth: 1000,
           }}
         >
           {meta.payer} · {meta.diagnosis}
@@ -95,22 +103,10 @@ export default async function CellOG({ params }: { params: { cell: string } }) {
             fontSize: 26,
           }}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 14, color: FG_DIM, letterSpacing: 2 }}>BASELINE</span>
-            <span style={{ color: TOMB }}>{baseline}%</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 14, color: FG_DIM, letterSpacing: 2 }}>CHAMPION</span>
-            <span style={{ color: CHAMPION }}>{current}%</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 14, color: FG_DIM, letterSpacing: 2 }}>GENERATIONS</span>
-            <span style={{ color: SURVIVOR }}>{meta.generations}</span>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 14, color: FG_DIM, letterSpacing: 2 }}>APOPTOSED</span>
-            <span style={{ color: TOMB }}>{meta.apoptosisTotal}</span>
-          </div>
+          {stat("SEED", `${baseline}%`, DEAD)}
+          {stat("CHAMPION", `${current}%`, CHAMPION)}
+          {stat("GENERATIONS", String(meta.generations), ALIVE)}
+          {stat("APOPTOSED", String(meta.apoptosisTotal), DEAD)}
         </div>
         <div
           style={{
