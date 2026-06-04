@@ -195,7 +195,6 @@ def evolve(
     CellPayload the frontend consumes) + a full artifact with appeals.
     """
     import asyncio
-    import json
     import os
     from pathlib import Path
 
@@ -215,6 +214,7 @@ def evolve(
 
     from granum.center.cycle import GerminalCycle
     from granum.center.evolution import GenerationalEvolution
+    from granum.web.payload_io import write_payload_atomic
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
     from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
@@ -262,6 +262,15 @@ def evolve(
             f"  models: judge/appeal={model}  writer-mutator={resolve_mutator_model(model)}"
         )
 
+        # Producer + API server agree on one location via GRANUM_DATA_DIR so the
+        # frontend's poll reads the file this run is rewriting (live-grow).
+        out_dir = Path(os.getenv("GRANUM_DATA_DIR", "runs/cell_payloads"))
+        out_path = out_dir / f"{cell}.json"
+        typer.echo(f"  live artifact (grows each generation): {out_path}")
+
+        def _emit(partial) -> None:
+            write_payload_atomic(out_path, partial.to_payload())
+
         async with phoenix_client_from_env() as phoenix:
             if reset:
                 n = await reset_cell(phoenix, cell=cell)
@@ -285,12 +294,10 @@ def evolve(
             evolution = GenerationalEvolution(
                 cycle=cyc, phoenix=phoenix, cell=cell, generations=generations
             )
-            result = await evolution.run(denial=denial)
+            result = await evolution.run(denial=denial, progress_sink=_emit)
 
         payload = result.to_payload()
-        out_dir = Path("runs/cell_payloads")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        (out_dir / f"{cell}.json").write_text(json.dumps(payload, indent=2))
+        write_payload_atomic(out_path, payload)  # final write with swept bodies
 
         typer.echo("")
         typer.echo("=== EVOLUTION COMPLETE (live) ===")
@@ -305,7 +312,7 @@ def evolve(
             f"{payload['meta']['apoptosisTotal']} extinctions across "
             f"{len(payload['strategies'])} strategies"
         )
-        typer.echo(f"  artifact: {out_dir / f'{cell}.json'}")
+        typer.echo(f"  artifact: {out_path}")
 
     asyncio.run(_run())
 
@@ -335,7 +342,6 @@ def coevolve(
     PHOENIX_API_KEY, PHOENIX_COLLECTOR_ENDPOINT).
     """
     import asyncio
-    import json
     import os
     from pathlib import Path
 
@@ -359,6 +365,7 @@ def coevolve(
     from granum.adversary.payer_agent import PayerAgent
     from granum.center.coevolution import CoEvolutionDriver
     from granum.center.coevolution_run import CoEvolutionRun
+    from granum.web.payload_io import write_payload_atomic
     from granum.center.defensibility_judge import DefensibilityJudge
     from granum.center.mutation_strategies import propose_mutations
     from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
@@ -445,14 +452,18 @@ def coevolve(
                     client=gemini, model=resolve_mutator_model(model)
                 ),
             )
+            out_dir = Path(os.getenv("GRANUM_DATA_DIR", "runs/cell_payloads"))
+            artifact = out_dir / f"{cell}_coevolution.json"
+            typer.echo(f"  live artifact (grows each round): {artifact}")
+
+            def _emit(partial) -> None:
+                write_payload_atomic(artifact, partial.to_payload())
+
             run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell=cell, rounds=rounds)
-            result = await run.run()
+            result = await run.run(progress_sink=_emit)
 
         payload = result.to_payload()
-        out_dir = Path("runs/cell_payloads")
-        out_dir.mkdir(parents=True, exist_ok=True)
-        artifact = out_dir / f"{cell}_coevolution.json"
-        artifact.write_text(json.dumps(payload, indent=2))
+        write_payload_atomic(artifact, payload)  # final write with swept bodies
 
         writers = payload.get("writers", [])
         payers = payload.get("payers", [])

@@ -193,6 +193,48 @@ async def test_node_keeps_max_fitness_across_rounds_not_last_seen():
 
 
 @pytest.mark.asyncio
+async def test_progress_sink_emits_growing_dual_tree_per_round():
+    """Live-grow for the Red Queen dual-tree: a partial CoEvolutionState is
+    emitted after each round, with this round's losers tombstoned incrementally."""
+    driver = MagicMock()
+    driver.round = AsyncMock(
+        side_effect=[
+            _round(
+                round_index=0,
+                writer_scoreboard=[("w1", 7.0), ("w2", 3.0)],
+                payer_scoreboard=[("p1", 6.0), ("p2", 4.0)],
+                writer_winner_id="w1", payer_winner_id="p1",
+                writer_loser_ids=("w2",), payer_loser_ids=("p2",),
+                writer_mutant_ids=("wm1",), payer_mutant_ids=("pm1",),
+            ),
+            _round(
+                round_index=1,
+                writer_scoreboard=[("w1", 8.0), ("wm1", 6.0)],
+                payer_scoreboard=[("p1", 6.5), ("pm1", 5.0)],
+                writer_winner_id="w1", payer_winner_id="p1",
+                writer_loser_ids=(), payer_loser_ids=(),
+                writer_mutant_ids=(), payer_mutant_ids=(),
+            ),
+        ]
+    )
+    phoenix = _phoenix_with_sweep(dead_ids={"w2", "p2"})
+    run = CoEvolutionRun(driver=driver, phoenix=phoenix, cell="aetna_cardiac", rounds=2)
+
+    snapshots: list[dict] = []
+    await run.run(progress_sink=lambda r: snapshots.append(r.to_payload()))
+
+    assert len(snapshots) == 2
+    assert set(snapshots[0].keys()) == {"cell", "writers", "payers"}
+    # Round-0 snapshot already shows the round-0 losers as tombstoned.
+    s0_writers = {s["id"]: s for s in snapshots[0]["writers"]}
+    s0_payers = {s["id"]: s for s in snapshots[0]["payers"]}
+    assert s0_writers["w2"]["status"] == "tombstoned"
+    assert s0_payers["p2"]["status"] == "tombstoned"
+    # Tree grows: round-1 snapshot has at least as many writer nodes as round-0.
+    assert len(snapshots[1]["writers"]) >= len(snapshots[0]["writers"])
+
+
+@pytest.mark.asyncio
 async def test_run_passes_is_final_only_on_last_round():
     """The runner tells the driver which round is the last so the driver can skip
     the adversary reset on it (prevents an all-tombstoned final payer pop)."""

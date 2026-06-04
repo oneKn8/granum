@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Callable
 
 from granum.center.coevolution import CoEvolutionDriver
 from granum.center.evolution import _citations, _label, _StrategyAccum, sweep_bodies_and_status
@@ -81,7 +82,18 @@ class CoEvolutionRun:
         self._cell = cell
         self._rounds = rounds
 
-    async def run(self) -> CoEvolutionRunResult:
+    async def run(
+        self,
+        *,
+        progress_sink: Callable[[CoEvolutionRunResult], None] | None = None,
+    ) -> CoEvolutionRunResult:
+        """Drive the Red Queen rounds.
+
+        ``progress_sink``, when supplied, is called with a partial
+        ``CoEvolutionRunResult`` after every round (live-grow for the dual-tree).
+        Losers in both populations are tombstoned incrementally so the snapshot
+        reflects deaths live; the final Phoenix sweep reconciles bodies + status.
+        """
         writers: dict[str, _CoEvNode] = {}
         payers: dict[str, _CoEvNode] = {}
 
@@ -147,6 +159,17 @@ class CoEvolutionRun:
                     ),
                 )
 
+            # Incremental apoptosis so a live snapshot shows deaths now (the
+            # final sweep reconciles authoritatively from Phoenix tags).
+            for loser_id in result.writer_loser_ids:
+                node = writers.get(loser_id)
+                if node is not None:
+                    node.status = "tombstoned"
+            for loser_id in result.payer_loser_ids:
+                node = payers.get(loser_id)
+                if node is not None:
+                    node.status = "tombstoned"
+
             _log.info(
                 "round %d: writer_winner=%s payer_winner=%s composite=%.2f "
                 "writer_losers=%d payer_losers=%d "
@@ -160,6 +183,15 @@ class CoEvolutionRun:
                 len(result.writer_mutant_ids),
                 len(result.payer_mutant_ids),
             )
+
+            if progress_sink is not None:
+                progress_sink(
+                    CoEvolutionRunResult(
+                        cell=self._cell,
+                        writer_nodes=tuple(writers.values()),
+                        payer_nodes=tuple(payers.values()),
+                    )
+                )
 
         await self._sweep_bodies_and_status(writers)
         await self._sweep_bodies_and_status(payers)

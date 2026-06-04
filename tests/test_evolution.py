@@ -120,3 +120,66 @@ async def test_evolution_fitness_curve_and_payload():
     assert payload["rounds"][1]["winnerId"] == "g1m0"
     # production survivors only counted in populationSize
     assert payload["meta"]["populationSize"] == 1  # only g1m0 production
+
+
+@pytest.mark.asyncio
+async def test_progress_sink_called_after_each_generation_with_growing_payload():
+    """Live-grow: the runner emits a partial payload after EACH generation so a
+    polling API serves more generations over time. Losers are tombstoned
+    incrementally so deaths show up live, not only after the final sweep."""
+    cycle = MagicMock()
+    cycle.run = AsyncMock(
+        side_effect=[
+            _outcome(
+                0, [("bc1", 8.0), ("bc2", 6.0), ("bc3", 7.0)], "bc1",
+                ("bc2", "bc3"), ("g1m0",), [("g1m0", "citation_swap: A → B")],
+            ),
+            _outcome(
+                1, [("bc1", 8.0), ("g1m0", 8.5)], "g1m0",
+                ("bc1",), ("g2m0",), [("g2m0", "reframe: x → y")],
+            ),
+        ]
+    )
+    phoenix = _phoenix_with_sweep(dead_ids={"bc1", "bc2", "bc3"})
+    ev = GenerationalEvolution(
+        cycle=cycle, phoenix=phoenix, cell="aetna_cardiac", generations=2
+    )
+    denial = generate_denial(payer="aetna", diagnosis="cardiac", seed=1)
+
+    snapshots: list[dict] = []
+    await ev.run(denial=denial, progress_sink=lambda r: snapshots.append(r.to_payload()))
+
+    # One snapshot per generation, generation count grows.
+    assert len(snapshots) == 2
+    assert snapshots[0]["meta"]["generations"] == 1
+    assert snapshots[1]["meta"]["generations"] == 2
+    # Incremental apoptosis: gen-0 losers are tombstoned in the gen-0 snapshot
+    # (before the final Phoenix sweep ran).
+    g0 = {s["id"]: s for s in snapshots[0]["strategies"]}
+    assert g0["bc2"]["status"] == "tombstoned"
+    assert g0["bc3"]["status"] == "tombstoned"
+
+
+@pytest.mark.asyncio
+async def test_current_overturn_is_champion_fitness_not_peak():
+    """meta.currentOverturn must equal the champion's LATEST fitness (what the FE
+    pill shows), not the run's peak — they diverge when the champion dips after a
+    peak. baselineOverturn stays the gen-0 best."""
+    cycle = MagicMock()
+    cycle.run = AsyncMock(
+        side_effect=[
+            _outcome(0, [("bc1", 4.0)], "bc1", (), (), []),   # baseline
+            _outcome(1, [("bc1", 9.8)], "bc1", (), (), []),   # peak
+            _outcome(2, [("bc1", 9.6)], "bc1", (), (), []),   # champion's final
+        ]
+    )
+    phoenix = _phoenix_with_sweep(dead_ids=set())
+    ev = GenerationalEvolution(
+        cycle=cycle, phoenix=phoenix, cell="aetna_cardiac", generations=3
+    )
+    denial = generate_denial(payer="aetna", diagnosis="cardiac", seed=1)
+
+    payload = (await ev.run(denial=denial)).to_payload()
+
+    assert payload["meta"]["baselineOverturn"] == 0.4   # gen-0 best
+    assert payload["meta"]["currentOverturn"] == 0.96   # champion's latest, NOT 0.98 peak

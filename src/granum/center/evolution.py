@@ -21,6 +21,7 @@ import logging
 import re
 from dataclasses import dataclass
 from statistics import mean
+from typing import Callable
 
 from granum.center.cycle import CycleOutcome, GerminalCycle
 from granum.data.denials import Denial
@@ -95,13 +96,15 @@ class EvolutionResult:
         payer, _, diagnosis = self.cell.partition("_")
         fitness = self.fitness_curve()
         apoptosis_total = sum(p["apoptosisCount"] for p in fitness)
-        final_max = max((p["maxFitness"] for p in fitness), default=0.0)
         first_max = fitness[0]["maxFitness"] if fitness else 0.0
 
         survivors = [s for s in self.strategies if s.status != "tombstoned"]
-        champion_id = (
-            max(survivors, key=lambda s: s.fitness).id if survivors else None
-        )
+        champion = max(survivors, key=lambda s: s.fitness) if survivors else None
+        champion_id = champion.id if champion else None
+        # currentOverturn = the champion's LATEST fitness (what the FE pill shows),
+        # NOT the run's peak. They diverge when the champion dips after peaking;
+        # showing the peak as "current" would overstate the live state.
+        current_overturn = round(champion.fitness / 10.0, 4) if champion else 0.0
 
         def _status(s: _StrategyAccum) -> str:
             if s.status == "tombstoned":
@@ -144,7 +147,7 @@ class EvolutionResult:
                 "payer": payer,
                 "diagnosis": diagnosis,
                 "baselineOverturn": first_max,
-                "currentOverturn": final_max,
+                "currentOverturn": current_overturn,
                 "generations": len(self.generations),
                 "populationSize": len(survivors),
                 "apoptosisTotal": apoptosis_total,
@@ -206,7 +209,20 @@ class GenerationalEvolution:
         self._cell = cell
         self._generations = generations
 
-    async def run(self, *, denial: Denial) -> EvolutionResult:
+    async def run(
+        self,
+        *,
+        denial: Denial,
+        progress_sink: Callable[[EvolutionResult], None] | None = None,
+    ) -> EvolutionResult:
+        """Drive the multi-generation evolution.
+
+        ``progress_sink``, when supplied, is called with a partial
+        ``EvolutionResult`` after every generation (live-grow): a polling API can
+        serve more generations over time as the run lands them. Losers are
+        tombstoned incrementally so deaths appear live; the final Phoenix sweep
+        then reconciles bodies + status authoritatively.
+        """
         records: list[GenerationRecord] = []
         # id -> accumulator. Seeds get added on first sighting (gen 0 candidates);
         # mutants get added when spawned (parent = that gen's winner).
@@ -214,7 +230,8 @@ class GenerationalEvolution:
 
         for g in range(self._generations):
             outcome = await self._cycle.run(denial=denial, generation=g)
-            records.append(_record(outcome, denial.denial_id))
+            record = _record(outcome, denial.denial_id)
+            records.append(record)
 
             score_by_id = dict(outcome.scoreboard)
             # Candidates seen this generation that we haven't recorded yet are
@@ -238,11 +255,26 @@ class GenerationalEvolution:
                         mutation_note=notes.get(mid),
                     ),
                 )
+            # Incremental apoptosis so the live snapshot reflects deaths now
+            # (the final sweep reconciles from Phoenix tags afterwards).
+            for loser_id in record.loser_ids:
+                loser = nodes.get(loser_id)
+                if loser is not None:
+                    loser.status = "tombstoned"
             _log.info(
                 "gen %d: winner=%s composite=%.2f tombstoned=%d mutants=%d",
                 g, outcome.winner_id, outcome.winner_composite_score,
                 len(outcome.tombstoned_ids), len(outcome.mutant_ids),
             )
+
+            if progress_sink is not None:
+                progress_sink(
+                    EvolutionResult(
+                        cell=self._cell,
+                        generations=tuple(records),
+                        strategies=tuple(nodes.values()),
+                    )
+                )
 
         await self._sweep_bodies_and_status(nodes)
         return EvolutionResult(
