@@ -39,25 +39,30 @@ export default async function LandingPage() {
 
         {/* Hero */}
         <section className="border-b border-border">
-          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 gap-y-10 px-6 py-16 lg:py-24">
-            <Reveal className="col-span-12 self-center lg:col-span-6">
+          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 items-center gap-x-10 gap-y-12 px-6 py-16 lg:py-24">
+            <Reveal className="col-span-12 lg:col-span-5">
               <p className="mb-6 font-mono text-xs uppercase tracking-[0.16em] text-seed-ink">
                 Google Cloud Rapid Agent · Arize Phoenix · 2026
               </p>
               <h1 className="font-display text-ink">
                 A denied appeal that gets better every time it loses.
               </h1>
-              <p className="mt-7 max-w-prose font-body text-base text-ink-muted lg:text-lg">
-                When a health plan denies care your doctor says you need, an appeal overturns it about 83% of
-                the time. Almost nobody files one. Each letter takes a physician roughly 12 hours to write, so
-                most denials just stand.
+              <p className="mt-6 font-body text-base text-ink-muted lg:text-lg">
+                Granum evolves insurance-appeal letters like an immune system. A naive draft matures into a
+                champion that wins.
               </p>
-              <p className="mt-4 max-w-prose font-body text-base text-ink-muted lg:text-lg">
-                Granum writes those appeals the way a body fights infection. For every payer and diagnosis it
-                keeps a small population of strategies. A denial comes in, the strategies draft competing
-                letters, a judge scores them against real overturned cases, and the best one is sent. Weak
-                strategies die. Strong ones branch and keep improving.
-              </p>
+              <dl className="mt-8 flex flex-wrap gap-x-9 gap-y-5">
+                {[
+                  ["83%", "overturned when filed"],
+                  ["10%", "ever appealed"],
+                  ["12h", "to write by hand"],
+                ].map(([n, label]) => (
+                  <div key={label}>
+                    <dt className="font-display text-2xl font-light leading-none text-ink">{n}</dt>
+                    <dd className="mt-1.5 font-mono text-[11px] text-ink-muted">{label}</dd>
+                  </div>
+                ))}
+              </dl>
               <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 font-mono text-xs">
                 <Link
                   href="/cell/aetna_cardiac"
@@ -76,16 +81,16 @@ export default async function LandingPage() {
               </div>
             </Reveal>
 
-            <Reveal delay={0.12} className="col-span-12 lg:col-span-6 lg:-ml-10">
+            <Reveal delay={0.12} className="col-span-12 lg:col-span-7">
               <LineageTree
                 strategies={aetna.strategies}
                 caption={`${cellLabelFromMeta(aetna.meta)}, ${generations} generations`}
-                height={540}
+                height={520}
               />
               <p className="mt-3 font-body text-sm text-ink-muted">
-                One strategy starts naive at <span className="font-mono text-ink">0.40</span> and climbs to a{" "}
-                <span className="font-mono text-champion-ink">0.98</span> champion across ten generations. The
-                strategies that died stay on the page, struck out, as a record of what did not work.
+                One strategy starts at <span className="font-mono text-ink">0.40</span> and climbs to a{" "}
+                <span className="font-mono text-champion-ink">0.98</span> champion. The losers stay on the
+                page, struck out.
               </p>
             </Reveal>
           </div>
@@ -103,11 +108,9 @@ export default async function LandingPage() {
                   It treats each appeal strategy like a living cell.
                 </h2>
                 <p className="mt-5 max-w-prose font-body text-base text-ink-muted lg:text-lg">
-                  Every payer-and-diagnosis pairing is its own cell with a small population of B-cell
-                  strategies. When a denial arrives, the survivors generate candidate appeals and an
-                  LLM-as-judge scores them against a gold set of appeals that really were overturned. The
-                  winner is submitted. The losing strategies are deleted from the Phoenix prompt registry for
-                  good. No revert, no archive, no keeping them around just in case.
+                  Every payer and diagnosis gets its own population. On each denial the strategies draft
+                  competing letters, a judge scores them against real overturned cases, and the losers are
+                  deleted from the registry for good. Winners branch.
                 </p>
               </Reveal>
               <Reveal delay={0.08}>

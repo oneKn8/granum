@@ -177,7 +177,12 @@ export function LineageTree({
       .sort((a, b) => a - b)
       .map((g) => ({ g, x: PAD_X + g * GEN_SPACING }));
 
-    return { nodes, links, spineIds, bbox: { xMin, xMax, yMin, yMax }, maxGen, genCols };
+    // Fitness reference lines — frames the climb as a deliberate plot.
+    const yTicks = [0.4, 0.6, 0.8, 1.0]
+      .filter((f) => f >= fitFloor)
+      .map((f) => ({ f, y: yOf(f) }));
+
+    return { nodes, links, spineIds, bbox: { xMin, xMax, yMin, yMax }, maxGen, genCols, yTicks };
   }, [strategies, height]);
 
   // ---- d3-zoom: fit on mount + smoothly re-fit as the tree grows ----
@@ -230,7 +235,7 @@ export function LineageTree({
   }, [fitKey, height]);
 
   if (!model) return null;
-  const { nodes, links, spineIds, genCols, bbox } = model;
+  const { nodes, links, spineIds, genCols, bbox, yTicks } = model;
 
   const proj = (n: PositionedNode) => ({ left: view.x + n.x * view.k, top: view.y + n.y * view.k });
   const seedNode = nodes.find((n) => n.s.parentId === null);
@@ -291,6 +296,31 @@ export function LineageTree({
           </defs>
 
           <g ref={gRef}>
+            {/* Fitness axis — horizontal reference lines so the climb reads as a plot */}
+            {yTicks.map((t) => (
+              <g key={`fit-${t.f}`} className="pointer-events-none">
+                <line
+                  x1={bbox.xMin - 10}
+                  x2={bbox.xMax + 20}
+                  y1={t.y}
+                  y2={t.y}
+                  stroke="var(--color-border)"
+                  strokeWidth={1}
+                  strokeDasharray="1 8"
+                  opacity={0.7}
+                />
+                <text
+                  x={bbox.xMin - 14}
+                  y={t.y + 3}
+                  textAnchor="end"
+                  fontFamily="var(--font-mono)"
+                  fontSize={9}
+                  fill="var(--color-ink-subtle)"
+                >
+                  {t.f.toFixed(1)}
+                </text>
+              </g>
+            ))}
             {/* Generation axis — faint warm gridlines + a time arrow */}
             {genCols.map((c, i) => (
               <g key={`gen-${c.g}`} className="pointer-events-none">
@@ -369,7 +399,9 @@ export function LineageTree({
                 : s.tag === "experimental" && !isTomb ? "var(--color-mutant)"
                 : variant === "payer" ? "oklch(0.55 0.12 28)" : "var(--color-alive)";
               const hasPill = isChampion || s.parentId === null;
-              const showLabel = (onSpine && !hasPill) || (!isTomb && !hasPill && (isHover || isSelected)) || (isTomb && (isHover || isSelected));
+              // Labels only on interaction — the spine + the seed/champion pills carry
+              // the story; always-on labels collide where the climb plateaus.
+              const showLabel = !hasPill && (isHover || isSelected);
               const delay = reduce ? 0 : 0.12 * s.generation + 0.2;
 
               return (
