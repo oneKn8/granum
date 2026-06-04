@@ -1,0 +1,21 @@
+# Cloud Build upload context — keep it tiny. The Dockerfile only needs
+# src/granum/__init__.py, src/granum/web, and api_data. Everything below is
+# irrelevant to the API image and would bloat / slow the source upload.
+.git/
+.venv/
+.scratch/
+runs/
+web/
+node_modules/
+.next/
+tests/
+research/
+videos/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+.env
