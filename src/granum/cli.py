@@ -184,6 +184,10 @@ def evolve(
     generations: int = typer.Option(8, "--generations", help="Number of generations"),
     seed_value: int = typer.Option(42, "--seed-value", help="Deterministic antigen seed"),
     mutation_count: int = typer.Option(2, "--mutation-count", help="Daughters per generation"),
+    survival_count: int = typer.Option(
+        1, "--survival-count",
+        help="Elitist top-K survival per generation (>1 keeps diversity; 1 = winner-take-all)",
+    ),
     reset: bool = typer.Option(
         False, "--reset", help="Hard-wipe + reseed the cell before evolving (clean run)"
     ),
@@ -261,6 +265,10 @@ def evolve(
         typer.echo(
             f"  models: judge/appeal={model}  writer-mutator={resolve_mutator_model(model)}"
         )
+        typer.echo(
+            f"  selection: top-{survival_count} elitist survival, "
+            f"{mutation_count} daughters/gen"
+        )
 
         # Producer + API server agree on one location via GRANUM_DATA_DIR so the
         # frontend's poll reads the file this run is rewriting (live-grow).
@@ -286,6 +294,7 @@ def evolve(
                 gold_path=f"data/{cell}/gold_appeals.jsonl",
                 mutation_proposer=propose_mutations,
                 mutation_count=mutation_count,
+                survival_count=survival_count,
                 appeal_generator=gen_appeal,
                 prompt_mutator=make_llm_mutator(
                     client=gemini, model=resolve_mutator_model(model)

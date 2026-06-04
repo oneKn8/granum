@@ -82,9 +82,12 @@ class GerminalCycle:
         gold_path: str | Path,
         mutation_proposer: _MutationProposer,
         mutation_count: int = 2,
+        survival_count: int = 1,
         appeal_generator: _AppealGenerator | None = None,
         prompt_mutator: _PromptMutator | None = None,
     ) -> None:
+        if survival_count < 1:
+            raise ValueError(f"survival_count must be >= 1; got {survival_count!r}")
         self._phoenix = phoenix
         self._judge = judge
         self._cell = cell
@@ -92,6 +95,10 @@ class GerminalCycle:
         self._gold = load_gold_appeals(gold_path)
         self._propose_mutations = mutation_proposer
         self._mutation_count = mutation_count
+        # Elitist top-K selection: the best `survival_count` strategies survive
+        # each generation (a germinal center retains many high-affinity clones),
+        # not just the single winner. 1 = legacy winner-take-all truncation.
+        self._survival_count = survival_count
         self._generate_appeal = appeal_generator
         self._mutate_prompt = prompt_mutator
 
@@ -159,12 +166,21 @@ class GerminalCycle:
             winner_body = prompt_body_by_id[winner_id]
             winner_feedback = tournament_result.winner_score.english_feedback
 
+            # Elitist top-K survival: rank all scored candidates best-first and
+            # keep the top `survival_count`; only the ranked[K:] tail is apoptosed.
+            # (survival_count=1 → ranked[1:], the legacy winner-take-all behavior.)
+            ranked = sorted(
+                tournament_result.all_scores,
+                key=lambda s: (-s.score.composite, s.prompt_id),
+            )
+            culled = ranked[self._survival_count:]
+
             # 4. Apoptosis losers
             with _tracer.start_as_current_span("granum.cycle.apoptosis"):
                 tombstoned_ids: list[str] = [pv.prompt_id for pv in rejected]
-                for loser_id, loser_version, _ in tournament_result.losers:
-                    await self._phoenix.tombstone(loser_id, loser_version)
-                    tombstoned_ids.append(loser_id)
+                for s in culled:
+                    await self._phoenix.tombstone(s.prompt_id, s.version_id)
+                    tombstoned_ids.append(s.prompt_id)
 
             # 5. Promote winner (idempotent — move-semantic tag)
             with _tracer.start_as_current_span("granum.cycle.promote"):

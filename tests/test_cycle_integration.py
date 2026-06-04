@@ -170,6 +170,58 @@ async def test_cycle_uses_feedback_directed_mutator_when_provided():
 
 
 @pytest.mark.asyncio
+async def test_top_k_elitist_survival_keeps_best_k_alive():
+    """Algorithm improvement: with survival_count=K the top-K candidates survive
+    (elitist clonal selection) instead of winner-take-all. Only the ranked[K:]
+    tail undergoes apoptosis — a near-best strategy is no longer killed for
+    placing 2nd, preserving lineage diversity."""
+    valid = (
+        "Per Aetna CPB 0119 §IV.A we appeal. ACC/AHA 2021 §6.2 supports. "
+        "Per 29 CFR 2560.503-1 we request reconsideration within 30 days."
+    )
+    phoenix = AsyncMock(spec=PhoenixClient)
+    phoenix.list_active_prompts.return_value = [
+        PromptVersion(prompt_id=f"bc{i}", version_id="v1", tags=("production",), body=valid)
+        for i in range(1, 5)  # bc1..bc4, all pass negative selection
+    ]
+    phoenix.tombstone.return_value = None
+    phoenix.add_version_tag.return_value = ("production",)
+    phoenix.add_dataset_examples.return_value = None
+
+    judge = AsyncMock()
+    # scored in candidate order bc1..bc4 → composites 9,7,5,3
+    judge.score.side_effect = [
+        JudgeScore(9, 9, 9, 9, 9, "bc1"),
+        JudgeScore(7, 7, 7, 7, 7, "bc2"),
+        JudgeScore(5, 5, 5, 5, 5, "bc3"),
+        JudgeScore(3, 3, 3, 3, 3, "bc4"),
+    ]
+
+    cycle = GerminalCycle(
+        phoenix=phoenix,
+        judge=judge,
+        cell="aetna_cardiac",
+        valid_citations_path="data/aetna_cardiac/valid_citations.json",
+        gold_path="data/aetna_cardiac/gold_appeals.jsonl",
+        mutation_proposer=lambda **kw: [],
+        mutation_count=0,
+        survival_count=2,
+    )
+    denial = generate_denial(payer="aetna", diagnosis="cardiac", seed=42)
+    outcome = await cycle.run(denial=denial)
+
+    # Winner is still the top strategy.
+    assert outcome.winner_id == "bc1"
+    # Top-2 survive (NOT tombstoned); bottom-2 culled.
+    assert "bc1" not in outcome.tombstoned_ids
+    assert "bc2" not in outcome.tombstoned_ids
+    assert "bc3" in outcome.tombstoned_ids
+    assert "bc4" in outcome.tombstoned_ids
+    # Exactly the ranked[K:] tail is apoptosed (no rejected this run).
+    assert phoenix.tombstone.await_count == 2
+
+
+@pytest.mark.asyncio
 async def test_cycle_raises_when_all_fail_negative_selection():
     phoenix = AsyncMock(spec=PhoenixClient)
     phoenix.list_active_prompts.return_value = [
