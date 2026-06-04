@@ -18,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Awaitable, Callable, Protocol
@@ -86,14 +87,18 @@ def _extract_persona_id(prompt_name: str) -> str:
 
     Convention (slash-style, original):
         {cell}_payer/baseline_<persona_id>
-        {cell}_payer/mut_<persona_id>_<index>
+        {cell}_payer/mut_<persona_id>_<index>              (legacy)
+        {cell}_payer/mut_r<round>_<persona_id>_<index>     (round-indexed)
 
     Phoenix normalizes '/' -> '__' on storage, so names arrive as:
         {cell}_payer__baseline_<persona_id>
         {cell}_payer__mut_<persona_id>_<index>
+        {cell}_payer__mut_r<round>_<persona_id>_<index>
 
     Both separators are handled by taking the suffix after the last
-    separator (/ preferred, __ as fallback).
+    separator (/ preferred, __ as fallback). persona_id may itself contain
+    underscores (e.g. ``cost_focused``), so a mutant name is parsed by peeling
+    an optional leading ``r<round>`` token and the trailing ``<index>``.
     """
     if "/" in prompt_name:
         suffix = prompt_name.rsplit("/", 1)[1]
@@ -104,11 +109,15 @@ def _extract_persona_id(prompt_name: str) -> str:
     if suffix.startswith("baseline_"):
         return suffix[len("baseline_"):]
     if suffix.startswith("mut_"):
-        # mut_<persona_id>_<index> — strip leading "mut_" and trailing "_<index>"
         rest = suffix[len("mut_"):]
-        if "_" not in rest:
-            raise ValueError(f"can't parse persona from {prompt_name!r}")
-        return rest.rsplit("_", 1)[0]
+        parts = rest.split("_")
+        # Round-indexed: mut_r<round>_<persona...>_<index> — drop r-token + index.
+        if len(parts) >= 3 and re.fullmatch(r"r\d+", parts[0]):
+            return "_".join(parts[1:-1])
+        # Legacy: mut_<persona...>_<index> — drop the trailing index only.
+        if len(parts) >= 2:
+            return "_".join(parts[:-1])
+        raise ValueError(f"can't parse persona from {prompt_name!r}")
     raise ValueError(f"can't parse persona from {prompt_name!r}")
 
 
@@ -291,7 +300,10 @@ class CoEvolutionDriver:
                     for i, (mutant_body, note) in enumerate(variants):
                         if not mutant_body or mutant_body == writer_winner_body:
                             continue  # empty or no-op daughter
-                        name = f"{self._cell}/bcell_mut_{writer_winner_id}_{i}"
+                        name = (
+                            f"{self._cell}/bcell_mut_r{self._round_index}_"
+                            f"{writer_winner_id}_{i}"
+                        )
                         pv = await self._phoenix.upsert_prompt(
                             name=name, body=mutant_body, tags=("experimental",)
                         )
@@ -313,7 +325,10 @@ class CoEvolutionDriver:
                             continue
                         if mutant_body == writer_winner_body:
                             continue
-                        name = f"{self._cell}/bcell_mut_{writer_winner_id}_{i}"
+                        name = (
+                            f"{self._cell}/bcell_mut_r{self._round_index}_"
+                            f"{writer_winner_id}_{i}"
+                        )
                         pv = await self._phoenix.upsert_prompt(
                             name=name, body=mutant_body, tags=("experimental",)
                         )
@@ -344,7 +359,8 @@ class CoEvolutionDriver:
                     if mutant_body == payer_winner_body:
                         continue
                     name = (
-                        f"{self._cell}_payer/mut_{payer_winner_persona}_{i}"
+                        f"{self._cell}_payer/mut_r{self._round_index}_"
+                        f"{payer_winner_persona}_{i}"
                     )
                     pv = await self._phoenix.upsert_prompt(
                         name=name, body=mutant_body, tags=("experimental",)

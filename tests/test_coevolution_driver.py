@@ -432,9 +432,11 @@ async def test_writer_mutations_spawned_from_writer_winner_body():
         c.kwargs["name"] for c in upsert_calls
         if c.kwargs["name"].startswith("aetna_cardiac/bcell_mut_")
     ]
+    # Names carry the round index (r0) so a persisting winner's mutants never
+    # collide/overwrite across rounds.
     assert writer_mutant_names == [
-        "aetna_cardiac/bcell_mut_w1_0",
-        "aetna_cardiac/bcell_mut_w1_1",
+        "aetna_cardiac/bcell_mut_r0_w1_0",
+        "aetna_cardiac/bcell_mut_r0_w1_1",
     ]
 
 
@@ -492,7 +494,7 @@ async def test_feedback_directed_writer_mutator_rewrites_strategy_from_critique(
         if c.kwargs["name"].startswith("aetna_cardiac/bcell_mut_")
     ]
     assert len(writer_mutant_upserts) == 1
-    assert writer_mutant_upserts[0].kwargs["name"] == "aetna_cardiac/bcell_mut_w1_0"
+    assert writer_mutant_upserts[0].kwargs["name"] == "aetna_cardiac/bcell_mut_r0_w1_0"
     assert writer_mutant_upserts[0].kwargs["body"] == "IMPROVED STRATEGY BODY"
     assert writer_mutant_upserts[0].kwargs["tags"] == ("experimental",)
 
@@ -587,8 +589,8 @@ async def test_payer_mutations_spawned_from_payer_winner_body():
         if c.kwargs["name"].startswith("aetna_cardiac_payer/mut_")
     ]
     assert payer_mutant_names == [
-        "aetna_cardiac_payer/mut_strict_0",
-        "aetna_cardiac_payer/mut_strict_1",
+        "aetna_cardiac_payer/mut_r0_strict_0",
+        "aetna_cardiac_payer/mut_r0_strict_1",
     ]
 
 
@@ -666,6 +668,67 @@ async def test_round_index_increments_after_successful_round():
     second = await driver.round()
     assert first.round_index == 0
     assert second.round_index == 1
+
+
+@pytest.mark.asyncio
+async def test_writer_mutant_names_are_unique_across_rounds_for_persisting_winner():
+    """Regression for the mutant-name collision bug: when the SAME winner persists
+    across rounds, each round's mutant must get a distinct (round-indexed) name so
+    upserts accumulate new prompts instead of overwriting the same one."""
+    writers = [_writer("w1", "winner body")]
+    payers = [_payer("p1", "strict")]
+
+    mock_phoenix = AsyncMock(spec=PhoenixClient)
+    # Two rounds → four list_active calls (writers, payers, writers, payers).
+    mock_phoenix.list_active_prompts.side_effect = [writers, payers, writers, payers]
+    mock_phoenix.tombstone.return_value = None
+    mock_phoenix.add_version_tag.return_value = ("production",)
+    mock_phoenix.add_dataset_examples.return_value = None
+    upserted_names: list[str] = []
+
+    async def _upsert(*, name, body, tags=("experimental",)):
+        upserted_names.append(name)
+        return PromptVersion(
+            prompt_id=f"u_{name}", version_id="v1", tags=tuple(tags), body=body, name=name
+        )
+
+    mock_phoenix.upsert_prompt.side_effect = _upsert
+
+    mock_payer = AsyncMock(spec=PayerAgent)
+    from granum.data.denials import Denial, DenialReason
+
+    mock_payer.deny.return_value = Denial(
+        denial_id="d", payer="aetna", diagnosis="cardiac", cpt_code="93306",
+        icd10_code="I25.10", patient_age_range="adv",
+        denial_reason=DenialReason.NOT_MEDICALLY_NECESSARY,
+        denial_text="t", submission_date="adversarial",
+    )
+    mock_judge = AsyncMock(spec=DefensibilityJudge)
+    mock_judge.score.return_value = _score(8)
+    mock_appeal_generator = AsyncMock(
+        side_effect=lambda writer_body, antigen: f"APPEAL for {writer_body}"
+    )
+    # Feedback-directed mutator returns one improved daughter each round.
+    prompt_mutator = AsyncMock(return_value=[("IMPROVED BODY", "note")])
+
+    driver = CoEvolutionDriver(
+        phoenix=mock_phoenix, payer_agent=mock_payer, judge=mock_judge,
+        cell="aetna_cardiac", gold_path=_GOLD_PATH,
+        mutation_proposer=MagicMock(return_value=[]), mutation_count=1,
+        appeal_generator=mock_appeal_generator, antigen=_antigen(),
+        prompt_mutator=prompt_mutator,
+    )
+
+    await driver.round()
+    await driver.round()
+
+    writer_mutant_names = [n for n in upserted_names if n.startswith("aetna_cardiac/bcell_mut_")]
+    assert writer_mutant_names == [
+        "aetna_cardiac/bcell_mut_r0_w1_0",
+        "aetna_cardiac/bcell_mut_r1_w1_0",
+    ]
+    # Distinct names → no overwrite collision.
+    assert len(set(writer_mutant_names)) == len(writer_mutant_names)
 
 
 @pytest.mark.asyncio
@@ -766,6 +829,24 @@ def test_extract_persona_id_double_underscore_mutant() -> None:
 def test_extract_persona_id_double_underscore_cost_focused() -> None:
     """Phoenix-normalized name with multi-word persona id parses correctly."""
     assert _extract_persona_id("aetna_cardiac_payer__baseline_cost_focused") == "cost_focused"
+
+
+def test_extract_persona_id_round_indexed_mutant_single_word() -> None:
+    """Round-indexed mutant name (mut_r{round}_{persona}_{index}) parses the persona."""
+    assert _extract_persona_id("aetna_cardiac_payer/mut_r3_strict_1") == "strict"
+
+
+def test_extract_persona_id_round_indexed_mutant_multi_word() -> None:
+    """Round-indexed mutant with a multi-word persona id parses correctly."""
+    assert _extract_persona_id("aetna_cardiac_payer/mut_r12_cost_focused_0") == "cost_focused"
+
+
+def test_extract_persona_id_round_indexed_mutant_double_underscore() -> None:
+    """Phoenix-normalized (__) round-indexed mutant parses correctly."""
+    assert (
+        _extract_persona_id("aetna_cardiac_payer__mut_r0_evidence_focused_2")
+        == "evidence_focused"
+    )
 
 
 def test_extract_persona_id_raises_on_unparseable_name() -> None:
