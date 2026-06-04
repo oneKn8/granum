@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from statistics import mean
 from typing import Callable
 
@@ -228,8 +229,18 @@ class GenerationalEvolution:
         # mutants get added when spawned (parent = that gen's winner).
         nodes: dict[str, _StrategyAccum] = {}
 
+        # Stamp the run start so each generation's self-observability read-back is
+        # scoped to THIS run's spans (a prior --reset run's stale spans, with the
+        # same generation numbers, must not pollute the agent's own telemetry).
+        # 5s of slack absorbs any export/clock jitter at the very first span.
+        run_started_at = (
+            datetime.now(timezone.utc) - timedelta(seconds=5)
+        ).isoformat()
+
         for g in range(self._generations):
-            outcome = await self._cycle.run(denial=denial, generation=g)
+            outcome = await self._cycle.run(
+                denial=denial, generation=g, run_started_at=run_started_at
+            )
             record = _record(outcome, denial.denial_id)
             records.append(record)
 

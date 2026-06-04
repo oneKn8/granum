@@ -404,3 +404,26 @@ async def test_read_self_improvement_history_reads_own_telemetry():
     assert all(isinstance(o, GenerationObservation) for o in hist)
     assert [o.generation for o in hist] == [0, 1]
     assert hist[1].critique == "citations not section-level"
+
+
+@pytest.mark.asyncio
+async def test_get_spans_scopes_to_since_when_provided():
+    """`since` scopes the read-back to the current run (start_time filter), so a
+    prior --reset run's stale spans don't pollute the agent's self-telemetry."""
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {"spans": []}
+    client = _client(mock_mcp)
+    await client.get_spans(project_name="granum", since="2026-06-04T16:00:00Z")
+    args = mock_mcp.call_tool.await_args[0][1]
+    assert args["project_identifier"] == "granum"
+    assert args["start_time"] == "2026-06-04T16:00:00Z"
+
+
+@pytest.mark.asyncio
+async def test_get_spans_omits_start_time_when_no_since():
+    mock_mcp = AsyncMock()
+    mock_mcp.call_tool.return_value = {"spans": []}
+    client = _client(mock_mcp)
+    await client.get_spans(project_name="granum")
+    args = mock_mcp.call_tool.await_args[0][1]
+    assert "start_time" not in args

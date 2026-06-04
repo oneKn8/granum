@@ -431,22 +431,23 @@ class PhoenixClient:
     # === Spans / traces ===
 
     async def get_spans(
-        self, *, project_name: str, filter_str: str = ""
+        self, *, project_name: str, filter_str: str = "", since: str | None = None
     ) -> list[dict[str, Any]]:
         """Online introspection of recent spans for a project.
 
-        Real `get-spans` keys on ``project_identifier`` and has no generic filter
-        string (``filter_str`` is accepted for the call contract but ignored —
-        use ``names``/``span_kinds`` server-side filters in a later iteration).
+        Real `get-spans` keys on ``project_identifier``; ``since`` (ISO 8601) maps
+        to the server-side ``start_time`` filter so a read-back can be scoped to
+        the current run. ``filter_str`` has no generic server equivalent and is
+        accepted only for call-contract stability (ignored).
         """
-        resp = await self._mcp.call_tool(
-            "get-spans",
-            {"project_identifier": project_name},
-        )
+        args: dict[str, Any] = {"project_identifier": project_name}
+        if since:
+            args["start_time"] = since
+        resp = await self._mcp.call_tool("get-spans", args)
         return resp.get("items") or resp.get("spans") or []
 
     async def read_self_improvement_history(
-        self, *, cell: str, project_name: str | None = None
+        self, *, cell: str, project_name: str | None = None, since: str | None = None
     ) -> list["GenerationObservation"]:
         """Read the cell's own prior-generation telemetry back from Phoenix.
 
@@ -463,7 +464,7 @@ class PhoenixClient:
             else project_name
         )
         try:
-            spans = await self.get_spans(project_name=project)
+            spans = await self.get_spans(project_name=project, since=since)
         except Exception:  # noqa: BLE001 — read-back is best-effort, never fatal
             _log.warning("self-observability read-back failed; using in-memory feedback")
             return []

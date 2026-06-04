@@ -107,7 +107,13 @@ class GerminalCycle:
         # telemetry back from Phoenix (get-spans) to inform the mutation.
         self._read_self_observability = read_self_observability
 
-    async def run(self, *, denial: Denial, generation: int = 0) -> CycleOutcome:
+    async def run(
+        self,
+        *,
+        denial: Denial,
+        generation: int = 0,
+        run_started_at: str | None = None,
+    ) -> CycleOutcome:
         with _tracer.start_as_current_span(f"granum.cycle.{self._cell}") as span:
             span.set_attribute("granum.cell", self._cell)
             span.set_attribute("granum.denial_id", denial.denial_id)
@@ -209,7 +215,7 @@ class GerminalCycle:
                     "granum.cycle.read_self_observability"
                 ) as obs_span:
                     history = await self._phoenix.read_self_improvement_history(
-                        cell=self._cell
+                        cell=self._cell, since=run_started_at
                     )
                     digest = format_telemetry_digest(history)
                     obs_span.set_attribute(
