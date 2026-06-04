@@ -20,3 +20,6 @@ videos/audit/*_trace.json
 
 # Live germinal-cycle run artifacts (reproducible via `granum cycle`)
 runs/
+
+# Local scratch (logs, run backups) — never commit
+.scratch/
