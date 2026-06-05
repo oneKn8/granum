@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { LineageTree } from "./LineageTree";
 import { PromptDiff } from "./PromptDiff";
 import { FitnessCurve } from "./FitnessCurve";
+import { SelfImprovementLoop } from "./SelfImprovementLoop";
 import { CoEvolutionDualTree } from "./CoEvolutionDualTree";
 import { cn } from "@/lib/cn";
 import type { BCellStrategy, CellPayload, CoEvolutionState } from "@/lib/types";
@@ -108,6 +109,8 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
       </div>
 
       <FitnessCurve points={payload.fitness} baseline={payload.meta.baselineOverturn} />
+
+      <SelfImprovementLoop payload={payload} />
     </div>
   );
 }
