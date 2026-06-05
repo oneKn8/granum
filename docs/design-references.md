@@ -1,7 +1,7 @@
 # Granum — Design References
 
 **Aesthetic family:** Cinematic Dark — "Germinal Lab"
-**Locked:** 2026-05-27 by Terminal C
+**Locked:** 2026-05-27
 
 The lukewarm middle is the failure state. This pick commits to lab-bench biology over dev-tool dark or corporate-tasteful light. The lineage tree is the primary visual asset (~60% of dashboard real estate); D3 phylogenetic trees pop dramatically on dark backgrounds tuned with biological cell-stain hues, NOT on the saturated supervisor-pattern centroid of neon cyan / terminal green / Tailwind defaults.
 
@@ -43,10 +43,10 @@ Academic biology visual language. Microscopy imagery uses eosin-blue, hematoxyli
 - **Streamlit / FastAPI-minimal-HTML chrome** — utility-grade defaults; signals "I didn't design this." Aegis-1, axon both fall here.
 - **Tailwind CDN with default `blue-500`/`cyan-400` accents** — agent-sre uses this; it is the AI-default fingerprint.
 - **Neon cyan / terminal green dark mode** — Cyberpunk dev-tool aesthetic. We are biology, not hacker movie.
-- **Centered hero + 2 CTAs / 3-card feature grid / Stats row (10K+/99%/24/7) / "Trusted by" strip / Pill buttons with gradient bg / Sticky nav with backdrop-blur** — Claude's reach-for defaults. All banned in `web/DESIGN.md`.
+- **Centered hero + 2 CTAs / 3-card feature grid / Stats row (10K+/99%/24/7) / "Trusted by" strip / Pill buttons with gradient bg / Sticky nav with backdrop-blur** — generic AI defaults. All banned in `web/DESIGN.md`.
 
 ---
 
 ## Why this commits hard to one extreme
 
-Per the Masterpiece Playbook: pick an extreme; the lukewarm middle is the failure state. Cinematic Dark — Germinal Lab — is contrastive against every published competitor in this track AND against the medical-software cliché of clinical-clean white. It earns its biology metaphor instead of decorating with it.
+Pick an extreme; the lukewarm middle is the failure state. Cinematic Dark — Germinal Lab — is contrastive against every published competitor in this track AND against the medical-software cliché of clinical-clean white. It earns its biology metaphor instead of decorating with it.

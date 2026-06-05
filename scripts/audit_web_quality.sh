@@ -15,15 +15,15 @@
 #   videos/audit/axe_<timestamp>.json           axe-core a11y findings
 #   videos/audit/SUMMARY.md                     one-line-per-metric digest
 #
-# 2026-pass bar (per .claude/rules/agents/tier2/website-designer.md step 9):
+# 2026 web-quality bar (Core Web Vitals + WCAG 2.2 AA):
 #   LCP < 2.0s
 #   INP < 150ms
 #   CLS < 0.05
 #   WCAG 2.2 AA clean (axe-core)
 #   JSON-LD LocalBusiness/MedicalOrganization schema present
 #
-# This script is the orchestrator; the skill itself runs inside Claude via mcp__chrome-devtools.
-# When run directly from a shell (not from Claude), it falls back to local lighthouse-cli
+# This script is the orchestrator; the audit runs via chrome-devtools MCP tooling.
+# When run directly from a shell, it falls back to local lighthouse-cli
 # if installed, otherwise prints the skill invocation needed.
 
 set -euo pipefail
@@ -56,12 +56,12 @@ if [[ "${URL}" == http://localhost:* ]]; then
   echo
 fi
 
-# Preferred path: invoke the web-quality-audit Claude skill (chrome-devtools MCP).
-# When run inside Claude, the user does:
+# Preferred path: invoke the web-quality-audit skill (chrome-devtools MCP).
+# When run via the audit tooling, the user does:
 #   /web-quality-audit URL=${URL}
 # That skill writes its own report; this script just ensures the audit dir exists.
 
-# Fallback path: local lighthouse-cli (works in plain shell, no Claude needed).
+# Fallback path: local lighthouse-cli (works in plain shell).
 if command -v lighthouse >/dev/null 2>&1; then
   echo "Running local lighthouse..."
   lighthouse "${URL}" \
@@ -87,7 +87,7 @@ if command -v lighthouse >/dev/null 2>&1; then
 else
   echo "lighthouse-cli not found locally."
   echo
-  echo "OPTION A — invoke the web-quality-audit skill from inside Claude:"
+  echo "OPTION A — invoke the web-quality-audit skill:"
   echo "    /web-quality-audit URL=${URL}"
   echo
   echo "OPTION B — install lighthouse-cli and re-run this script:"

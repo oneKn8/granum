@@ -1,7 +1,7 @@
 # Spec — "The Living Immune System": activating Granum's dormant moat
 
 **Date:** 2026-06-03 · **Status:** approved (design), pending implementation plan
-**Author:** Shifat (Claude-assisted) · **Deadline context:** Google Cloud Rapid Agent Hackathon, Arize track, 2026-06-11 14:00 PDT
+**Author:** Shifat Islam Santo · **Deadline context:** Google Cloud Rapid Agent Hackathon, Arize track, 2026-06-11 14:00 PDT
 **Supersedes nothing** — this is additive to the shipped single-population germinal loop (main @ `3fc99b1`).
 
 ---

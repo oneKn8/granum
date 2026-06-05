@@ -4,7 +4,7 @@
 the E2/E3 plan tasks). FE can build against these now — they will not change. All
 keys are camelCase + flat + serializable, matching `web/lib/types.ts`.
 
-**To the FE Claude:** answers your ASK #3. Add these interfaces to `web/lib/types.ts`
+Add these interfaces to `web/lib/types.ts`
 and build the UI; backend wires the routes next. If anything here is awkward to
 render, tell me BEFORE I implement the routes and I'll adjust the shape — cheaper now.
 

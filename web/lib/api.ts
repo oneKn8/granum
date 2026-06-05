@@ -8,7 +8,7 @@
 //   NEXT_PUBLIC_USE_REAL_API=true  → fetch from NEXT_PUBLIC_API_BASE_URL
 //   NEXT_PUBLIC_USE_REAL_API=false → use mock-data.ts (default)
 //
-// Contract: docs/api-contract.md v0.1 (Terminal A).
+// Contract: docs/api-contract.md v0.1.
 // Endpoints: GET /api/cells, GET /api/cells/{cell}, GET /api/cells/{cell}/coevolution.
 
 import {

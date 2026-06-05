@@ -1,16 +1,16 @@
 # Granum API Contract
 
 **Status:** v0.1 — locked 2026-05-27, Phase 3 prep
-**Producer:** Terminal A (`src/granum/web/api.py`, to land in Phase 3 wiring)
-**Consumer:** Terminal C frontend (`web/lib/` — swap `mock-data.ts` for fetcher)
+**Producer:** the backend (`src/granum/web/api.py`, to land in Phase 3 wiring)
+**Consumer:** the Next.js frontend (`web/lib/` — swap `mock-data.ts` for fetcher)
 
-This document is the source of truth for the JSON shapes the FastAPI server will return. Terminal C's `web/lib/types.ts` is the canonical TypeScript representation; this file mirrors those types and lists the endpoints that produce them.
+This document is the source of truth for the JSON shapes the FastAPI server will return. The frontend's `web/lib/types.ts` is the canonical TypeScript representation; this file mirrors those types and lists the endpoints that produce them.
 
 ---
 
 ## Type alignment
 
-The Python `dataclass` definitions in `src/granum/` map onto Terminal C's `web/lib/types.ts` interfaces 1:1, with a small naming normalization layer in the FastAPI response models (Pydantic `BaseModel` with `model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)`). Python uses `snake_case`; JSON over the wire is `camelCase` to match TypeScript convention.
+The Python `dataclass` definitions in `src/granum/` map onto the frontend's `web/lib/types.ts` interfaces 1:1, with a small naming normalization layer in the FastAPI response models (Pydantic `BaseModel` with `model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)`). Python uses `snake_case`; JSON over the wire is `camelCase` to match TypeScript convention.
 
 | TypeScript (web/lib/types.ts) | Python source | Notes |
 |---|---|---|
@@ -307,7 +307,7 @@ Status codes used:
 
 ## CORS
 
-Cloud Run service allows GET from `https://*.vercel.app` (Terminal C's deployment target) and from `http://localhost:3000` for dev. Configured in `src/granum/web/app.py` via `CORSMiddleware`.
+Cloud Run service allows GET from `https://*.vercel.app` (the frontend's deployment target) and from `http://localhost:3000` for dev. Configured in `src/granum/web/app.py` via `CORSMiddleware`.
 
 ---
 
@@ -324,6 +324,6 @@ Cloud Run service allows GET from `https://*.vercel.app` (Terminal C's deploymen
 
 ## Outstanding
 
-- Real fitness computation requires the live-cycle loop (Phase 1.10) to run with real Phoenix. Until then, the server can return synthesized data from the same generators Terminal C uses in `mock-data.ts`. **Recommendation for Terminal C**: keep `mock-data.ts` and add a feature flag `NEXT_PUBLIC_USE_REAL_API` that, when `true`, fetches from Cloud Run; when `false`, uses mock. This lets the demo work BEFORE Phase 0.5/1.10 unblock.
-- `/api/cells/{cell}/coevolution` is Phase 3 work — Terminal A will publish this once the Red Queen population lands.
+- Real fitness computation requires the live-cycle loop (Phase 1.10) to run with real Phoenix. Until then, the server can return synthesized data from the same generators the frontend uses in `mock-data.ts`. **Recommendation for the frontend**: keep `mock-data.ts` and add a feature flag `NEXT_PUBLIC_USE_REAL_API` that, when `true`, fetches from Cloud Run; when `false`, uses mock. This lets the demo work BEFORE Phase 0.5/1.10 unblock.
+- `/api/cells/{cell}/coevolution` is Phase 3 work — the backend will publish this once the Red Queen population lands.
 - `judgeRationale` field in `TournamentRound` is populated from the English-feedback channel of the LLM-as-judge (per `JudgeScore.english_feedback`).

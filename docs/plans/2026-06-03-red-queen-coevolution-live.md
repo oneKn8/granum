@@ -1,6 +1,5 @@
 # Red Queen Co-Evolution — Live + Demoed (E1) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the already-built `CoEvolutionDriver` run live across many rounds, emit a real `{cell}_coevolution.json` matching the frontend `CoEvolutionState`, and light up the existing `CoEvolutionDualTree` with real writer-vs-payer lineages and apoptosis on both populations.
 

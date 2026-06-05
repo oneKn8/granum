@@ -1,6 +1,6 @@
 # Cell Curation Methodology — How the (Payer × Diagnosis) Data Was Built
 
-Granum demonstrates a self-improving appeal-writing agent across five (payer × diagnosis) cells: Aetna × cardiac (the reference cell, owned by Terminal A), UnitedHealthcare × oncology, Anthem (Elevance) × mental health, Cigna × orthopedic, and Humana × endocrinology (the four new cells, this document). This document describes how each new cell was sourced so that a judge spot-checking the data can verify legitimacy.
+Granum demonstrates a self-improving appeal-writing agent across five (payer × diagnosis) cells: Aetna × cardiac (the reference cell), UnitedHealthcare × oncology, Anthem (Elevance) × mental health, Cigna × orthopedic, and Humana × endocrinology (the four new cells, this document). This document describes how each new cell was sourced so that a judge spot-checking the data can verify legitimacy.
 
 ## What "synthetic but grounded" means here
 
@@ -13,7 +13,7 @@ Every denial pattern, citation, and gold appeal in this repository is **syntheti
 - **Clinical guideline citations** (NCCN, AAOS, ASTRO, NASS, ADA, AACE, APA, ASAM, LOCUS, CALOCUS-CASII) reference real guidelines from real organizations with real publication URLs.
 - **Patient demographic details, dates, and clinical narratives** are fictional.
 
-This approach mirrors the Aetna cardiac reference cell created by Terminal A in `data/aetna_cardiac/` and matches the data disclaimer pattern already established in `src/granum/data/denials.py` ("Patterns derived from publicly published CMS denial taxonomies and AMA prior-authorization survey samples. All data synthetic and clearly labeled.").
+This approach mirrors the Aetna cardiac reference cell in `data/aetna_cardiac/` and matches the data disclaimer pattern already established in `src/granum/data/denials.py` ("Patterns derived from publicly published CMS denial taxonomies and AMA prior-authorization survey samples. All data synthetic and clearly labeled.").
 
 ## Per-cell sourcing
 

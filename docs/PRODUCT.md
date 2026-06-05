@@ -158,7 +158,7 @@ This is the under-publicized data flywheel Arize's CPO has publicly said they wa
 
 ## 9. On the name
 
-"Granum" is the working name. It's Latin for *grain* / *kernel*, used in biology to refer to dense regions inside structures (chloroplast grana, germinal-center granular cells). It's deliberately weird — most projects in this hackathon are named with the same cluster of safety/governance words ("sentinel," "guardian," "mender," "axon," "shipsafe"). We want to be the one project that doesn't sound like a Claude-default.
+"Granum" is the working name. It's Latin for *grain* / *kernel*, used in biology to refer to dense regions inside structures (chloroplast grana, germinal-center granular cells). It's deliberately weird — most projects in this hackathon are named with the same cluster of safety/governance words ("sentinel," "guardian," "mender," "axon," "shipsafe"). We want to be the one project that doesn't sound like a generic default.
 
 Alternatives if Granum doesn't fit:
 - **Centra** (germinal center, Latin centrum)

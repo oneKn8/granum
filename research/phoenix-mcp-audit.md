@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-27
 **Purpose:** Empirically verify what Phoenix supports for the Granum "functional apoptosis" mechanism before Phase 0 begins. Locks the implementation path.
-**Conducted by:** Granum pre-flight audit subagent
+**Conducted by:** Granum pre-flight audit
 **Environment:** Local Docker (`arizephoenix/phoenix:latest`) + `@arizeai/phoenix-mcp@latest` over stdio JSON-RPC + direct REST probes.
 
 ---
@@ -142,7 +142,7 @@ Endpoints that matter for Granum apoptosis (paths grepped for `prompt|dataset|tr
 
 ---
 
-## 6. Recommended `PhoenixClient` interface stubs (for next subagent)
+## 6. Recommended `PhoenixClient` interface stubs
 
 ```python
 # granum/infra/phoenix_client.py — to be implemented in Phase 0.4

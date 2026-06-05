@@ -1,7 +1,7 @@
 // Granum web — shared types
 //
-// This file is the mock-contract source-of-truth until Terminal A publishes
-// docs/api-contract.md (Phase 3). When that drops, this file is what Terminal C
+// This file is the mock-contract source-of-truth until the backend publishes
+// docs/api-contract.md (Phase 3). When that drops, this file is what the frontend
 // diffs against. Keep shapes flat and serializable.
 
 export type CellId =

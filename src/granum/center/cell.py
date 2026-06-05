@@ -1,8 +1,8 @@
 """Cell abstraction - parameterized (payer x diagnosis) pair with data paths.
 
 In v0.1, five cells are declared. Only `aetna_cardiac` is guaranteed to
-have all data files (curated by Terminal A). The other four (United,
-Anthem, Cigna, Humana) are curated by Terminal B in parallel; their data
+have all data files. The other four (United,
+Anthem, Cigna, Humana) are curated separately; their data
 may or may not be present at any given moment.
 
 Use `CellRegistry.validated_cells()` to iterate only over cells with

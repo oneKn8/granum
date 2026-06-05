@@ -1,6 +1,6 @@
 # Granum — Devpost Submission Text
 
-> Source-of-truth for every Devpost form field. Copy-paste directly into the form on submission day. Last revised 2026-05-27 by Terminal C; deadline 2026-06-11 14:00 PDT.
+> Source-of-truth for every Devpost form field. Copy-paste directly into the form on submission day. Last revised 2026-05-27; deadline 2026-06-11 14:00 PDT.
 
 ---
 
@@ -165,7 +165,7 @@ If the Phoenix MCP layer disappeared, Granum would have no state. The self-impro
 
 ---
 
-## Submission-day checklist (Terminal C will run this on 2026-06-10)
+## Submission-day checklist (run on 2026-06-10)
 
 - [ ] License visible at repo root (already present — Apache-2.0)
 - [ ] Hosted URL alive and serving (requires Phase 0.5 Cloud Run deploy — currently blocked on user GCP-billing action)

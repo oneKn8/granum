@@ -17,7 +17,7 @@ def test_cell_aetna_cardiac_paths_resolve():
 def test_cell_validates_data_files_exist():
     """Cell.validate() raises if expected data files are absent."""
     cell = Cell(payer="aetna", diagnosis="cardiac")
-    # All 4 files exist for aetna_cardiac (Terminal A shipped them)
+    # All 4 files exist for aetna_cardiac
     cell.validate()  # should not raise
 
 
@@ -49,6 +49,6 @@ def test_registry_validated_cells_only_returns_those_with_data():
     """Returns cells whose data files all exist. Useful for safely iterating."""
     reg = CellRegistry()
     validated = reg.validated_cells()
-    # aetna_cardiac has all files. The other 4 depend on Terminal B's progress.
+    # aetna_cardiac has all files. The other 4 depend on data availability.
     ids = {c.id for c in validated}
     assert "aetna_cardiac" in ids

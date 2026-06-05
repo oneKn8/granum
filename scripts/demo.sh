@@ -19,10 +19,10 @@
 #   bash scripts/demo.sh
 #   DEMO_FRESH=1 DEMO_PACE=12 bash scripts/demo.sh
 #
-# Boundaries (Terminal C scope):
+# Boundaries (frontend scope):
 #   This script ONLY calls existing `granum` CLI commands + the web server.
 #   It does not write Python code. If `granum doctor` fails, surface the
-#   error and stop — that's Terminal A's job to fix.
+#   error and stop — that's the backend's job to fix.
 
 set -euo pipefail
 
