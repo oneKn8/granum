@@ -75,6 +75,17 @@ export function LineageTree({
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [offscreen, setOffscreen] = useState(false);
   const [view, setView] = useState({ x: 0, y: 0, k: 1, ready: false });
+  // LIVE growth: one-shot flourishes (cell division, apoptosis lysis, promotion
+  // bloom) fired when router.refresh() brings a new generation. `pulse` holds the
+  // ids mid-flourish and self-clears, so the rings survive the camera re-fit's
+  // re-renders instead of unmounting a frame later.
+  const [pulse, setPulse] = useState<{
+    arrived: Set<string>;
+    died: Set<string>;
+    promoted: Set<string>;
+  }>({ arrived: new Set(), died: new Set(), promoted: new Set() });
+  const prevRef = useRef<Map<string, { tomb: boolean; champ: boolean }>>(new Map());
+  const mountedRef = useRef(false);
 
   // Pause the champion's looping breath when the tree scrolls out of view.
   useEffect(() => {
@@ -234,6 +245,42 @@ export function LineageTree({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey, height]);
 
+  // Diff this poll's population against the last to drive the LIVE flourishes.
+  useEffect(() => {
+    const cur = new Map<string, { tomb: boolean; champ: boolean }>(
+      strategies.map((s) => [
+        s.id,
+        { tomb: s.status === "tombstoned", champ: s.status === "champion" },
+      ]),
+    );
+    if (!mountedRef.current || reduce) {
+      prevRef.current = cur;
+      mountedRef.current = true;
+      return;
+    }
+    const prev = prevRef.current;
+    const arrived = new Set<string>();
+    const died = new Set<string>();
+    const promoted = new Set<string>();
+    for (const [id, st] of cur) {
+      const p = prev.get(id);
+      if (!p) arrived.add(id);
+      else {
+        if (!p.tomb && st.tomb) died.add(id);
+        if (!p.champ && st.champ) promoted.add(id);
+      }
+    }
+    prevRef.current = cur;
+    if (arrived.size || died.size || promoted.size) {
+      setPulse({ arrived, died, promoted });
+      const t = setTimeout(
+        () => setPulse({ arrived: new Set(), died: new Set(), promoted: new Set() }),
+        1400,
+      );
+      return () => clearTimeout(t);
+    }
+  }, [strategies, reduce]);
+
   if (!model) return null;
   const { nodes, links, spineIds, genCols, bbox, yTicks } = model;
 
@@ -242,6 +289,16 @@ export function LineageTree({
   const championNode = nodes.find((n) => n.s.status === "champion");
   const aliveCount = strategies.filter((s) => s.status !== "tombstoned").length;
   const deadCount = strategies.filter((s) => s.status === "tombstoned").length;
+
+  // Stagger order for live-arriving nodes, so a fresh generation buds in promptly
+  // instead of waiting on its absolute generation index (the first-paint cascade).
+  const liveOrder = new Map<string, number>();
+  if (mountedRef.current && !reduce) {
+    nodes
+      .filter((n) => !prevRef.current.has(n.s.id))
+      .sort((a, b) => a.s.generation - b.s.generation || a.y - b.y)
+      .forEach((n, i) => liveOrder.set(n.s.id, i));
+  }
 
   const accentGrad =
     variant === "payer" ? "url(#cell-payer)" : "url(#cell-alive)";
@@ -390,6 +447,11 @@ export function LineageTree({
               const onSpine = spineIds.has(s.id);
               const unscored = s.status === "alive" && s.fitness === 0;
               const r = nodeRadius(s);
+              const isLiveArrival =
+                mountedRef.current && !reduce && !prevRef.current.has(s.id);
+              const justArrived = pulse.arrived.has(s.id);
+              const justDied = pulse.died.has(s.id);
+              const justPromoted = pulse.promoted.has(s.id);
               const fill =
                 isChampion ? "url(#cell-champion)"
                 : s.tag === "experimental" && !isTomb ? "url(#cell-mutant)"
@@ -402,7 +464,11 @@ export function LineageTree({
               // Labels only on interaction — the spine + the seed/champion pills carry
               // the story; always-on labels collide where the climb plateaus.
               const showLabel = !hasPill && (isHover || isSelected);
-              const delay = reduce ? 0 : 0.12 * s.generation + 0.2;
+              const delay = reduce
+                ? 0
+                : isLiveArrival
+                  ? 0.05 * (liveOrder.get(s.id) ?? 0)
+                  : 0.12 * s.generation + 0.2;
 
               return (
                 <motion.g
@@ -430,6 +496,43 @@ export function LineageTree({
                     }
                   }}
                 >
+                  {/* LIVE: a new cell divides into existence */}
+                  {justArrived && !isTomb && (
+                    <motion.circle
+                      r={r}
+                      fill="none"
+                      stroke={ringColor}
+                      strokeWidth={1.4}
+                      style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                      initial={{ scale: 0.5, opacity: 0.7 }}
+                      animate={{ scale: 3.4, opacity: 0 }}
+                      transition={{ duration: 0.9, ease: "easeOut" }}
+                    />
+                  )}
+                  {/* LIVE: apoptosis — the membrane bursts as the strategy lyses */}
+                  {justDied && (
+                    <motion.circle
+                      r={r}
+                      fill="var(--color-dead)"
+                      style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                      initial={{ scale: 1, opacity: 0.32 }}
+                      animate={{ scale: 2.5, opacity: 0 }}
+                      transition={{ duration: 0.7, ease: "easeOut" }}
+                    />
+                  )}
+                  {/* LIVE: champion promotion bloom */}
+                  {justPromoted && (
+                    <motion.circle
+                      r={r}
+                      fill="none"
+                      stroke="var(--color-champion)"
+                      strokeWidth={2}
+                      style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                      initial={{ scale: 1, opacity: 0.8 }}
+                      animate={{ scale: 3.1, opacity: 0 }}
+                      transition={{ duration: 1.1, ease: "easeOut" }}
+                    />
+                  )}
                   {isChampion && (
                     <circle
                       className="champion-breath"
@@ -454,7 +557,21 @@ export function LineageTree({
                         strokeWidth={onSpine ? 1.8 : 1.4}
                         opacity={onSpine ? 0.85 : 1}
                       />
-                      <line x1={-r - 1.5} y1={0} x2={r + 1.5} y2={0} stroke="var(--color-dead)" strokeWidth={1.1} opacity={0.8} />
+                      {justDied ? (
+                        <motion.line
+                          x1={-r - 1.5}
+                          y1={0}
+                          x2={r + 1.5}
+                          y2={0}
+                          stroke="var(--color-dead)"
+                          strokeWidth={1.1}
+                          initial={{ pathLength: 0, opacity: 0 }}
+                          animate={{ pathLength: 1, opacity: 0.8 }}
+                          transition={{ duration: 0.42, delay: 0.16, ease: "easeOut" }}
+                        />
+                      ) : (
+                        <line x1={-r - 1.5} y1={0} x2={r + 1.5} y2={0} stroke="var(--color-dead)" strokeWidth={1.1} opacity={0.8} />
+                      )}
                     </>
                   ) : (
                     <>
