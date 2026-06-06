@@ -65,8 +65,7 @@ the critique while keeping what already works. Each variant MUST:
 exact policy-clause citations with section numbers, explicit procedural/deadline \
 compliance, tighter argument structure),
 - NEVER instruct the writer to fabricate citations, guidelines, or clinical facts,
-- ALWAYS keep at least one real Aetna CPB citation (e.g. CPB 0119) and the 30-day /
-  29 CFR 2560.503-1 appeal-deadline reference (these are required downstream),
+- ALWAYS {citation_hint} (required downstream by negative selection; never invent them),
 - stay under 220 words.
 
 Return ONLY a JSON array of exactly {n} objects, each:
@@ -88,14 +87,48 @@ def _parse_variants(raw: str) -> list[dict[str, Any]]:
     return data if isinstance(data, list) else []
 
 
+# The "required citation + deadline" hint the mutator must preserve. It is
+# cell-specific: forcing Aetna citations into a UnitedHealthcare strategy makes
+# every daughter fail negative selection in that cell, so the cell never climbs.
+_AETNA_CITATION_HINT = (
+    "keep at least one real Aetna CPB citation (e.g. CPB 0119) and the 30-day / "
+    "29 CFR 2560.503-1 appeal-deadline reference"
+)
+_GENERIC_CITATION_HINT = (
+    "keep at least one real, verifiable policy citation appropriate to this payer "
+    "and reference the applicable appeal-filing deadline"
+)
+_CITATION_HINTS: dict[str, str] = {
+    "aetna_cardiac": _AETNA_CITATION_HINT,
+    "united_oncology": (
+        "keep at least one real UnitedHealthcare oncology policy citation (e.g. the "
+        "controlling UHC Oncology Medication Clinical Coverage policy) AND the "
+        "applicable NCCN guideline with its category, plus the 65-day timely-filing "
+        "deadline"
+    ),
+}
+
+
+def citation_hint_for_cell(cell: str) -> str:
+    """The cell-appropriate 'keep a real citation + deadline' instruction for the mutator."""
+    return _CITATION_HINTS.get(cell, _GENERIC_CITATION_HINT)
+
+
 def make_llm_mutator(
-    *, client: _GenClient, model: str
+    *, client: _GenClient, model: str, citation_hint: str = _AETNA_CITATION_HINT
 ) -> Callable[[str, str, int], Awaitable[list[tuple[str, str]]]]:
-    """Build the cycle's `prompt_mutator`: (parent_body, feedback, n) -> [(body, note)]."""
+    """Build the cycle's `prompt_mutator`: (parent_body, feedback, n) -> [(body, note)].
+
+    ``citation_hint`` is the cell-specific citation/deadline guidance the daughters
+    must preserve; defaults to the Aetna hint (the proven 0.40→0.98 behavior).
+    """
 
     async def mutate(parent_body: str, feedback: str, n: int) -> list[tuple[str, str]]:
         prompt = _MUTATOR_PROMPT.format(
-            parent=parent_body, feedback=feedback or "(no critique available)", n=n
+            parent=parent_body,
+            feedback=feedback or "(no critique available)",
+            n=n,
+            citation_hint=citation_hint,
         )
         # Higher temperature for variant diversity; JSON mode for a reliable parse.
         raw = await client.generate(

@@ -84,3 +84,18 @@ def get_coevolution(cell: str) -> dict:
     if not f.exists():
         return {"cell": cell, "writers": [], "payers": []}
     return json.loads(f.read_text())
+
+
+@app.get("/api/transfers")
+def list_transfers() -> dict:
+    """Cross-cell transfer edges (clonal selection across cells).
+
+    Each edge records a champion strategy from one cell trialed in another:
+    its mean judge score on the target's denials, the target's naive baseline,
+    the lift, the t-test p-value, and whether it cleared the promotion gate.
+    Returns an empty list when no transfer run has been recorded.
+    """
+    f = _data_dir() / "transfers.json"
+    if not f.exists():
+        return {"edges": []}
+    return json.loads(f.read_text())

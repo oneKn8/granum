@@ -17,7 +17,13 @@ import {
   getCell as getMockCell,
   getCoEvolution as getMockCoEvolution,
 } from "./mock-data";
-import type { CellId, CellMeta, CellPayload, CoEvolutionState } from "./types";
+import type {
+  CellId,
+  CellMeta,
+  CellPayload,
+  CoEvolutionState,
+  TransferGraph,
+} from "./types";
 
 const USE_REAL_API =
   process.env.NEXT_PUBLIC_USE_REAL_API === "true" ||
@@ -88,6 +94,13 @@ export async function getCoEvolution(
     return fetchJson<CoEvolutionState>(`/api/cells/${cell}/coevolution`);
   }
   return getMockCoEvolution(cell);
+}
+
+export async function getTransfers(): Promise<TransferGraph> {
+  if (USE_REAL_API) {
+    return fetchJson<TransferGraph>("/api/transfers");
+  }
+  return { edges: [] };
 }
 
 export function isRealApiEnabled(): boolean {

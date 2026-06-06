@@ -52,3 +52,28 @@ def test_verify_rejects_missing_appeal_deadline_reference():
     result = verify_citations(text, valid_set_path="data/aetna_cardiac/valid_citations.json")
     assert not result.passed
     assert "missing_deadline_reference" in result.reasons
+
+
+def test_verify_accepts_cell_generic_citation_united():
+    """Cell-generic: a UnitedHealthcare appeal citing its real policy passes,
+    even though the Aetna/ACC/CFR regexes cannot parse the policy name."""
+    text = (
+        "Per the UnitedHealthcare Commercial Medical Drug Policy: Oncology "
+        "Medication Clinical Coverage, the requested agent is covered when "
+        "prior-therapy records are documented. Records attached. Filed within "
+        "the 180 days appeal window."
+    )
+    result = verify_citations(
+        text, valid_set_path="data/united_oncology/valid_citations.json"
+    )
+    assert result.passed
+    assert result.invalid == ()
+
+
+def test_verify_rejects_united_appeal_without_any_policy():
+    text = "This UnitedHealthcare oncology denial is wrong. Reconsider within 180 days."
+    result = verify_citations(
+        text, valid_set_path="data/united_oncology/valid_citations.json"
+    )
+    assert not result.passed
+    assert "no_citations_found" in result.reasons

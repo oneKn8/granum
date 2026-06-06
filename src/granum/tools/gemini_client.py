@@ -29,12 +29,17 @@ from __future__ import annotations
 import asyncio
 import os
 
+import httpx
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
 
 # HTTP status codes that are transient and worth retrying.
 _RETRYABLE_CODES = frozenset({429, 503})
+
+# Transport-level failures (server disconnects, read/connect timeouts) are
+# transient too — a long evolve/transfer run must not die on one network blip.
+_TRANSIENT_TRANSPORT = (httpx.TransportError,)
 
 
 class GeminiClient:
@@ -86,6 +91,15 @@ class GeminiClient:
             for attempt in range(self._max_attempts):
                 try:
                     return await asyncio.to_thread(_call)
+                except _TRANSIENT_TRANSPORT as exc:
+                    last_exc = exc  # type: ignore[assignment]
+                    if attempt < self._max_attempts - 1:
+                        backoff = min(
+                            self._base_backoff * (2**attempt), self._max_backoff
+                        )
+                        await asyncio.sleep(backoff)
+                        continue
+                    raise
                 except genai_errors.APIError as exc:
                     if getattr(exc, "code", None) in _RETRYABLE_CODES:
                         last_exc = exc

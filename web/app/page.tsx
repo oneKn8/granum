@@ -3,13 +3,15 @@ import { LineageTree } from "@/components/LineageTree";
 import { CellSelector } from "@/components/CellSelector";
 import { LivePoll } from "@/components/LivePoll";
 import { Reveal } from "@/components/Reveal";
-import { getCellPayload, listCellMetas } from "@/lib/api";
+import { TransferGraph } from "@/components/TransferGraph";
+import { getCellPayload, getTransfers, listCellMetas } from "@/lib/api";
 import { cellLabelFromMeta } from "@/lib/mock-data";
 
 export default async function LandingPage() {
-  const [aetna, cellMetas] = await Promise.all([
+  const [aetna, cellMetas, transfers] = await Promise.all([
     getCellPayload("aetna_cardiac"),
     listCellMetas(),
+    getTransfers(),
   ]);
   const navItems = cellMetas.map((m) => ({ id: m.id, label: cellLabelFromMeta(m) }));
   const { baselineOverturn, currentOverturn, generations, apoptosisTotal } = aetna.meta;
@@ -160,6 +162,16 @@ export default async function LandingPage() {
             </Reveal>
           </div>
         </section>
+
+        {transfers.edges.length > 0 && (
+          <section className="border-t border-border">
+            <div className="mx-auto max-w-screen-2xl px-6 py-16">
+              <Reveal>
+                <TransferGraph edges={transfers.edges} cells={cellMetas} />
+              </Reveal>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="border-t border-border">

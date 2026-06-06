@@ -104,3 +104,30 @@ export interface CoEvolutionState {
   writers: BCellStrategy[];
   payers: BCellStrategy[];
 }
+
+/**
+ * Cross-cell transfer (clonal selection): a champion strategy from one cell
+ * trialed against another cell's denials. Scores are on the judge's 0-10
+ * composite scale. `promoted` = cleared the gate (p < 0.05 AND lift >= 1.0).
+ */
+export interface TransferEdge {
+  sourceCell: CellId;
+  targetCell: CellId;
+  /** Short id of the source champion strategy (e.g. "g8m1"). */
+  sourceStrategy: string;
+  /** Mean judge composite of the transferred strategy on the target denials. */
+  meanScore: number;
+  /** The target cell's naive gen-0 baseline composite. */
+  baselineScore: number;
+  /** meanScore - baselineScore. */
+  lift: number;
+  pValue: number;
+  /** Per-sample composite scores. */
+  samples: number[];
+  negativeSelectionFailures: number;
+  promoted: boolean;
+}
+
+export interface TransferGraph {
+  edges: TransferEdge[];
+}

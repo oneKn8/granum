@@ -31,6 +31,15 @@ class _DenialFactory(Protocol):
     ) -> Denial: ...
 
 
+class _AppealGenerator(Protocol):
+    """Applies a source strategy (system prompt) to a target denial, returning a
+    drafted appeal. This is what makes transfer honest: we evaluate the matured
+    *strategy* by the quality of the appeal it writes in the target environment,
+    not by string-matching the source prompt's payer-specific citations."""
+
+    async def __call__(self, prompt_body: str, denial: Denial) -> str: ...
+
+
 @dataclass(frozen=True)
 class TransferTrial:
     source_cell: str
@@ -56,6 +65,7 @@ class TransferTrialHarness:
         target_valid_citations_path: str | Path,
         target_gold_path: str | Path,
         baseline_target_fitness: float,
+        appeal_generator: _AppealGenerator | None = None,
     ) -> None:
         self._judge = judge
         self._denial_factory = target_denial_factory
@@ -64,6 +74,10 @@ class TransferTrialHarness:
         self._valid_citations_path = target_valid_citations_path
         self._gold: list[GoldAppeal] = load_gold_appeals(target_gold_path)
         self._baseline = baseline_target_fitness
+        # When set, the trial applies the strategy to each target denial and
+        # judges the resulting appeal (the honest path). When None, the trial
+        # judges the prompt body directly (legacy / unit-test behavior).
+        self._appeal_generator = appeal_generator
 
     async def trial_transfer(
         self,
@@ -79,6 +93,17 @@ class TransferTrialHarness:
         """Evaluate a source-cell prompt against n_samples target-cell denials."""
         if n_samples < 2:
             raise ValueError("trial_transfer requires n_samples >= 2 for t-test")
+
+        if self._appeal_generator is not None:
+            return await self._trial_via_generation(
+                source_cell=source_cell,
+                target_cell=target_cell,
+                prompt_id=prompt_id,
+                prompt_version_id=prompt_version_id,
+                prompt_body=prompt_body,
+                n_samples=n_samples,
+                seed=seed,
+            )
 
         # 1. Negative selection against the TARGET cell's valid-citation set.
         ns_result = verify_citations(
@@ -133,6 +158,69 @@ class TransferTrialHarness:
             p_value=p_value,
             baseline_target_fitness=self._baseline,
             n_negative_selection_failures=0,
+        )
+
+    async def _trial_via_generation(
+        self,
+        *,
+        source_cell: str,
+        target_cell: str,
+        prompt_id: str,
+        prompt_version_id: str,
+        prompt_body: str,
+        n_samples: int,
+        seed: int,
+    ) -> TransferTrial:
+        """Honest transfer: apply the source strategy to each target denial, run
+        negative selection on the *generated appeal* against the target cell's
+        citations, and judge that appeal vs the target gold set. A matured
+        strategy lifts the target baseline only if it genuinely writes better
+        appeals there — payer-specific citation strings don't carry over, but
+        transferable structure (quantified metrics, section-level citation,
+        argument shape, deadline) does.
+        """
+        assert self._appeal_generator is not None
+        scores: list[float] = []
+        ns_failures = 0
+        for i in range(n_samples):
+            denial = self._denial_factory(
+                payer=self._target_payer,
+                diagnosis=self._target_diagnosis,
+                seed=seed + i,
+            )
+            appeal = await self._appeal_generator(prompt_body, denial)
+            ns = verify_citations(appeal, valid_set_path=self._valid_citations_path)
+            if not ns.passed:
+                scores.append(0.0)
+                ns_failures += 1
+                continue
+            judge_score = await self._judge.score(
+                candidate_appeal=appeal, reference_set=self._gold
+            )
+            scores.append(judge_score.composite)
+
+        mean = statistics.mean(scores) if scores else 0.0
+        if ns_failures == n_samples:
+            p_value = 1.0
+        else:
+            stdev = statistics.stdev(scores) if n_samples >= 2 else 0.0
+            if stdev == 0.0:
+                p_value = 0.0 if mean > self._baseline else 1.0
+            else:
+                t = (mean - self._baseline) / (stdev / math.sqrt(n_samples))
+                p_value = _t_survival(t, n_samples - 1)
+
+        return TransferTrial(
+            source_cell=source_cell,
+            target_cell=target_cell,
+            prompt_id=prompt_id,
+            prompt_version_id=prompt_version_id,
+            prompt_body=prompt_body,
+            scores=tuple(scores),
+            mean_score=mean,
+            p_value=p_value,
+            baseline_target_fitness=self._baseline,
+            n_negative_selection_failures=ns_failures,
         )
 
 

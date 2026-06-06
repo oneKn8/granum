@@ -42,6 +42,37 @@ SEED_BANK: dict[str, list[tuple[str, str]]] = {
             "Aetna to reconsider.",
         ),
     ],
+    # Second cell. Same naive baselines: each names the controlling UnitedHealthcare
+    # oncology policy and the appeal window, but offers no guidance on the things the
+    # judge rewards (quantified prior-therapy records, section-level policy citations,
+    # structured medical-necessity argument). So gen-0 scores low and has to climb.
+    "united_oncology": [
+        (
+            "united_oncology/bcell_1_generic",
+            "You are writing a prior-authorization appeal letter for a "
+            "UnitedHealthcare oncology coverage denial. Mention the "
+            "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication "
+            "Clinical Coverage and note that the appeal must be filed before the "
+            "deadline. Argue that the denial should be overturned because the "
+            "treatment is medically necessary. Keep it under 500 words.",
+        ),
+        (
+            "united_oncology/bcell_2_persuasive",
+            "Write a persuasive letter to UnitedHealthcare appealing a denied "
+            "oncology treatment. Reference the UnitedHealthcare Oncology Medication "
+            "Clinical Coverage policy and remind them of the appeal deadline. "
+            "Emphasize that the patient needs this treatment and that denying it "
+            "is unreasonable.",
+        ),
+        (
+            "united_oncology/bcell_3_plain",
+            "Draft a short appeal for a UnitedHealthcare oncology coverage denial. "
+            "Cite the UnitedHealthcare Commercial Medical Drug Policy for oncology "
+            "medications and state that the appeal must be filed on time. Explain "
+            "in plain language why the treatment is needed and ask UnitedHealthcare "
+            "to reconsider.",
+        ),
+    ],
 }
 
 

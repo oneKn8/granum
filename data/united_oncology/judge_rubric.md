@@ -1,90 +1,113 @@
-# Granum Judge Rubric — United Healthcare × Oncology Cell
+# Granum Judge Rubric — UnitedHealthcare × Oncology Cell
 
-This rubric is a specialization of the global 5-axis judge rubric for appeals against UnitedHealthcare oncology denials. The judge LLM scores each candidate appeal on each axis from 1 (poor) to 10 (excellent). Composite score is the mean; only candidates with composite ≥ 7 enter the gold dataset, and only candidates that win the median-of-3 tournament are promoted to `production` in the Phoenix prompt registry.
+Score a candidate appeal letter on 5 axes, each 1-10. Composite = mean of the axes.
+Be EXACTING and DISCRIMINATING: a generic "this treatment is medically necessary"
+appeal with no policy grounding scores 3-5. Reserve 8-10 for appeals that fully meet
+the anchor. Score the candidate RELATIVE to the gold reference appeals provided — those
+are 9-quality; an appeal visibly less grounded or less structured scores lower.
 
-UnitedHealthcare appeals have payer-specific characteristics: heavy reliance on the NCCN Drugs & Biologics Compendium, biomarker-driven coverage logic, biosimilar step-therapy rules, and a 65-day timely-filing deadline for internal first-level appeals on commercial plans. The axes below weight these characteristics.
+**Score on what a good appeal can do with the FACTS IN THE DENIAL.** The appeal must
+NOT fabricate clinical data. Do NOT require lab values, biomarker percentages, or
+staging the denial did not supply. Reward correct USE of the facts that ARE available
+— the diagnosis (ICD-10), the requested agent and its therapeutic target/indication,
+the denial reason, and the controlling policy — plus sound, policy-grounded argument.
+An appeal is never penalized for omitting a number it was never given; it IS penalized
+for failing to connect the requested drug to the patient's cancer and to the policy.
 
 ---
 
 ## Axis 1 — Clinical Specificity (1-10)
 
-**What it measures:** How concretely the appeal grounds the patient's clinical picture in objective findings tied to UHC's medical-necessity standard.
+How concretely the appeal grounds the patient's clinical picture in the facts available
+and ties them to UHC's medical-necessity standard.
 
-| Score | Anchor |
-|---|---|
-| 1-3 | Generic "the patient needs this treatment" language. No specific clinical findings, staging, or biomarkers. |
-| 4-6 | Some clinical detail (diagnosis, stage), but missing biomarker results, performance status, or prior-therapy specifics that UHC requires for the requested agent. |
-| 7-8 | Clinical detail includes pathology, stage (TNM or AJCC), KPS/ECOG performance status, prior-therapy line and reason for failure or intolerance, and required biomarker results (PD-L1 TPS, HER2 IHC/ISH, BRCA, MSI, TMB, etc.). |
-| 9-10 | All of 7-8 plus quantitative clinical context (e.g., LVEF for cardiotoxic agents, creatinine clearance for nephrotoxic agents, hematologic baselines) and explicit linkage of each clinical fact to the policy criterion it satisfies. |
+- **9-10**: Names the diagnosis (ICD-10) and the requested agent's therapeutic target /
+  on-label indication (e.g., HER2-directed therapy for HER2-positive breast cancer),
+  states the line of therapy and the prior-therapy or intolerance context the denial
+  implies, and ties each clinical fact to the specific coverage criterion it satisfies.
+- **6-8**: Diagnosis plus the agent-to-target relationship is stated, and at least one
+  coverage criterion is linked to a patient fact.
+- **3-5**: General clinical language ("the patient needs this drug", "medically
+  necessary") with no diagnosis-to-agent rationale. **Cap here if the appeal does not
+  connect the requested agent to the patient's specific cancer.**
+- **1-2**: No clinical specifics at all.
 
 ---
 
 ## Axis 2 — Policy Citation Quality (1-10)
 
-**What it measures:** Accuracy and specificity of UnitedHealthcare and NCCN citations.
+Accuracy and specificity of UnitedHealthcare and NCCN citations.
 
-| Score | Anchor |
-|---|---|
-| 1-3 | No specific UHC policy named. Vague references to "industry guidelines" or "standard of care." |
-| 4-6 | Names the correct UHC policy title (e.g., "Oncology Medication Clinical Coverage") but does not cite the specific criterion paragraph that the patient satisfies. |
-| 7-8 | Cites the exact UHC policy by title and version date, AND cites the specific NCCN guideline version (e.g., "NCCN NSCLC V.5.2026, Category 1") that supports the requested treatment. |
-| 9-10 | All of 7-8 plus quotes or paraphrases the policy criterion language with direct mapping to patient facts. Cites NCCN Drugs & Biologics Compendium for off-label use when applicable. Includes FDA prescribing information citation when the indication is on-label. |
+- **9-10**: Names the controlling UHC oncology policy AND the applicable NCCN guideline
+  or category (or the NCCN Drugs & Biologics Compendium for off-label use), and maps the
+  criterion language to the patient's facts. FDA labeling cited when the use is on-label.
+- **6-8**: Names the correct UHC policy AND an NCCN reference, but without mapping the
+  criterion to patient facts.
+- **3-5**: Names a UHC policy with no NCCN/guideline support, or only "the policy
+  states". **Cap here if there is no NCCN reference.**
+- **1-2**: No UHC policy reference.
 
-**Hallucination penalty:** Any citation that does not appear in `valid_citations.json` triggers automatic negative-selection rejection BEFORE this axis is scored. If the appeal reaches the judge, all cited policy IDs must resolve to real published UHC or NCCN materials.
+Hallucinated citations are rejected at negative selection BEFORE scoring; any citation
+that reaches the judge resolves to real published UHC or NCCN material.
 
 ---
 
 ## Axis 3 — Procedural Compliance (1-10)
 
-**What it measures:** Adherence to UnitedHealthcare appeal procedural rules.
+Adherence to UnitedHealthcare appeal procedural rules.
 
-| Score | Anchor |
-|---|---|
-| 1-3 | No reference to appeal level, deadline, or required attachments. |
-| 4-6 | Identifies appeal as first-level or expedited but omits timely-filing deadline acknowledgment or required attachments. |
-| 7-8 | Explicitly identifies appeal level (first-level internal, second-level internal, or external review), confirms submission within 65-day commercial timely-filing window (or 60-day Medicare Advantage window), and lists required attachments: original denial letter, clinical notes, biomarker reports, prior-authorization records. |
-| 9-10 | All of 7-8 plus requests peer-to-peer review with an oncologist board-certified in the relevant subspecialty (per UHC peer-to-peer policy), invokes state external-review rights if applicable, and addresses each specific denial reason from the EOB or denial letter point-by-point. |
+- **9-10**: Names the appeal level (first-level internal, expedited, or external
+  review), confirms submission within the 65-day commercial timely-filing window,
+  addresses each denial reason point-by-point, and requests peer-to-peer review with a
+  board-certified oncologist.
+- **6-8**: Appeal level plus timely-filing acknowledgment, missing 1-2 of the above.
+- **3-5**: Mentions a deadline or reconsideration but omits the appeal level. **Cap here
+  if there is no timely-filing reference.**
+- **1-2**: No procedural language.
 
 ---
 
 ## Axis 4 — Argumentative Structure (1-10)
 
-**What it measures:** Logical flow and persuasive construction of the appeal.
+Logical flow and persuasive construction.
 
-| Score | Anchor |
-|---|---|
-| 1-3 | Disorganized. Mixes clinical facts, citations, and procedural requests with no clear thesis. |
-| 4-6 | Has a thesis ("the denial is incorrect because...") but does not address each specific UHC denial criterion sequentially. |
-| 7-8 | Opens with a one-sentence overturn-request thesis. Addresses each UHC denial rationale in a numbered or labeled section. Each section pairs a UHC criterion with patient-specific evidence that satisfies it. Closes with a specific request for action and a contact path. |
-| 9-10 | All of 7-8 plus pre-empts likely UHC counter-arguments (e.g., "if the reviewer believes a preferred biosimilar trial is required, the patient's documented infusion reaction to bevacizumab-bvzr on [date] satisfies the policy's intolerance exception"). Uses structure consistent with UHC's own clinical-criteria decision tree. |
+- **9-10**: Opens with a one-sentence overturn-request thesis. Addresses each denial
+  rationale in its own labeled section pairing a policy criterion with patient evidence.
+  Pre-empts the likely UHC counter-argument. Closes with a specific action request and a
+  contact path.
+- **6-8**: Clear thesis and sections, with one logical gap.
+- **3-5**: An argument exists but it is disorganized or merely asserts conclusions.
+- **1-2**: A list of grievances, no argument.
 
 ---
 
 ## Axis 5 — Likelihood of Overturn (1-10)
 
-**What it measures:** The judge LLM's holistic probability estimate that an independent external reviewer (or a UHC peer-to-peer oncologist) would overturn the denial.
+Holistic: would an external reviewer applying NCCN logic, or a UHC peer-to-peer
+oncologist, overturn the denial on this appeal alone?
 
-| Score | Anchor |
-|---|---|
-| 1-3 | The denial reasons are likely correct or under-addressed. Overturn unlikely. |
-| 4-6 | Even-odds case. Some criteria are met, others are weakly addressed. A skilled reviewer might overturn but it is not the most-likely outcome. |
-| 7-8 | The appeal satisfies the explicit UHC policy criteria. An external reviewer applying NCCN compendium logic would likely overturn. AMA / KFF data show ~80% of oncology denials are overturned on appeal when NCCN evidence is presented; this appeal meets that bar. |
-| 9-10 | The appeal is grounded in a Category 1 NCCN recommendation directly applicable to the patient, cites FDA-approved labeling, and addresses every denial criterion with specific evidence. Overturn is highly likely on first-level review without need for external escalation. |
-
----
-
-## Composite scoring
-
-```
-composite = mean(axis_1, axis_2, axis_3, axis_4, axis_5)
-```
-
-- Gold dataset eligibility: `composite ≥ 7` AND `axis_2 (Policy Citation Quality) ≥ 7` AND no negative-selection failure.
-- Tournament winner: highest composite from median-of-3 judge runs (per `granum/center/judge.py`).
-- Tombstone trigger: composite < 5 OR `axis_2 < 4` (hallucinated or absent citations).
+- **9-10**: Grounded in an applicable NCCN recommendation and the controlling UHC
+  criterion, with every denial reason answered. Overturn highly likely on first-level
+  review.
+- **6-8**: Satisfies the explicit policy criteria; probable overturn.
+- **3-5**: Even-odds; a key criterion is weakly addressed. **Default here for any appeal
+  lacking BOTH an NCCN reference AND criterion-to-fact mapping.**
+- **1-2**: Denial reasons under-addressed; overturn unlikely.
 
 ---
+
+## Output
+
+Return ONLY JSON with keys: `clinical_specificity`, `policy_citation_quality`,
+`procedural_compliance`, `argumentative_structure`, `likelihood_overturn`,
+`english_feedback`.
 
 ## English-feedback requirement
 
-The judge MUST also produce a one-paragraph English critique alongside the scalar scores. Per the Arize / Phoenix "prompt learning over scalars" thesis, the critique is what the next-generation mutator reads to construct improvement mutations. A score of 8 with critique "The biomarker section is precise but the biosimilar step-therapy section omits the documented bevacizumab-bvzr intolerance from 2024-11-12" is more useful than a 7 with critique "OK appeal."
+The judge MUST also produce a one-paragraph English critique (200-400 characters). Name
+the SPECIFIC weakest axis and the single highest-leverage fix — concrete enough that a
+rewrite can act on it directly. Examples: "names the UHC policy but cites no NCCN
+category — add the applicable NCCN guideline and its category", or "no criterion-to-fact
+mapping — tie the HER2-positive status to the policy's coverage criterion it satisfies".
+Per the prompt-learning-over-scalars thesis, this critique is what the next-generation
+mutator reads to construct its improvement.

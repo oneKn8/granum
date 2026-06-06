@@ -85,7 +85,11 @@ def cycle(
     from granum.center.cycle import GerminalCycle
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
+    from granum.center.prompt_mutation import (
+        citation_hint_for_cell,
+        make_llm_mutator,
+        resolve_mutator_model,
+    )
     from granum.data.denials import Denial, generate_denial
     from granum.tools.gemini_client import GeminiClient
     from granum.tools.phoenix_session import phoenix_client_from_env
@@ -122,7 +126,14 @@ def cycle(
         except Exception as exc:  # noqa: BLE001 — tracing is supplementary
             typer.echo(f"WARN: Phoenix tracer registration failed: {exc}", err=True)
 
-        judge = LLMJudge(client=gemini, model=model, rubric_path=Path("data/judge_rubric.md"))
+        _cell_rubric = Path(f"data/{cell}/judge_rubric.md")
+        judge = LLMJudge(
+            client=gemini,
+            model=model,
+            rubric_path=_cell_rubric
+            if _cell_rubric.exists()
+            else Path("data/judge_rubric.md"),
+        )
         denial = generate_denial(payer=payer, diagnosis=diagnosis, seed=seed_value)
         typer.echo(f"Denial {denial.denial_id} ({denial.denial_reason}) — running live cycle…")
 
@@ -137,7 +148,9 @@ def cycle(
                 mutation_count=mutation_count,
                 appeal_generator=gen_appeal,
                 prompt_mutator=make_llm_mutator(
-                    client=gemini, model=resolve_mutator_model(model)
+                    client=gemini,
+                    model=resolve_mutator_model(model),
+                    citation_hint=citation_hint_for_cell(cell),
                 ),
             )
             outcome = await cyc.run(denial=denial)
@@ -221,7 +234,11 @@ def evolve(
     from granum.web.payload_io import write_payload_atomic
     from granum.center.judge import LLMJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
+    from granum.center.prompt_mutation import (
+        citation_hint_for_cell,
+        make_llm_mutator,
+        resolve_mutator_model,
+    )
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell
     from granum.tools.gemini_client import GeminiClient
@@ -256,7 +273,14 @@ def evolve(
         except Exception as exc:  # noqa: BLE001
             typer.echo(f"WARN: Phoenix tracer registration failed: {exc}", err=True)
 
-        judge = LLMJudge(client=gemini, model=model, rubric_path=Path("data/judge_rubric.md"))
+        _cell_rubric = Path(f"data/{cell}/judge_rubric.md")
+        judge = LLMJudge(
+            client=gemini,
+            model=model,
+            rubric_path=_cell_rubric
+            if _cell_rubric.exists()
+            else Path("data/judge_rubric.md"),
+        )
         denial = generate_denial(payer=payer, diagnosis=diagnosis, seed=seed_value)
         typer.echo(
             f"Antigen {denial.denial_id} ({denial.denial_reason}); "
@@ -297,7 +321,9 @@ def evolve(
                 survival_count=survival_count,
                 appeal_generator=gen_appeal,
                 prompt_mutator=make_llm_mutator(
-                    client=gemini, model=resolve_mutator_model(model)
+                    client=gemini,
+                    model=resolve_mutator_model(model),
+                    citation_hint=citation_hint_for_cell(cell),
                 ),
                 read_self_observability=True,  # Arize bonus: read own telemetry back
             )
@@ -378,7 +404,11 @@ def coevolve(
     from granum.web.payload_io import write_payload_atomic
     from granum.center.defensibility_judge import DefensibilityJudge
     from granum.center.mutation_strategies import propose_mutations
-    from granum.center.prompt_mutation import make_llm_mutator, resolve_mutator_model
+    from granum.center.prompt_mutation import (
+        citation_hint_for_cell,
+        make_llm_mutator,
+        resolve_mutator_model,
+    )
     from granum.data.denials import Denial, generate_denial
     from granum.data.seeds import reset_cell, seed_cell, seed_payers, wait_for_active_population
     from granum.tools.gemini_client import GeminiClient
@@ -459,7 +489,9 @@ def coevolve(
                 appeal_generator=gen_appeal,
                 antigen=antigen,
                 prompt_mutator=make_llm_mutator(
-                    client=gemini, model=resolve_mutator_model(model)
+                    client=gemini,
+                    model=resolve_mutator_model(model),
+                    citation_hint=citation_hint_for_cell(cell),
                 ),
             )
             out_dir = Path(os.getenv("GRANUM_DATA_DIR", "runs/cell_payloads"))

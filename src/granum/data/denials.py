@@ -7,9 +7,11 @@ labeled — no PHI.
 from __future__ import annotations
 
 import hashlib
+import json
 import random
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 
 
 class DenialReason(StrEnum):
@@ -182,13 +184,13 @@ def generate_denial(*, payer: str, diagnosis: str, seed: int | None = None) -> D
         A Denial dataclass instance with a stable denial_id.
 
     Raises:
-        NotImplementedError if (payer, diagnosis) not in the curated bank.
+        NotImplementedError if the cell has no curated patterns and no
+        data/{cell}/denial_templates.json on disk.
     """
     if payer != "aetna" or diagnosis != "cardiac":
-        raise NotImplementedError(
-            f"Pattern bank for ({payer}, {diagnosis}) not yet curated. "
-            f"v0.1 supports only ('aetna', 'cardiac')."
-        )
+        # Every other cell is data-driven: read its curated denial templates
+        # from data/{payer}_{diagnosis}/denial_templates.json.
+        return _generate_from_templates(payer=payer, diagnosis=diagnosis, seed=seed)
     rng = random.Random(seed)
     pattern = rng.choice(_AETNA_CARDIAC_PATTERNS)
     age_low = rng.choice([45, 50, 55, 60, 65, 70])
@@ -207,5 +209,68 @@ def generate_denial(*, payer: str, diagnosis: str, seed: int | None = None) -> D
         patient_age_range=age_range,
         denial_reason=pattern["reason"],
         denial_text=pattern["text"],
+        submission_date=submission_date,
+    )
+
+
+# Other cells (united_oncology, etc.) carry their denial bank on disk as
+# data/{cell}/denial_templates.json — same shape the aetna patterns encode in
+# code, but authored from that payer's real published policies + CPT/ICD codes.
+_DENIAL_DATA_ROOT = Path("data")
+
+
+def _coerce_reason(value: str) -> DenialReason:
+    """Map a template's denial_reason string to the enum, tolerating unknowns."""
+    try:
+        return DenialReason(value)
+    except ValueError:
+        return DenialReason.NOT_MEDICALLY_NECESSARY
+
+
+def _load_cell_denial_templates(cell: str) -> list[dict]:
+    f = _DENIAL_DATA_ROOT / cell / "denial_templates.json"
+    if not f.exists():
+        return []
+    try:
+        data = json.loads(f.read_text())
+    except (json.JSONDecodeError, OSError):
+        return []
+    return data if isinstance(data, list) else []
+
+
+def _generate_from_templates(
+    *, payer: str, diagnosis: str, seed: int | None = None
+) -> Denial:
+    """Build a Denial for a non-aetna cell from its on-disk template bank.
+
+    Mirrors the aetna pattern path (deterministic under `seed`, stable id) but
+    sources patterns from data/{cell}/denial_templates.json.
+    """
+    cell = f"{payer}_{diagnosis}"
+    templates = _load_cell_denial_templates(cell)
+    if not templates:
+        raise NotImplementedError(
+            f"No denial bank for cell {cell!r}. "
+            f"Add data/{cell}/denial_templates.json (list of "
+            f"{{cpt_code, icd10_code, denial_reason, text_template}})."
+        )
+    rng = random.Random(seed)
+    pattern = rng.choice(templates)
+    age_low = rng.choice([45, 50, 55, 60, 65, 70])
+    age_range = f"{age_low}-{age_low + 5}"
+    submission_date = f"2026-{rng.randint(1, 5):02d}-{rng.randint(1, 28):02d}"
+    cpt = str(pattern.get("cpt_code", ""))
+    icd10 = str(pattern.get("icd10_code", ""))
+    raw_id_seed = f"{cpt}-{icd10}-{submission_date}-{age_range}-{seed}"
+    denial_id = f"{cell}_" + hashlib.sha1(raw_id_seed.encode()).hexdigest()[:12]
+    return Denial(
+        denial_id=denial_id,
+        payer=payer,
+        diagnosis=diagnosis,
+        cpt_code=cpt,
+        icd10_code=icd10,
+        patient_age_range=age_range,
+        denial_reason=_coerce_reason(str(pattern.get("denial_reason", ""))),
+        denial_text=str(pattern.get("text_template", "")),
         submission_date=submission_date,
     )
