@@ -6,7 +6,7 @@
     "baselineOverturn": 0.62,
     "currentOverturn": 0.98,
     "generations": 10,
-    "populationSize": 4,
+    "populationSize": 2,
     "apoptosisTotal": 18
   },
   "strategies": [
@@ -21,7 +21,11 @@
       "fitness": 0.5,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__bcell_1_generic",
@@ -34,7 +38,11 @@
       "fitness": 0.46,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g1m0",
@@ -47,7 +55,11 @@
       "fitness": 0.86,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g1m1",
@@ -60,7 +72,11 @@
       "fitness": 0.88,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g2m0",
@@ -73,7 +89,11 @@
       "fitness": 0.92,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g2m1",
@@ -86,7 +106,11 @@
       "fitness": 0.94,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g3m0",
@@ -99,7 +123,11 @@
       "fitness": 0.96,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g3m1",
@@ -112,7 +140,11 @@
       "fitness": 0.88,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g4m0",
@@ -125,7 +157,11 @@
       "fitness": 0.96,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g4m1",
@@ -138,7 +174,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g5m0",
@@ -151,7 +191,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g5m1",
@@ -164,7 +208,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g6m0",
@@ -177,7 +225,11 @@
       "fitness": 0.98,
       "tag": "production",
       "status": "champion",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g6m1",
@@ -190,7 +242,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g7m0",
@@ -203,7 +259,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g7m1",
@@ -216,7 +276,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g8m0",
@@ -229,7 +293,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g8m1",
@@ -242,7 +310,11 @@
       "fitness": 0.96,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g9m0",
@@ -255,7 +327,11 @@
       "fitness": 0.98,
       "tag": "production",
       "status": "alive",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     },
     {
       "id": "united_oncology__g9m1",
@@ -268,33 +344,11 @@
       "fitness": 0.98,
       "tag": "experimental",
       "status": "tombstoned",
-      "citations": []
-    },
-    {
-      "id": "united_oncology__g10m0",
-      "cell": "united_oncology",
-      "generation": 10,
-      "parentId": "united_oncology__g6m0",
-      "label": "G10 \u2014 Added direct opening thesis and softened P2P request",
-      "promptBody": "Draft a first-level prior-authorization appeal letter for a UnitedHealthcare (UHC) oncology denial. Never fabricate facts, guidelines, or codes. Open the first sentence with a direct thesis explicitly requesting to overturn the specific drug denial for the exact indication. Ensure clinical specificity by matching exact administration routes to proper coding (precise oral HCPCS/NDC codes, no IV CPT codes for oral drugs). Explicitly state the appeal is within the UHC commercial 65-day timely-filing window. Prove medical necessity by citing exact section numbers from the 'UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage'. Cite the applicable NCCN guideline (including exact version, e.g., V.1.2024, and evidence category) and FDA prescribing information. Map these clauses to patient records. To prevent secondary denials, explicitly document the patient's current line of therapy, ECOG performance status, and lack of contraindications. Definitively prove refractory status by detailing specific prior treatment dates and subsequent progression imaging dates. If not immediately overturned, close with a collaborative tone by stating, 'we respectfully request a peer-to-peer review' with a board-certified oncologist. Keep under 500 words.",
-      "mutationNote": "Added direct opening thesis and softened P2P request",
-      "fitness": 0.0,
-      "tag": "production",
-      "status": "alive",
-      "citations": []
-    },
-    {
-      "id": "united_oncology__g10m1",
-      "cell": "united_oncology",
-      "generation": 10,
-      "parentId": "united_oncology__g6m0",
-      "label": "G10 \u2014 Structured argument, added opening thesis, softened P2P tone",
-      "promptBody": "Write a <500-word first-level prior-authorization appeal for a UnitedHealthcare (UHC) oncology denial. Never fabricate facts or codes. Structure the appeal as follows: 1) Opening: Begin immediately with a clear thesis explicitly requesting to overturn the specific drug denial for the exact indication. Note the appeal falls within the UHC commercial 65-day timely-filing window. 2) Clinical Specificity: Use exact oral HCPCS/NDC codes (never IV CPTs). Explicitly state the patient's ECOG performance status, current line of therapy, and lack of contraindications. Detail dates of prior treatments and progression imaging to definitively prove refractory status. 3) Citations: Prove medical necessity by citing exact section numbers from the 'UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage'. Integrate the FDA label and applicable NCCN guideline (with exact version and evidence category), mapping all criteria directly to patient records. 4) Closing: Conclude with a collaborative, professional tone by stating, 'we respectfully request a peer-to-peer review' with a board-certified oncologist if the denial is not overturned.",
-      "mutationNote": "Structured argument, added opening thesis, softened P2P tone",
-      "fitness": 0.0,
-      "tag": "production",
-      "status": "alive",
-      "citations": []
+      "citations": [
+        "UnitedHealthcare Commercial Medical Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Community Plan Medical Benefit Drug Policy: Oncology Medication Clinical Coverage",
+        "UnitedHealthcare Individual Exchange Medical Benefit Drug Policy: Oncology Medication Clinical Coverage"
+      ]
     }
   ],
   "rounds": [

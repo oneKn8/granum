@@ -24,6 +24,8 @@ from pathlib import Path
 
 import typer
 
+from granum.center.evolution import extract_citations, load_valid_citations
+
 app = typer.Typer(help="Bake a curated demo CellPayload from a live run artifact.")
 
 
@@ -49,6 +51,13 @@ def bake(
     kept = [s for s in strategies if not _is_unjudged_frontier(s, max_generation)]
     dropped = [s["id"] for s in strategies if s not in kept]
 
+    # Re-derive citations with the cell-aware extractor: artifacts rendered
+    # before extraction went cell-generic carry empty citations for non-aetna
+    # cells even though the promptBody cites real policies.
+    valid = load_valid_citations(payload["meta"]["id"])
+    for s in kept:
+        s["citations"] = extract_citations(s["promptBody"], valid)
+
     payload["strategies"] = kept
     payload["meta"]["populationSize"] = sum(
         1 for s in kept if s["status"] != "tombstoned"
@@ -65,6 +74,8 @@ def bake(
         f"apoptosis={m['apoptosisTotal']} strategies={len(kept)}"
     )
     typer.echo(f"status counts: {dict(Counter(s['status'] for s in kept))}")
+    cited = sum(1 for s in kept if s["citations"])
+    typer.echo(f"strategies with citations: {cited}/{len(kept)}")
 
 
 if __name__ == "__main__":
