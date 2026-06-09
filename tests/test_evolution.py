@@ -183,3 +183,34 @@ async def test_current_overturn_is_champion_fitness_not_peak():
 
     assert payload["meta"]["baselineOverturn"] == 0.4   # gen-0 best
     assert payload["meta"]["currentOverturn"] == 0.96   # champion's latest, NOT 0.98 peak
+
+
+def test_extract_citations_regex_only_without_valid_set():
+    from granum.center.evolution import extract_citations
+
+    body = "Cite Aetna CPB 0119 and the 29 CFR 2560.503-1 deadline."
+    assert extract_citations(body) == ["29 CFR 2560.503-1", "Aetna CPB 0119"]
+
+
+def test_extract_citations_is_cell_generic_via_valid_set():
+    """Non-aetna cells get real citations from their own valid_citations.json
+    (the Aetna/ACC/CFR regexes can never match UHC policy names)."""
+    from granum.center.evolution import extract_citations, load_valid_citations
+
+    valid = load_valid_citations("united_oncology")
+    assert valid, "united_oncology valid_citations.json should load"
+    body = (
+        "Reference the UnitedHealthcare Commercial Medical Drug Policy: "
+        "Oncology Medication Clinical Coverage and file within the 65-day window."
+    )
+    cites = extract_citations(body, valid)
+    assert (
+        "UnitedHealthcare Commercial Medical Drug Policy: "
+        "Oncology Medication Clinical Coverage" in cites
+    )
+
+
+def test_load_valid_citations_none_for_unknown_cell():
+    from granum.center.evolution import load_valid_citations
+
+    assert load_valid_citations("no_such_cell") is None

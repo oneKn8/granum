@@ -13,7 +13,13 @@ from dataclasses import dataclass
 from typing import Callable
 
 from granum.center.coevolution import CoEvolutionDriver
-from granum.center.evolution import _citations, _label, _StrategyAccum, sweep_bodies_and_status
+from granum.center.evolution import (
+    _label,
+    _StrategyAccum,
+    extract_citations,
+    load_valid_citations,
+    sweep_bodies_and_status,
+)
 from granum.tools.phoenix_client import PhoenixClient
 
 _log = logging.getLogger(__name__)
@@ -220,6 +226,7 @@ def _serialize_nodes(nodes: tuple[_CoEvNode, ...], cell: str) -> list[dict]:
             return "tombstoned"
         return "champion" if n.id == champion_id else "alive"
 
+    valid_citations = load_valid_citations(cell)
     result = []
     for node in nodes:
         status = _status(node)
@@ -234,7 +241,7 @@ def _serialize_nodes(nodes: tuple[_CoEvNode, ...], cell: str) -> list[dict]:
             "fitness": round(node.fitness / 10.0, 4),
             "tag": "production" if status != "tombstoned" else "experimental",
             "status": status,
-            "citations": _citations(node.body),
+            "citations": extract_citations(node.body, valid_citations),
             "createdAt": _CREATED_AT_PLACEHOLDER,
             "killedAt": _KILLED_AT_PLACEHOLDER if status == "tombstoned" else None,
         })

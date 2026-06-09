@@ -20,11 +20,13 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from statistics import mean
 from typing import Callable
 
 from granum.center.cycle import CycleOutcome, GerminalCycle
+from granum.center.negative_selection import _citations_from_valid_set, _load_valid_set
 from granum.data.denials import Denial
 from granum.tools.phoenix_client import (
     PhoenixClient,
@@ -95,6 +97,7 @@ class EvolutionResult:
         NOT a real-world overturn rate (we have no real outcomes).
         """
         payer, _, diagnosis = self.cell.partition("_")
+        valid_citations = load_valid_citations(self.cell)
         fitness = self.fitness_curve()
         apoptosis_total = sum(p["apoptosisCount"] for p in fitness)
         first_max = fitness[0]["maxFitness"] if fitness else 0.0
@@ -124,7 +127,7 @@ class EvolutionResult:
                 "fitness": round(s.fitness / 10.0, 4),
                 "tag": "production" if s.status != "tombstoned" else "experimental",
                 "status": _status(s),
-                "citations": _citations(s.body),
+                "citations": extract_citations(s.body, valid_citations),
             }
             for s in self.strategies
         ]
@@ -164,9 +167,29 @@ _CITATION_RE = re.compile(
 )
 
 
-def _citations(body: str) -> list[str]:
-    """Extract the policy/guideline citations a strategy preferentially cites."""
-    return sorted(set(_CITATION_RE.findall(body)))
+def load_valid_citations(cell: str) -> set[str] | None:
+    """Load the cell's own valid-citation ids, or None when no data dir exists.
+
+    Synthetic test cells have no ``data/{cell}/`` directory; they fall back to
+    the regex-only extraction below.
+    """
+    path = Path(f"data/{cell}/valid_citations.json")
+    if not path.exists():
+        return None
+    return _load_valid_set(path)
+
+
+def extract_citations(body: str, valid: set[str] | None = None) -> list[str]:
+    """Extract the policy/guideline citations a strategy preferentially cites.
+
+    The regex covers the Aetna/ACC/CFR forms; the cell's own
+    ``valid_citations.json`` ids cover every other payer (same anchor matching
+    negative selection uses), so non-aetna cells get real citations too.
+    """
+    hits = set(_CITATION_RE.findall(body))
+    if valid:
+        hits |= _citations_from_valid_set(body, valid)
+    return sorted(hits)
 
 
 def _label(s: _StrategyAccum) -> str:

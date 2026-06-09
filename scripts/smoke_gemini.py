@@ -11,8 +11,7 @@ Model fallback chain (verified 2026-05-27 against Vertex AI):
     3. gemini-2.5-pro           — last-resort fallback if 3.x unavailable
 
 NOTE: `gemini-3-pro` was DISCONTINUED in March 2026 and is intentionally NOT
-in this list. See research/gcp-rapid-agent-2026.md + feedback memory
-`feedback-verify-model-names-and-apis` for the discovery story.
+in this list (verified 2026-05-27 against the Vertex model catalog).
 """
 
 from __future__ import annotations
