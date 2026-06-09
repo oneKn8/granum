@@ -72,8 +72,16 @@ export function PromptDiff({ parent, mutant }: PromptDiffProps) {
           </span>
         </span>
         <span className="font-mono text-xs text-ink-subtle">
-          fitness {parent.fitness.toFixed(2)} <span aria-hidden>→</span>{" "}
-          <span className="text-champion-ink">{mutant.fitness.toFixed(2)}</span>
+          {mutant.status === "alive" && mutant.fitness === 0 ? (
+            // A daughter on the live frontier has not been judged yet;
+            // "0.00" would read as a collapse, not a pending tournament.
+            <>fitness {parent.fitness.toFixed(2)} <span aria-hidden>→</span> awaiting judge</>
+          ) : (
+            <>
+              fitness {parent.fitness.toFixed(2)} <span aria-hidden>→</span>{" "}
+              <span className="text-champion-ink">{mutant.fitness.toFixed(2)}</span>
+            </>
+          )}
         </span>
       </header>
 

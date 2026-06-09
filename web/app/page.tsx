@@ -41,7 +41,9 @@ export default async function LandingPage() {
 
         {/* Hero */}
         <section className="border-b border-border">
-          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 items-center gap-x-10 gap-y-12 px-6 py-16 lg:py-24">
+          {/* x-gap only at lg: below that every child is col-span-12, and 11
+              fixed gaps would force the grid wider than a phone viewport. */}
+          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 items-center gap-y-12 px-6 py-16 lg:gap-x-10 lg:py-24">
             <Reveal className="col-span-12 lg:col-span-5">
               <p className="mb-6 font-mono text-xs uppercase tracking-[0.16em] text-seed-ink">
                 Google Cloud Rapid Agent · Arize Phoenix · 2026
@@ -90,9 +92,10 @@ export default async function LandingPage() {
                 height={520}
               />
               <p className="mt-3 font-body text-sm text-ink-muted">
-                One strategy starts at <span className="font-mono text-ink">0.40</span> and climbs to a{" "}
-                <span className="font-mono text-champion-ink">0.98</span> champion. The losers stay on the
-                page, struck out.
+                One strategy starts at{" "}
+                <span className="font-mono text-ink">{baselineOverturn.toFixed(2)}</span> and climbs to a{" "}
+                <span className="font-mono text-champion-ink">{currentOverturn.toFixed(2)}</span> champion.
+                The losers stay on the page, struck out.
               </p>
             </Reveal>
           </div>
@@ -100,7 +103,7 @@ export default async function LandingPage() {
 
         {/* Mechanism */}
         <section className="border-b border-border">
-          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-x-6 gap-y-8 px-6 py-16 lg:py-20">
+          <div className="mx-auto grid max-w-screen-2xl grid-cols-12 gap-y-8 px-6 py-16 lg:gap-x-6 lg:py-20">
             <Reveal className="col-span-12 lg:col-span-3">
               <p className="font-mono text-xs uppercase tracking-[0.16em] text-ink-subtle">how it works</p>
             </Reveal>

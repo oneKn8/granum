@@ -122,7 +122,12 @@ export function LineageTree({
     for (const s of strategies) countSub(s.id);
 
     const maxGen = Math.max(...strategies.map((s) => s.generation));
-    const minFit = Math.min(...strategies.map((s) => s.fitness));
+    // Un-judged live-frontier daughters carry fitness 0; they must neither
+    // stretch the Y scale nor plunge to the floor — they hang just below
+    // their nearest scored ancestor until the judge runs.
+    const isUnscored = (s: BCellStrategy) => s.status === "alive" && s.fitness === 0;
+    const scored = strategies.filter((s) => !isUnscored(s));
+    const minFit = Math.min(...(scored.length ? scored : strategies).map((s) => s.fitness));
     const fitFloor = Math.min(0.34, minFit - 0.03);
     const innerTop = PAD_Y;
     const innerBottom = height - PAD_Y;
@@ -130,12 +135,20 @@ export function LineageTree({
       const t = (fit - fitFloor) / (1 - fitFloor || 1);
       return innerBottom - t * (innerBottom - innerTop); // higher fitness → higher up
     };
+    const anchorFit = (s: BCellStrategy): number => {
+      let cur: BCellStrategy | undefined = s;
+      let guard = 0;
+      while (cur && isUnscored(cur) && guard++ < 100) {
+        cur = cur.parentId ? byId.get(cur.parentId) : undefined;
+      }
+      return cur && !isUnscored(cur) ? cur.fitness : 0;
+    };
 
     // position, then resolve vertical collisions per generation column
     const nodes: PositionedNode[] = strategies.map((s) => ({
       s,
       x: PAD_X + s.generation * GEN_SPACING,
-      y: yOf(s.fitness),
+      y: isUnscored(s) ? yOf(anchorFit(s)) + 18 : yOf(s.fitness),
       subtree: subtree.get(s.id) ?? 1,
     }));
     const byGen = new Map<number, PositionedNode[]>();
@@ -644,7 +657,9 @@ export function LineageTree({
             <span className="size-2 rounded-full border border-dead bg-surface" /> apoptosed
           </span>
         </div>
-        <p className="pointer-events-none absolute bottom-2 right-2 max-w-[15rem] text-right font-body text-[11px] leading-snug text-ink-subtle">
+        {/* Hidden below md: it shares the bottom edge with the legend and the
+            two collide on narrow cards. */}
+        <p className="pointer-events-none absolute bottom-2 right-2 hidden max-w-[15rem] text-right font-body text-[11px] leading-snug text-ink-subtle md:block">
           Height is fitness; left&nbsp;→&nbsp;right is time. Winners branch upward; losers are struck out and frozen.
         </p>
       </div>

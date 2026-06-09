@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { getCellPayload } from "@/lib/api";
 import { ALL_CELLS, CELL_LABEL } from "@/lib/mock-data";
 import type { CellId } from "@/lib/types";
 
@@ -6,6 +7,16 @@ export const runtime = "edge";
 export const alt = "Granum cell lineage";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+// Share-card host shown in the footer; must match the canonical in layout.tsx.
+const SITE_HOST = (() => {
+  const url =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000");
+  return new URL(url).host;
+})();
 
 // Light "agar" palette (hex, for Satori safety).
 const BG = "#f7f2e8";
@@ -44,7 +55,14 @@ export default async function CellOG({ params }: { params: { cell: string } }) {
       size,
     );
   }
-  const meta = ALL_CELLS[cell].meta;
+  // The card must show the same numbers as the page it previews: fetch the
+  // real payload and only fall back to mock when the API is unreachable.
+  let meta = ALL_CELLS[cell].meta;
+  try {
+    meta = (await getCellPayload(cell)).meta;
+  } catch {
+    /* mock fallback */
+  }
   const baseline = (meta.baselineOverturn * 100).toFixed(0);
   const current = (meta.currentOverturn * 100).toFixed(0);
 
@@ -121,7 +139,7 @@ export default async function CellOG({ params }: { params: { cell: string } }) {
             color: FG_DIM,
           }}
         >
-          <span>granum.app/cell/{cell}</span>
+          <span>{SITE_HOST}/cell/{cell}</span>
           <span>Apache-2.0 · synthetic data only</span>
         </div>
       </div>

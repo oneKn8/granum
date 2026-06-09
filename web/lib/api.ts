@@ -53,6 +53,9 @@ async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(url, {
     headers: { Accept: "application/json" },
     cache: "no-store",
+    // A hung upstream socket must not pin the render (the page re-polls
+    // every few seconds anyway); surface as a catchable failure instead.
+    signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) {
     let problem: unknown = null;

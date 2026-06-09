@@ -24,8 +24,14 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Canonical / Open Graph base URL. Override at deploy with NEXT_PUBLIC_SITE_URL.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://granum.app";
+// Canonical / Open Graph base URL. Set NEXT_PUBLIC_SITE_URL at deploy; on
+// Vercel the project production domain is the fallback so share previews
+// never point at a host that does not serve this app.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

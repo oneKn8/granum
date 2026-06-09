@@ -23,10 +23,21 @@ export function CellDashboard({ payload, coEvolution }: CellDashboardProps) {
   const defaultSelected =
     payload.strategies.find((s) => s.status === "champion") ??
     payload.strategies.find((s) => s.status === "alive") ??
-    payload.strategies[payload.strategies.length - 1];
+    payload.strategies[payload.strategies.length - 1] ??
+    null;
 
-  const [selectedId, setSelectedId] = useState<string>(defaultSelected.id);
+  const [selectedId, setSelectedId] = useState<string>(defaultSelected?.id ?? "");
   const [mode, setMode] = useState<ViewMode>("lineage");
+
+  // A freshly seeded cell can be listed before its first strategies are
+  // written; render a waiting state instead of crashing the page.
+  if (!defaultSelected) {
+    return (
+      <div className="border border-border bg-surface/70 p-6 font-body text-sm text-ink-muted">
+        This cell is seeded but has no strategies yet. The lineage appears with the first generation.
+      </div>
+    );
+  }
 
   const selected = payload.strategies.find((s) => s.id === selectedId) ?? defaultSelected;
   const parent = selected.parentId
