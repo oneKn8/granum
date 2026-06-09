@@ -1,8 +1,8 @@
 # PRODUCT.md — What Granum Is
 
-**Working name:** Granum (placeholder — see naming section at the end)
+**Name:** Granum
 **Tagline:** An immune system for medical appeals.
-**Status:** Draft, 2026-05-27, pre-build.
+**Status:** Shipped for the hackathon — two cells evolved live, cross-cell transfer demonstrated. Last revised 2026-06-09.
 
 ---
 
@@ -92,9 +92,7 @@ The unfilled space is: **a learning system that improves at writing appeals for 
 
 ## 5. Why this is novel — the structural bite
 
-Six other entries in the same hackathon track ([mender-agent](https://github.com/mattspaulding/mender-agent), [agent-sre](https://github.com/OJ-IRO/agent-sre), [tracepilot](https://github.com/bullyopswork/tracepilot), [flightcheck](https://github.com/divergent99/flightcheck), [axon](https://github.com/colinh09/axon), [Aegis-1](https://github.com/Arham-Begani/Aegis-1)) implement the **same supervisor architecture**: a meta-agent watches a target agent and patches it.
-
-That pattern is excellent. It's also saturated. We chose a different shape:
+The common shape for a self-improving agent is the **supervisor pattern**: a meta-agent watches a target agent and patches it on diagnosis. That pattern is sound, and it is everywhere. Granum chose a different shape.
 
 | Axis | Supervisor pattern | Granum |
 |---|---|---|
@@ -114,12 +112,12 @@ This is **selection pressure as the safety mechanism**, not surveillance.
 
 ## 6. The vision (post-hackathon)
 
-The hackathon submission is a single (payer × diagnosis) demo cell with synthetic denials. The product trajectory is:
+The hackathon submission ships two evolved cells plus working cross-cell transfer, on synthetic-but-grounded data. The product trajectory is:
 
-- **v0.1 (hackathon submission, 2026-06-11):** Single-cell demo, synthetic CMS-derived data, Aetna+cardiac as the example pair, Phoenix-rendered lineage tree, 41% → 79% measured overturn rate over 8 generations.
-- **v0.2 (post-hackathon, 4–6 weeks):** Onboard 2–3 friendly independent physicians' practices, run on real denials with explicit consent + de-identified eval data, ship a patient-advocate dashboard.
+- **v0.1 (hackathon submission, 2026-06-11):** Two cells evolved live on Phoenix + Vertex Gemini — Aetna+cardiac (0.40 → 0.98) and United+oncology (0.62 → 0.98), each over 10 generations with 18 apoptosed strategies. Cross-cell transfer demonstrated: United → Aetna promoted (+1.92 composite, p = 0.024), Aetna → United rejected. Five cells curated; Phoenix-rendered lineage tree.
+- **v0.2 (post-hackathon, 4–6 weeks):** Evolve the three remaining curated cells (Anthem, Cigna, Humana) and run cross-cell transfer across the full matrix. Onboard 2–3 friendly independent physicians' practices, run on real denials with explicit consent + de-identified eval data, ship a patient-advocate dashboard.
 - **v0.3 (3 months):** Scale to ~20 (payer × diagnosis) cells. Outcomes-as-a-service API for physician billing companies.
-- **v1.0 (6 months):** Multi-payer cross-pollination — a strategy that learns to win against Aetna cardiac sometimes generalizes to United cardiac, and Granum captures that transfer learning automatically via cell embedding similarity.
+- **v1.0 (6 months):** Continuous payer co-evolution across every cell, so each writer population trains against a perpetually adapting adversary rather than a fixed antigen.
 - **v2.0 (12 months):** Federated cells across practices — physicians' Granum instances share anonymized fitness signals without sharing patient data. The population becomes adaptive at population-scale.
 
 The eventual product is not "an AI that writes appeals." It is **a learning organism that gets better at fighting denials for every (payer × diagnosis) pair, indefinitely, with permanent deletion of losing strategies enforcing real commitment.**
@@ -158,7 +156,7 @@ This is the under-publicized data flywheel Arize's CPO has publicly said they wa
 
 ## 9. On the name
 
-"Granum" is the working name. It's Latin for *grain* / *kernel*, used in biology to refer to dense regions inside structures (chloroplast grana, germinal-center granular cells). It's deliberately weird — most projects in this hackathon are named with the same cluster of safety/governance words ("sentinel," "guardian," "mender," "axon," "shipsafe"). We want to be the one project that doesn't sound like a generic default.
+"Granum" is the working name. It's Latin for *grain* / *kernel*, used in biology to refer to dense regions inside structures (chloroplast grana, germinal-center granular cells). It is deliberately not another safety/governance word ("sentinel," "guardian," "shipsafe"); the name should carry the biology, not sound like a generic default.
 
 Alternatives if Granum doesn't fit:
 - **Centra** (germinal center, Latin centrum)

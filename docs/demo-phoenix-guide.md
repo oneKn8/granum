@@ -31,7 +31,7 @@ span → **Attributes**. Every generation carries the story as first-class span 
 > climbs 0.40 → 0.98, losers are apoptosed, and the judge's English critique is
 > recorded as telemetry — not a number, English feedback, exactly Arize's prompt-learning thesis."*
 
-### 2. The bonus loop — "it improves from its OWN observability data" ⭐
+### 2. The bonus loop — "it improves from its OWN observability data" [key beat]
 Filter span name `granum.cycle.read_self_observability`. Open a gen-2+ span → attribute
 `granum.observability_readback_generations` (grows 1 → 2 → 3). This span sits **before**
 the mutation each generation.
@@ -55,6 +55,17 @@ Phoenix → **Prompts**. Filter to `aetna_cardiac/`. Show:
 Phoenix → **Datasets** → `granum/aetna_cardiac/outcomes`. Each generation writes its
 outcome (winner, composite, critique). Pair with the lineage tree in our own UI.
 
+### 5. The second cell + cross-cell transfer — "it generalizes, honestly"
+`united_oncology` evolved the same way (0.62 → 0.98 over 10 generations) and has its own
+spans, prompt lineage, and outcomes dataset. Then show transfer: in our UI the
+`united_oncology` champion transferred into `aetna_cardiac` was promoted (+0.19 lift on the
+normalized scale, p = 0.024), while the reverse was rejected.
+
+> **Narration:** *"The same loop evolved a second cell, oncology, 0.62 to 0.98. And one cell's
+> champion can transfer to another: united-to-aetna gave a significant lift, p equals zero
+> point zero two four, so it was promoted. The reverse was rejected, because that champion was
+> too citation-rigid to generalize. The asymmetry is the honest result."*
+
 ---
 
 ## The on-camera live-grow moment (our UI + Phoenix side-by-side)
@@ -69,7 +80,7 @@ GRANUM_DATA_DIR=runs/cell_payloads \
 set -a; source .env; set +a
 GEMINI_MODEL=gemini-3.5-flash GRANUM_MUTATOR_MODEL=gemini-3.1-pro-preview \
 GRANUM_DATA_DIR=runs/cell_payloads \
-  env -u PYTHONPATH uv run granum evolve --cell aetna_cardiac --generations 8 \
+  env -u PYTHONPATH uv run granum evolve --cell aetna_cardiac --generations 10 \
     --survival-count 3 --reset
 ```
 The lineage tree grows + fitness curve climbs in our UI (no restart), while the same run
