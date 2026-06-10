@@ -208,6 +208,10 @@ p, li, blockquote {
   fill: none;
   stroke: var(--color-edge);
   stroke-linecap: round;
+  /* Decorative connectors must not intercept pointer events; without this the
+     edge paths overlay the node circles and swallow node clicks (selection
+     never fires). Clicks fall through to the nodes beneath. */
+  pointer-events: none;
   /* opacity + pathLength are Motion-owned; keep CSS off those properties. */
   transition: stroke-opacity 240ms ease-out;
 }
