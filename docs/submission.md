@@ -22,7 +22,7 @@ Every prior-auth automation startup I surveyed serves the payer, because that's 
 
 Separately, I was reading about affinity maturation in germinal centers (Victora & Mesin, *Science* 2016): the immune-system mechanism by which B-cells evolve antibodies against a novel pathogen via somatic hypermutation, antigen-driven tournament selection, and apoptosis of low-affinity variants. The structural property that makes germinal centers honest is commitment. A B-cell that loses the tournament does not survive. There is no archive, no revert. That constraint forces every mutation to be a real bet.
 
-Nobody was doing this with prompts. Every "self-improving agent" I surveyed keeps full version history just in case. I wanted to build one that didn't, where losing strategies are retired for good and the lineage tree only contains nodes that earned their place.
+Evolving prompts is not new on its own. PromptBreeder and EvoPrompt already treat a population of prompts as a genetic population and refine it with mutation and selection. But every such system keeps full version history, just in case, and reverts when a variant underperforms. That safety net quietly removes the commitment that makes germinal centers honest. I could not find anyone who had built prompt evolution with *permanent apoptosis* (losers retired for good, no revert), run it on a *prompt registry as the literal genome* (versions are lineage, tags are life and death), and pointed it at a real vertical where the stakes are a denied patient. That synthesis is Granum.
 
 Granum is the answer.
 
