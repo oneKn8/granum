@@ -15,8 +15,9 @@ htmlcov/
 phoenix-audit-data/
 synthetic-secrets/
 
-# Web-quality audit raw traces (regenerable; multi-MB)
-videos/audit/*_trace.json
+# Demo video working files: rendered voiceover, audit traces, raw footage.
+# Local-only; never commit (large, and the scratch voiceover is not the submission).
+videos/
 
 # Live germinal-cycle run artifacts (reproducible via `granum cycle`)
 runs/

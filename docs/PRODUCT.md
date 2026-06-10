@@ -114,7 +114,7 @@ This is **selection pressure as the safety mechanism**, not surveillance.
 
 The hackathon submission ships two evolved cells plus working cross-cell transfer, on synthetic-but-grounded data. The product trajectory is:
 
-- **v0.1 (hackathon submission, 2026-06-11):** Two cells evolved live on Phoenix + Vertex Gemini — Aetna+cardiac (0.40 → 0.98) and United+oncology (0.62 → 0.98), each over 10 generations with 18 apoptosed strategies. Cross-cell transfer demonstrated: United → Aetna promoted (+1.92 composite, p = 0.024), Aetna → United rejected. Five cells curated; Phoenix-rendered lineage tree.
+- **v0.1 (hackathon submission, 2026-06-11):** Two cells evolved live on Phoenix + Vertex Gemini — Aetna+cardiac (0.40 → 0.98) and United+oncology (0.62 → 0.98), each over 10 generations with 18 apoptosed strategies. Cross-cell transfer demonstrated: United → Aetna promoted (+1.92 composite, p = 0.024), Aetna → United rejected. Four cells curated; Phoenix-rendered lineage tree.
 - **v0.2 (post-hackathon, 4–6 weeks):** Evolve the three remaining curated cells (Anthem, Cigna, Humana) and run cross-cell transfer across the full matrix. Onboard 2–3 friendly independent physicians' practices, run on real denials with explicit consent + de-identified eval data, ship a patient-advocate dashboard.
 - **v0.3 (3 months):** Scale to ~20 (payer × diagnosis) cells. Outcomes-as-a-service API for physician billing companies.
 - **v1.0 (6 months):** Continuous payer co-evolution across every cell, so each writer population trains against a perpetually adapting adversary rather than a fixed antigen.

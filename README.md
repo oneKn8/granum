@@ -32,7 +32,7 @@ Two cells have evolved end-to-end on live Phoenix + Vertex Gemini, plus one cros
 
 **Cross-cell transfer.** Granum tests whether a champion strategy from one cell helps another. `united_oncology` → `aetna_cardiac` was **promoted**: +1.92 composite on the 0–10 judge scale, p = 0.024, 5/5 trials pass negative selection. The reverse, `aetna_cardiac` → `united_oncology`, was **rejected**. The Aetna champion is too citation-rigid to generalize, and all 5 trials failed negative selection. The asymmetry is honest: transfer works when a strategy is general enough to survive a new antigen, and not otherwise.
 
-256 tests pass. `ruff` and `mypy` are clean.
+259 tests pass. `ruff` and `mypy` are clean.
 
 ---
 
@@ -126,7 +126,7 @@ granum/
 │   ├── data/             # denial generation, gold-appeal loader, cell seeds
 │   └── web/              # FastAPI app serving the cell payloads
 ├── web/                  # Next.js 15 frontend (App Router, D3, Recharts)
-├── data/                 # 5 cells: denial templates, gold appeals, citations,
+├── data/                 # curated cells: denial templates, gold appeals, citations,
 │                         #   payer personas, judge rubrics
 ├── api_data/             # baked cell payloads served by the API
 ├── scripts/              # seed_cell.py, demo + voiceover tooling, smoke tests
