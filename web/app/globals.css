@@ -229,6 +229,14 @@ p, li, blockquote {
   stroke-dasharray: 2 4;
 }
 
+/* The apoptosis strike-line inside a node is wider than the cell and overlaps
+   neighbouring nodes' centers, intercepting their clicks. Make every decorative
+   line inside a node click-through so the cell-body circle is the only hit
+   target; this is what makes node selection actually fire. */
+.lineage-node line {
+  pointer-events: none;
+}
+
 /* Scroll regions keep a thin warm scrollbar */
 .tree-scroll {
   scrollbar-width: thin;
