@@ -475,12 +475,17 @@ export function LineageTree({
                   : 0.12 * s.generation + 0.2;
 
               return (
+                // Position lives on a STATIC outer <g> (SVG transform attribute, which
+                // Framer Motion cannot drop). The inner motion.g animates ONLY scale +
+                // opacity, scaling around its own box center. Previously both position
+                // and scale were on one motion.g, and Motion sometimes dropped the
+                // translate when the scale animation resolved, snapping the node (and its
+                // rings/labels) to the SVG origin in the top-left corner.
+                <g key={s.id} transform={`translate(${n.x},${n.y})`}>
                 <motion.g
-                  key={s.id}
-                  transform={`translate(${n.x},${n.y})`}
                   className="lineage-node cursor-pointer"
                   data-status={s.status}
-                  style={{ opacity: isTomb ? 0.82 : 1 }}
+                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
                   initial={reduce ? false : { opacity: 0, scale: 0.3 }}
                   animate={{ opacity: isTomb ? 0.82 : 1, scale: 1 }}
                   transition={{ duration: 0.5, delay, ease: [0.34, 1.3, 0.5, 1] }}
@@ -581,12 +586,8 @@ export function LineageTree({
                     </>
                   )}
 
-                  {/* In-tree hover/select label removed: Motion positions nodes via a
-                      CSS transform the SVG geometry layer doesn't track, so this label
-                      anchored to the untransformed origin (top-left). Selection feedback
-                      is the ring + the detail panel; the seed/champion HTML pills handle
-                      the always-on labels. */}
                 </motion.g>
+                </g>
               );
             })}
           </g>
