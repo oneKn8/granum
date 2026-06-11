@@ -152,7 +152,7 @@ opentelemetry
 - **GitHub repo:** https://github.com/oneKn8/granum  *(Apache-2.0, public)*
 - **Live app:** https://granum-oneknights-projects.vercel.app
 - **Live API:** https://granum-api-lpgmo76lta-uc.a.run.app
-- **Demo video:** linked on the Devpost project page
+- **Demo video:** https://youtu.be/483aJsQ9c6Y  *(YouTube, unlisted, 2:57)*
 - **Devpost project page:** *(fill once the form is created)*
 
 ## 12. Track selection
@@ -177,7 +177,7 @@ If the Phoenix MCP layer disappeared, Granum would have no state. The self-impro
 
 - [x] License visible at repo root (Apache-2.0)
 - [x] Hosted URL alive and serving (Vercel frontend + Cloud Run API live)
-- [ ] Demo video published, ≤3:00, English, no ads
+- [x] Demo video published, ≤3:00, English, no ads (https://youtu.be/483aJsQ9c6Y, unlisted, 2:57)
 - [ ] All 12 form fields above pasted into Devpost form
 - [ ] Devpost track selection set to Arize Phoenix
 - [ ] At least one teammate / soloist listed (Shifat Islam Santo, solo)

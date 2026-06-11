@@ -12,6 +12,7 @@ Built for the [Google Cloud Rapid Agent Hackathon](https://rapid-agent.devpost.c
 
 ## Live
 
+- **Demo video:** https://youtu.be/483aJsQ9c6Y (2:57)
 - **Frontend:** https://granum-oneknights-projects.vercel.app (Vercel, Next.js 15)
 - **API:** https://granum-api-lpgmo76lta-uc.a.run.app (Cloud Run, GCP project `granum-2026`)
   - `GET /api/cells`: every evolved cell and its meta
@@ -131,7 +132,7 @@ granum/
 ├── api_data/             # baked cell payloads served by the API
 ├── scripts/              # seed_cell.py, demo + voiceover tooling, smoke tests
 ├── infra/                # Cloud Run deploy
-├── docs/                 # PRODUCT, submission, demo-script, biology-mapping, specs
+├── docs/                 # PRODUCT, submission, demo-script, storyboard, biology-mapping, api-contract
 └── LICENSE               # Apache-2.0
 ```
 
