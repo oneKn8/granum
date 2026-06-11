@@ -41,11 +41,6 @@ interface PositionedLink {
   spine: boolean;
 }
 
-function shortLabel(label: string): string {
-  const stripped = label.replace(/^[GL][\d.]*\s*[—–-]\s*/i, "").trim() || label;
-  return stripped.length > 30 ? `${stripped.slice(0, 29).trimEnd()}…` : stripped;
-}
-
 /** Round bump path (curveBumpX): horizontal tangents, smooth S — organic, not elbow. */
 function bumpPath(sx: number, sy: number, tx: number, ty: number): string {
   const mx = (sx + tx) / 2;
@@ -473,10 +468,6 @@ export function LineageTree({
                 isChampion ? "var(--color-champion)"
                 : s.tag === "experimental" && !isTomb ? "var(--color-mutant)"
                 : variant === "payer" ? "oklch(0.55 0.12 28)" : "var(--color-alive)";
-              const hasPill = isChampion || s.parentId === null;
-              // Labels only on interaction — the spine + the seed/champion pills carry
-              // the story; always-on labels collide where the climb plateaus.
-              const showLabel = !hasPill && (isHover || isSelected);
               const delay = reduce
                 ? 0
                 : isLiveArrival
@@ -594,34 +585,11 @@ export function LineageTree({
                     </>
                   )}
 
-                  {showLabel && (
-                    <g aria-hidden="true">
-                      <rect
-                        x={r + 5}
-                        y={-8}
-                        width={shortLabel(s.label).length * 6 + 12}
-                        height={isTomb ? 14 : 27}
-                        rx={2}
-                        fill="var(--color-surface)"
-                        opacity={0.86}
-                      />
-                      <text
-                        x={r + 9}
-                        y={isTomb ? 2.5 : 1.5}
-                        fontFamily="var(--font-mono)"
-                        fontSize={11}
-                        fill={isTomb ? "var(--color-dead-ink)" : "var(--color-ink)"}
-                        style={isTomb ? { textDecoration: "line-through" } : undefined}
-                      >
-                        {shortLabel(s.label)}
-                      </text>
-                      {!isTomb && (
-                        <text x={r + 9} y={14} fontFamily="var(--font-mono)" fontSize={9.5} fill="var(--color-ink-subtle)">
-                          {unscored ? `awaiting judge · g${s.generation}` : `f=${s.fitness.toFixed(2)} · g${s.generation}`}
-                        </text>
-                      )}
-                    </g>
-                  )}
+                  {/* In-tree hover/select label removed: Motion positions nodes via a
+                      CSS transform the SVG geometry layer doesn't track, so this label
+                      anchored to the untransformed origin (top-left). Selection feedback
+                      is the ring + the detail panel; the seed/champion HTML pills handle
+                      the always-on labels. */}
                 </motion.g>
               );
             })}
