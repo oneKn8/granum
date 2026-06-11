@@ -537,15 +537,11 @@ export function LineageTree({
                       transition={{ duration: 1.1, ease: "easeOut" }}
                     />
                   )}
-                  {isChampion && (
-                    <circle
-                      className="champion-breath"
-                      r={20}
-                      fill="none"
-                      stroke="var(--color-champion)"
-                      strokeWidth={1.25}
-                    />
-                  )}
+                  {/* champion "breath" ring removed: it animates scale via
+                      transform-box:fill-box, which Framer Motion's CSS transform on the
+                      parent node mis-anchors to the SVG origin (a stray ring in the
+                      corner). The champion is already marked by its gold body, pill, and
+                      spine. */}
                   {isSelected && (
                     <circle r={r + 7} fill="none" stroke="var(--color-primary)" strokeWidth={1.25} opacity={0.9} />
                   )}
