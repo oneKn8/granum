@@ -1,0 +1,11 @@
+# Record a decision for the two dependencies that ship install scripts.
+# pnpm 10 skipped unapproved builds with a warning; pnpm 12 turned that
+# warning into ERR_PNPM_IGNORED_BUILDS and fails the install outright.
+#
+# Both of these resolve a prebuilt native binary and only fall back to
+# compiling when the current platform has no prebuild, so they are allowed:
+#   sharp         - next/image optimisation (install/check.js)
+#   unrs-resolver - native resolver behind eslint-config-next (postinstall.js)
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
